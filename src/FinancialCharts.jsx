@@ -6,8 +6,10 @@ import { ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line
 // Import dataset terpisah dari data.js
 import { chartDataPU, chartDataLabaKotor, chartDataBKPU, chartDataLabaBersih, topUnachievedPU, topUnachievedLK, topUnachievedDefault } from "./data";
 
-export default function FinancialCharts() {
-  const [activeChartTab, setActiveChartTab] = useState("PU");
+export default function FinancialCharts({
+  activeChartTab,
+  setActiveChartTab,
+}) {
 
   // Logika pembacaan konfigurasi grafik & sinkronisasi data tabel samping
   const getComponentConfig = () => {

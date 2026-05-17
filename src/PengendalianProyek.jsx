@@ -1,16 +1,41 @@
 // src/PengendalianProyek.jsx
-import React from "react";
-import { Clock, AlertTriangle, TrendingDown, ShieldAlert, Activity } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Clock,
+  AlertTriangle,
+  TrendingDown,
+  ShieldAlert,
+  Activity,
+} from "lucide-react";
 import FinancialCharts from "./FinancialCharts";
 
 export default function PengendalianProyek() {
-  
   // DATA COL 1: TIME OVERRUN (0/45) & ALMOST OVERRUN (5/45)
   const timeOverrunData = [
-    { name: "Oplah 3 Sumut", prog: "82.10%", endDate: "31-May-26", remain: "31" },
-    { name: "Japeksel 3 Induk", prog: "98.57%", endDate: "23-Jun-26", remain: "54" },
-    { name: "KSPP Merauke", prog: "21.20%", endDate: "06-Jul-26", remain: "67" },
-    { name: "Patimban Port", prog: "69.94%", endDate: "17-Jul-26", remain: "78" },
+    {
+      name: "Oplah 3 Sumut",
+      prog: "82.10%",
+      endDate: "31-May-26",
+      remain: "31",
+    },
+    {
+      name: "Japeksel 3 Induk",
+      prog: "98.57%",
+      endDate: "23-Jun-26",
+      remain: "54",
+    },
+    {
+      name: "KSPP Merauke",
+      prog: "21.20%",
+      endDate: "06-Jul-26",
+      remain: "67",
+    },
+    {
+      name: "Patimban Port",
+      prog: "69.94%",
+      endDate: "17-Jul-26",
+      remain: "78",
+    },
   ];
 
   // DATA COL 2: BEHIND SCHEDULE (13/45 - RATIO 28%)
@@ -32,207 +57,341 @@ export default function PengendalianProyek() {
 
   // DATA COL 3: COST OVERRUN BK/PU > MAPP (22/45 - RATIO 49%)
   const costOverrunData = [
-    { name: "CWIS", prog: "0.14%", mapp: "93.00%", real: "259.62%", dev: "-166.62%" },
-    { name: "Pengarah Rukoh", prog: "54.37%", mapp: "105.20%", real: "131.72%", dev: "-26.52%" },
-    { name: "Bend. Cibeet", prog: "8.84%", mapp: "84.97%", real: "99.35%", dev: "-14.38%" },
-    { name: "Bend. Karangnongko", prog: "31.33%", mapp: "87.58%", real: "100.19%", dev: "-12.61%" },
-    { name: "Fas. Pengarah Rukoh JOI", prog: "67.37%", mapp: "88.81%", real: "100.08%", dev: "-11.26%" },
-    { name: "Perbaikan KAPB", prog: "44.34%", mapp: "88.99%", real: "100.20%", dev: "-11.21%" },
-    { name: "Jln. Singaraja-Mengwitani", prog: "6.69%", mapp: "90.97%", real: "97.86%", dev: "-6.89%" },
-    { id: "BIM", name: "IPAL IKN", prog: "88.06%", mapp: "124.35%", real: "130.38%", dev: "-6.03%" },
-    { name: "Irg. Lempuing 3", prog: "69.17%", mapp: "88.03%", real: "92.22%", dev: "-4.18%" },
-    { name: "Bocimi 3A", prog: "84.86%", mapp: "88.82%", real: "92.90%", dev: "-4.08%" },
-    { name: "KSPP Merauke", prog: "21.20%", mapp: "92.29%", real: "95.35%", dev: "-3.05%" },
-    { name: "Bend. Tiga Dihaji", prog: "50.84%", mapp: "81.42%", real: "84.37%", dev: "-2.95%" },
-    { name: "Tol IKN 3B-2", prog: "89.34%", mapp: "90.20%", real: "92.81%", dev: "-2.61%" },
-    { name: "Rentang LOS-01", prog: "100.00%", mapp: "94.87%", real: "97.46%", dev: "-2.59%" },
-    { name: "Bend. Bener", prog: "80.89%", mapp: "92.72%", real: "95.12%", dev: "-2.39%" },
-    { name: "Patimban Port", prog: "69.94%", mapp: "91.36%", real: "93.54%", dev: "-2.18%" },
-    { name: "Lempuing II JOP", prog: "73.58%", mapp: "88.62%", real: "90.14%", dev: "-1.52%" },
-    { name: "Bend. Mbay", prog: "96.61%", mapp: "96.45%", real: "97.91%", dev: "-1.46%" },
-    { name: "Bocimi 3B", prog: "73.69%", mapp: "90.90%", real: "92.18%", dev: "-1.28%" },
-    { name: "Bend. Jragung I", prog: "92.30%", mapp: "81.65%", real: "82.68%", dev: "-1.03%" },
-    { name: "BA Bireun-Takengon", prog: "2.66%", mapp: "90.00%", real: "90.95%", dev: "-0.95%" },
-    { name: "Irg. Cibaliung", prog: "79.37%", mapp: "85.86%", real: "86.71%", dev: "-0.84%" },
+    {
+      name: "CWIS",
+      prog: "0.14%",
+      mapp: "93.00%",
+      real: "259.62%",
+      dev: "-166.62%",
+    },
+    {
+      name: "Pengarah Rukoh",
+      prog: "54.37%",
+      mapp: "105.20%",
+      real: "131.72%",
+      dev: "-26.52%",
+    },
+    {
+      name: "Bend. Cibeet",
+      prog: "8.84%",
+      mapp: "84.97%",
+      real: "99.35%",
+      dev: "-14.38%",
+    },
+    {
+      name: "Bend. Karangnongko",
+      prog: "31.33%",
+      mapp: "87.58%",
+      real: "100.19%",
+      dev: "-12.61%",
+    },
+    {
+      name: "Fas. Pengarah Rukoh JOI",
+      prog: "67.37%",
+      mapp: "88.81%",
+      real: "100.08%",
+      dev: "-11.26%",
+    },
+    {
+      name: "Perbaikan KAPB",
+      prog: "44.34%",
+      mapp: "88.99%",
+      real: "100.20%",
+      dev: "-11.21%",
+    },
+    {
+      name: "Jln. Singaraja-Mengwitani",
+      prog: "6.69%",
+      mapp: "90.97%",
+      real: "97.86%",
+      dev: "-6.89%",
+    },
+    {
+      id: "BIM",
+      name: "IPAL IKN",
+      prog: "88.06%",
+      mapp: "124.35%",
+      real: "130.38%",
+      dev: "-6.03%",
+    },
+    {
+      name: "Irg. Lempuing 3",
+      prog: "69.17%",
+      mapp: "88.03%",
+      real: "92.22%",
+      dev: "-4.18%",
+    },
+    {
+      name: "Bocimi 3A",
+      prog: "84.86%",
+      mapp: "88.82%",
+      real: "92.90%",
+      dev: "-4.08%",
+    },
+    {
+      name: "KSPP Merauke",
+      prog: "21.20%",
+      mapp: "92.29%",
+      real: "95.35%",
+      dev: "-3.05%",
+    },
+    {
+      name: "Bend. Tiga Dihaji",
+      prog: "50.84%",
+      mapp: "81.42%",
+      real: "84.37%",
+      dev: "-2.95%",
+    },
+    {
+      name: "Tol IKN 3B-2",
+      prog: "89.34%",
+      mapp: "90.20%",
+      real: "92.81%",
+      dev: "-2.61%",
+    },
+    {
+      name: "Rentang LOS-01",
+      prog: "100.00%",
+      mapp: "94.87%",
+      real: "97.46%",
+      dev: "-2.59%",
+    },
+    {
+      name: "Bend. Bener",
+      prog: "80.89%",
+      mapp: "92.72%",
+      real: "95.12%",
+      dev: "-2.39%",
+    },
+    {
+      name: "Patimban Port",
+      prog: "69.94%",
+      mapp: "91.36%",
+      real: "93.54%",
+      dev: "-2.18%",
+    },
+    {
+      name: "Lempuing II JOP",
+      prog: "73.58%",
+      mapp: "88.62%",
+      real: "90.14%",
+      dev: "-1.52%",
+    },
+    {
+      name: "Bend. Mbay",
+      prog: "96.61%",
+      mapp: "96.45%",
+      real: "97.91%",
+      dev: "-1.46%",
+    },
+    {
+      name: "Bocimi 3B",
+      prog: "73.69%",
+      mapp: "90.90%",
+      real: "92.18%",
+      dev: "-1.28%",
+    },
+    {
+      name: "Bend. Jragung I",
+      prog: "92.30%",
+      mapp: "81.65%",
+      real: "82.68%",
+      dev: "-1.03%",
+    },
+    {
+      name: "BA Bireun-Takengon",
+      prog: "2.66%",
+      mapp: "90.00%",
+      real: "90.95%",
+      dev: "-0.95%",
+    },
+    {
+      name: "Irg. Cibaliung",
+      prog: "79.37%",
+      mapp: "85.86%",
+      real: "86.71%",
+      dev: "-0.84%",
+    },
   ];
+
+  const [activeChartTab, setActiveChartTab] = useState("PU");
 
   return (
     <div className="space-y-4 animate-fadeIn font-sans">
-      
-
-       {/* KPI SUMMARY */}
+      {/* KPI SUMMARY */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6"></div>
 
       {/* ===================================================== */}
-{/* RINGKASAN KINERJA KEUANGAN */}
-{/* ===================================================== */}
+      {/* RINGKASAN KINERJA KEUANGAN */}
+      {/* ===================================================== */}
 
-<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-
-  {/* PENDAPATAN USAHA */}
-  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-sm font-semibold text-slate-500 uppercase">
-        Pendapatan Usaha
-      </h3>
-
-      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-        <span className="text-emerald-600 text-lg">₿</span>
-      </div>
-    </div>
-
-    <h2 className="text-3xl font-bold text-slate-800 mb-2">
-      Rp 1.25 T
-    </h2>
-
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-slate-500">
-        RKAP: Rp 1.30 T
-      </span>
-
-      <span className="text-red-500 font-semibold">
-        -3.8%
-      </span>
-    </div>
-
-    <div className="mt-4">
-      <div className="w-full bg-slate-100 rounded-full h-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        {/* PENDAPATAN USAHA */}
         <div
-          className="bg-emerald-500 h-2 rounded-full"
-          style={{ width: "96%" }}
-        />
-      </div>
+          onClick={() => setActiveChartTab("PU")}
+          className={`bg-white rounded-2xl border p-5 shadow-sm cursor-pointer transition-all hover:shadow-md ${
+            activeChartTab === "PU"
+              ? "ring-2 ring-[#000075] border-[#000075]"
+              : "border-slate-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase">
+              Pendapatan Usaha
+            </h3>
 
-      <p className="text-xs text-slate-400 mt-1">
-        Capaian terhadap RKAP
-      </p>
-    </div>
-  </div>
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <span className="text-emerald-600 text-lg">₿</span>
+            </div>
+          </div>
 
-  {/* BK/PU */}
-  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-sm font-semibold text-slate-500 uppercase">
-        BK/PU
-      </h3>
+          <h2 className="text-3xl font-bold text-slate-800 mb-2">Rp 1.25 T</h2>
 
-      <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-        <span className="text-blue-600 text-lg">%</span>
-      </div>
-    </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">RKAP: Rp 1.30 T</span>
 
-    <h2 className="text-3xl font-bold text-slate-800 mb-2">
-      82%
-    </h2>
+            <span className="text-red-500 font-semibold">-3.8%</span>
+          </div>
 
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-slate-500">
-        RKAP: 85%
-      </span>
+          <div className="mt-4">
+            <div className="w-full bg-slate-100 rounded-full h-2">
+              <div
+                className="bg-emerald-500 h-2 rounded-full"
+                style={{ width: "96%" }}
+              />
+            </div>
 
-      <span className="text-red-500 font-semibold">
-        -3%
-      </span>
-    </div>
+            <p className="text-xs text-slate-400 mt-1">Capaian terhadap RKAP</p>
+          </div>
+        </div>
 
-    <div className="mt-4">
-      <div className="w-full bg-slate-100 rounded-full h-2">
+        {/* BK/PU */}
         <div
-          className="bg-blue-500 h-2 rounded-full"
-          style={{ width: "82%" }}
-        />
-      </div>
+          onClick={() => setActiveChartTab("BKPU")}
+          className={`bg-white rounded-2xl border p-5 shadow-sm cursor-pointer transition-all hover:shadow-md ${
+            activeChartTab === "BKPU"
+              ? "ring-1 ring-blue-700 border-blue-700"
+              : "border-slate-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase">
+              BK/PU
+            </h3>
 
-      <p className="text-xs text-slate-400 mt-1">
-        Margin operasional
-      </p>
-    </div>
-  </div>
+            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+              <span className="text-blue-600 text-lg">%</span>
+            </div>
+          </div>
 
-  {/* LABA KOTOR */}
-  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-sm font-semibold text-slate-500 uppercase">
-        Laba Kotor
-      </h3>
+          <h2 className="text-3xl font-bold text-slate-800 mb-2">82%</h2>
 
-      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-        <span className="text-amber-600 text-lg">▲</span>
-      </div>
-    </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">RKAP: 85%</span>
 
-    <h2 className="text-3xl font-bold text-slate-800 mb-2">
-      Rp 240 M
-    </h2>
+            <span className="text-red-500 font-semibold">-3%</span>
+          </div>
 
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-slate-500">
-        RKAP: Rp 260 M
-      </span>
+          <div className="mt-4">
+            <div className="w-full bg-slate-100 rounded-full h-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full"
+                style={{ width: "82%" }}
+              />
+            </div>
 
-      <span className="text-red-500 font-semibold">
-        -7.6%
-      </span>
-    </div>
+            <p className="text-xs text-slate-400 mt-1">Margin operasional</p>
+          </div>
+        </div>
 
-    <div className="mt-4">
-      <div className="w-full bg-slate-100 rounded-full h-2">
+        {/* LABA KOTOR */}
         <div
-          className="bg-amber-500 h-2 rounded-full"
-          style={{ width: "92%" }}
-        />
-      </div>
+          onClick={() => setActiveChartTab("LK")}
+          className={`bg-white rounded-2xl border p-5 shadow-sm cursor-pointer transition-all hover:shadow-md ${
+            activeChartTab === "LK"
+              ? "ring-1 ring-blue-700 border-blue-700"
+              : "border-slate-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase">
+              Laba Kotor
+            </h3>
 
-      <p className="text-xs text-slate-400 mt-1">
-        Gross Profit Performance
-      </p>
-    </div>
-  </div>
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+              <span className="text-amber-600 text-lg">▲</span>
+            </div>
+          </div>
 
-  {/* LABA BERSIH */}
-  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-sm font-semibold text-slate-500 uppercase">
-        Laba Bersih
-      </h3>
+          <h2 className="text-3xl font-bold text-slate-800 mb-2">Rp 240 M</h2>
 
-      <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
-        <span className="text-rose-600 text-lg">◆</span>
-      </div>
-    </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">RKAP: Rp 260 M</span>
 
-    <h2 className="text-3xl font-bold text-slate-800 mb-2">
-      Rp 180 M
-    </h2>
+            <span className="text-red-500 font-semibold">-7.6%</span>
+          </div>
 
-    <div className="flex items-center justify-between text-sm">
-      <span className="text-slate-500">
-        RKAP: Rp 200 M
-      </span>
+          <div className="mt-4">
+            <div className="w-full bg-slate-100 rounded-full h-2">
+              <div
+                className="bg-amber-500 h-2 rounded-full"
+                style={{ width: "92%" }}
+              />
+            </div>
 
-      <span className="text-red-500 font-semibold">
-        -10%
-      </span>
-    </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Gross Profit Performance
+            </p>
+          </div>
+        </div>
 
-    <div className="mt-4">
-      <div className="w-full bg-slate-100 rounded-full h-2">
+        {/* LABA BERSIH */}
         <div
-          className="bg-rose-500 h-2 rounded-full"
-          style={{ width: "90%" }}
-        />
+          onClick={() => setActiveChartTab("LB")}
+          className={`bg-white rounded-2xl border p-5 shadow-sm cursor-pointer transition-all hover:shadow-md ${
+            activeChartTab === "LB"
+              ? "ring-1 ring-blue-700 border-blue-700"
+              : "border-slate-200"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-slate-500 uppercase">
+              Laba Bersih
+            </h3>
+
+            <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+              <span className="text-rose-600 text-lg">◆</span>
+            </div>
+          </div>
+
+          <h2 className="text-3xl font-bold text-slate-800 mb-2">Rp 180 M</h2>
+
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-500">RKAP: Rp 200 M</span>
+
+            <span className="text-red-500 font-semibold">-10%</span>
+          </div>
+
+          <div className="mt-4">
+            <div className="w-full bg-slate-100 rounded-full h-2">
+              <div
+                className="bg-rose-500 h-2 rounded-full"
+                style={{ width: "90%" }}
+              />
+            </div>
+
+            <p className="text-xs text-slate-400 mt-1">
+              Net Profit Achievement
+            </p>
+          </div>
+        </div>
       </div>
-
-      <p className="text-xs text-slate-400 mt-1">
-        Net Profit Achievement
-      </p>
-    </div>
-  </div>
-
-</div>
 
       {/* SEKSI ATAS: GRAFIK FINANSIAL MULTI-TAB TERPADU */}
-      <FinancialCharts />
+      <FinancialCharts
+        activeChartTab={activeChartTab}
+        setActiveChartTab={setActiveChartTab}
+      />
 
       {/* TITEL OPERASIONAL UTAMA */}
       <div className="border-b border-slate-200 pb-3 mt-4">
@@ -240,12 +399,14 @@ export default function PengendalianProyek() {
           <Activity size={20} className="text-blue-800" />
           Matriks Monitoring & Pengendalian Operasional Proyek Strategis
         </h2>
-        <p className="text-slate-500 text-xs mt-0.5">Lembar Kerja Evaluasi Kritis Produksi Divisi Infrastruktur s.d Bulan Ini</p>
+        <p className="text-slate-500 text-xs mt-0.5">
+          Lembar Kerja Evaluasi Kritis Produksi Divisi Infrastruktur s.d Bulan
+          Ini
+        </p>
       </div>
 
       {/* ==================== PANEL UTAMA 3 KOLOM SEJAJAR (PERSIS FORMAT SLIDE) ==================== */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
-        
         {/* KOLOM 1: TIME OVERRUN (TEMA TEGAS - MERAH WASKITA) */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
           {/* Header & Indikator Donut Persentase */}
@@ -253,8 +414,12 @@ export default function PengendalianProyek() {
             <div className="flex items-center gap-2">
               <Clock className="text-[#BD002F]" size={18} />
               <div>
-                <h3 className="text-sm font-black text-slate-900">TIME OVERRUN</h3>
-                <p className="text-[10px] font-bold text-slate-400">Rasio Kasus: 0/45 Proyek</p>
+                <h3 className="text-sm font-black text-slate-900">
+                  TIME OVERRUN
+                </h3>
+                <p className="text-[10px] font-bold text-slate-400">
+                  Rasio Kasus: 0/45 Proyek
+                </p>
               </div>
             </div>
             {/* Visual Indikator Lingkaran 0% */}
@@ -274,15 +439,36 @@ export default function PengendalianProyek() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
-                <tr className="bg-slate-50 text-slate-500 text-[10px] font-black"><td colSpan="4" className="p-2 pl-3 uppercase">Time Overrun</td></tr>
-                <tr className="bg-white"><td colSpan="4" className="p-3 text-center text-slate-400 italic">0 Proyek Terdeteksi</td></tr>
-                <tr className="bg-slate-50 text-slate-500 text-[10px] font-black"><td colSpan="4" className="p-2 pl-3 uppercase">Almost Overrun</td></tr>
+                <tr className="bg-slate-50 text-slate-500 text-[10px] font-black">
+                  <td colSpan="4" className="p-2 pl-3 uppercase">
+                    Time Overrun
+                  </td>
+                </tr>
+                <tr className="bg-white">
+                  <td
+                    colSpan="4"
+                    className="p-3 text-center text-slate-400 italic"
+                  >
+                    0 Proyek Terdeteksi
+                  </td>
+                </tr>
+                <tr className="bg-slate-50 text-slate-500 text-[10px] font-black">
+                  <td colSpan="4" className="p-2 pl-3 uppercase">
+                    Almost Overrun
+                  </td>
+                </tr>
                 {timeOverrunData.map((p, i) => (
                   <tr key={i} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-2 pl-3 font-bold text-slate-800 truncate max-w-[110px]">{p.name}</td>
+                    <td className="p-2 pl-3 font-bold text-slate-800 truncate max-w-[110px]">
+                      {p.name}
+                    </td>
                     <td className="p-2 text-center">{p.prog}</td>
-                    <td className="p-2 text-center text-slate-500 font-mono">{p.endDate}</td>
-                    <td className="p-2 text-center font-black text-red-600 pr-3">{p.remain}</td>
+                    <td className="p-2 text-center text-slate-500 font-mono">
+                      {p.endDate}
+                    </td>
+                    <td className="p-2 text-center font-black text-red-600 pr-3">
+                      {p.remain}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -297,8 +483,12 @@ export default function PengendalianProyek() {
             <div className="flex items-center gap-2">
               <Activity className="text-orange-600" size={18} />
               <div>
-                <h3 className="text-sm font-black text-slate-900">BEHIND SCHEDULE</h3>
-                <p className="text-[10px] font-bold text-slate-400">Rasio Kasus: 13/45 Proyek</p>
+                <h3 className="text-sm font-black text-slate-900">
+                  BEHIND SCHEDULE
+                </h3>
+                <p className="text-[10px] font-bold text-slate-400">
+                  Rasio Kasus: 13/45 Proyek
+                </p>
               </div>
             </div>
             {/* Visual Indikator Lingkaran 28% */}
@@ -320,10 +510,14 @@ export default function PengendalianProyek() {
               <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
                 {behindScheduleData.map((p, i) => (
                   <tr key={i} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-2.5 pl-3 font-bold text-slate-800 truncate max-w-[120px]">{p.name}</td>
+                    <td className="p-2.5 pl-3 font-bold text-slate-800 truncate max-w-[120px]">
+                      {p.name}
+                    </td>
                     <td className="p-2.5 text-center text-slate-500">{p.ra}</td>
                     <td className="p-2.5 text-center text-[#000075]">{p.ri}</td>
-                    <td className="p-2.5 text-center font-black text-red-600 pr-3">{p.dev}</td>
+                    <td className="p-2.5 text-center font-black text-red-600 pr-3">
+                      {p.dev}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -338,8 +532,12 @@ export default function PengendalianProyek() {
             <div className="flex items-center gap-2">
               <TrendingDown className="text-[#000075]" size={18} />
               <div>
-                <h3 className="text-sm font-black text-slate-900">BK/PU &gt; MAPP</h3>
-                <p className="text-[10px] font-bold text-slate-400">Rasio Kasus: 22/45 Proyek</p>
+                <h3 className="text-sm font-black text-slate-900">
+                  BK/PU &gt; MAPP
+                </h3>
+                <p className="text-[10px] font-bold text-slate-400">
+                  Rasio Kasus: 22/45 Proyek
+                </p>
               </div>
             </div>
             {/* Visual Indikator Lingkaran 49% */}
@@ -362,21 +560,31 @@ export default function PengendalianProyek() {
               <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
                 {costOverrunData.map((p, i) => (
                   <tr key={i} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-2 pl-3 font-bold text-slate-800 truncate max-w-[100px]" title={p.name}>
+                    <td
+                      className="p-2 pl-3 font-bold text-slate-800 truncate max-w-[100px]"
+                      title={p.name}
+                    >
                       {p.name}
-                      {p.id === "BIM" && <span className="ml-1 text-[8px] bg-red-100 text-red-700 px-1 rounded font-black uppercase tracking-wider animate-pulse">BIM</span>}
+                      {p.id === "BIM" && (
+                        <span className="ml-1 text-[8px] bg-red-100 text-red-700 px-1 rounded font-black uppercase tracking-wider animate-pulse">
+                          BIM
+                        </span>
+                      )}
                     </td>
                     <td className="p-2 text-center text-slate-500">{p.prog}</td>
                     <td className="p-2 text-center text-slate-500">{p.mapp}</td>
-                    <td className="p-2 text-center text-[#000075] font-bold">{p.real}</td>
-                    <td className="p-2 text-center font-black text-red-600 pr-3 bg-red-50/20">{p.dev}</td>
+                    <td className="p-2 text-center text-[#000075] font-bold">
+                      {p.real}
+                    </td>
+                    <td className="p-2 text-center font-black text-red-600 pr-3 bg-red-50/20">
+                      {p.dev}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-
       </div>
       {/* =========================================================================================== */}
 
@@ -384,10 +592,16 @@ export default function PengendalianProyek() {
       <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-xl flex items-center gap-3">
         <ShieldAlert size={18} className="text-[#000075] shrink-0" />
         <p className="text-slate-700 text-xs font-medium">
-          <span className="font-bold text-[#000075]">Nota Pengendalian SCM:</span> Sebanyak 22 proyek terindikasi pembengkakan anggaran operasional kerja lapangan (<span className="italic font-bold">BK/PU &gt; Batas MAPP</span>). Diperlukan evaluasi skema subkontraktor dan percepatan penyerapan termin klaim sesegera mungkin.
+          <span className="font-bold text-[#000075]">
+            Nota Pengendalian SCM:
+          </span>{" "}
+          Sebanyak 22 proyek terindikasi pembengkakan anggaran operasional kerja
+          lapangan (
+          <span className="italic font-bold">BK/PU &gt; Batas MAPP</span>).
+          Diperlukan evaluasi skema subkontraktor dan percepatan penyerapan
+          termin klaim sesegera mungkin.
         </p>
       </div>
-
     </div>
   );
 }
