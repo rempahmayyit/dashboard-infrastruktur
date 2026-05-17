@@ -43,6 +43,8 @@ export default function App() {
   const [activeMenu, setActiveMenu] = useState("Executive Dashboard");
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const [activeChartTab, setActiveChartTab] = useState("PU");
+
   useEffect(() => {
     fetchExecutiveKPI();
   }, []);
@@ -304,7 +306,10 @@ export default function App() {
               </div>
             </div>
 
-            <FinancialCharts />
+            <FinancialCharts
+              activeChartTab={activeChartTab}
+              setActiveChartTab={setActiveChartTab}
+            />
 
             <div className="mb-8">
               <ProjectMap />
