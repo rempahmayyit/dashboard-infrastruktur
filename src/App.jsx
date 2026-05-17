@@ -339,106 +339,136 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased relative">
-      {/* SIDEBAR */}
-      <div className="w-80 bg-gradient-to-b from-[#000060] via-[#000045] to-[#020220] text-white p-5 flex flex-col h-screen sticky top-0 z-10 shadow-2xl border-r border-[#000030]">
-        <div className="mb-8 pb-5 border-b border-white/10">
-          <div className="bg-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 border border-white/20 w-full h-20">
-            <div className="w-1/2 flex flex-col items-start justify-center">
-              <span className="text-[7px] text-slate-400 font-black tracking-widest block uppercase mb-1 leading-none">
-                MEMBER OF
-              </span>
+    <div className="h-screen overflow-hidden bg-slate-50 text-slate-900 flex font-sans antialiased relative">
+      {/* ================= SIDEBAR KIRI FINAL ================= */}
+      <div className="w-72 bg-[#00005a] text-slate-200 min-h-screen flex flex-col justify-between p-5 font-sans border-r border-slate-800/40 shadow-2xl sticky top-0 z-10">
+        <div>
+          {/* LOGO AREA */}
+          <div className="bg-white rounded-3xl p-4 mb-8 shadow-inner flex flex-col items-center justify-center gap-3">
+            <div className="flex items-center justify-center gap-4 w-full px-2">
+              {/* DANANTARA */}
+              <div className="w-1/2 flex flex-col justify-center">
+                <span className="text-[8px] text-slate-400 font-black tracking-[0.25em] uppercase mb-1">
+                  Member Of
+                </span>
 
-              <img
-                src={danantaraLogo}
-                alt="Logo Danantara"
-                className="h-9 w-full object-contain object-left scale-105"
-              />
-            </div>
-
-            <div className="w-[2px] h-12 bg-slate-200 self-center"></div>
-
-            <div className="w-1/2 flex items-center justify-center">
-              <img
-                src={waskitaLogo}
-                alt="Logo Waskita"
-                className="h-10 w-full object-contain object-center scale-110"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-1.5 overflow-y-auto flex-1 pr-1 scrollbar-none">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-
-            const isActive = activeMenu === item.name;
-
-            return (
-              <div
-                key={item.name}
-                onClick={() => setActiveMenu(item.name)}
-                className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all duration-200 relative overflow-hidden group ${
-                  isActive
-                    ? "bg-gradient-to-r from-[#BD002F] to-[#990022] text-white shadow-lg shadow-red-900/40 font-bold border-t border-white/10"
-                    : "text-blue-200/80 hover:bg-white/5 hover:text-white hover:translate-x-1.5"
-                }`}
-              >
-                <div className="flex items-center gap-3.5 z-10">
-                  <Icon size={17} />
-
-                  <span className="text-[13.5px] tracking-wide">
-                    {item.name}
-                  </span>
-                </div>
-
-                <ChevronRight size={14} />
+                <img
+                  src={danantaraLogo}
+                  alt="Danantara"
+                  className="h-10 object-contain object-left"
+                />
               </div>
-            );
-          })}
+
+              {/* DIVIDER */}
+              <div className="w-[1.5px] h-10 bg-slate-300"></div>
+
+              {/* WASKITA */}
+              <div className="w-1/2 flex items-center justify-center">
+                <img
+                  src={waskitaLogo}
+                  alt="Waskita"
+                  className="h-12 object-contain"
+                />
+              </div>
+            </div>
+
+            {/* DIVISI */}
+            <div className="w-full text-center border-t border-slate-100 pt-3 mt-1">
+              <p className="text-[10px] font-black tracking-[0.35em] text-[#00005a] uppercase">
+                Divisi Infrastruktur
+              </p>
+            </div>
+          </div>
+
+          {/* MENU */}
+          <nav className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeMenu === item.name;
+
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => setActiveMenu(item.name)}
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-200 group ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#BD002F] to-[#990022] text-white shadow-xl shadow-red-900/30"
+                      : "text-blue-200/80 hover:bg-white/5 hover:text-white hover:translate-x-1"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon size={17} />
+
+                    <span className="text-[13px] font-semibold tracking-wide">
+                      {item.name}
+                    </span>
+                  </div>
+
+                  <ChevronRight
+                    size={14}
+                    className={`transition-all ${
+                      isActive
+                        ? "text-white"
+                        : "text-blue-300/50 group-hover:text-white"
+                    }`}
+                  />
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        <div className="pt-4 border-t border-white/10 text-center space-y-2">
-          <div>
-            <p className="text-[9px] text-blue-300/40 font-black tracking-widest uppercase mt-1">
-              #ForBetterWaskita
-            </p>
-          </div>
+        {/* FOOTER */}
+        <div className="text-center pt-6 border-t border-white/5">
+          <p className="text-[9px] tracking-[0.35em] text-white/30 uppercase font-bold">
+            #FORBETTERWASKITA
+          </p>
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 p-8 overflow-y-auto bg-slate-50">
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      {/* ================= CONTENT ================= */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* TOPBAR */}
+        <div className="flex justify-between items-center px-8 py-6 border-b border-slate-200 bg-white sticky top-0 z-20">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">
               {activeMenu}
             </h1>
+
+            <p className="text-sm text-slate-400 mt-1">
+              Dashboard Portofolio Divisi Infrastruktur
+            </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* FULLSCREEN */}
+          <div className="flex items-center gap-3">
             <button
               onClick={toggleFullscreen}
-              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold shadow-sm"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-sm font-semibold transition-all"
             >
-              {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-
-              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              {isFullscreen ? (
+                <>
+                  <Minimize2 size={16} />
+                  Exit Fullscreen
+                </>
+              ) : (
+                <>
+                  <Maximize2 size={16} />
+                  Fullscreen
+                </>
+              )}
             </button>
 
-            {/* PDF */}
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold shadow-sm"
-            >
-              <Printer size={15} />
+            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-sm font-semibold transition-all">
+              <Printer size={16} />
               Cetak PDF Resmi
             </button>
           </div>
         </div>
 
-        {renderContent()}
+        {/* PAGE CONTENT */}
+        <main className="flex-1 overflow-y-auto px-8 py-6 h-full">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );
