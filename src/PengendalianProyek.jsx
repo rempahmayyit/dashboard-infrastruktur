@@ -57,8 +57,180 @@ export default function PengendalianProyek() {
   ];
 
   return (
-    <div className="space-y-6 animate-fadeIn font-sans">
+    <div className="space-y-4 animate-fadeIn font-sans">
       
+
+       {/* KPI SUMMARY */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6"></div>
+
+      {/* ===================================================== */}
+{/* RINGKASAN KINERJA KEUANGAN */}
+{/* ===================================================== */}
+
+<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+
+  {/* PENDAPATAN USAHA */}
+  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-sm font-semibold text-slate-500 uppercase">
+        Pendapatan Usaha
+      </h3>
+
+      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+        <span className="text-emerald-600 text-lg">₿</span>
+      </div>
+    </div>
+
+    <h2 className="text-3xl font-bold text-slate-800 mb-2">
+      Rp 1.25 T
+    </h2>
+
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-slate-500">
+        RKAP: Rp 1.30 T
+      </span>
+
+      <span className="text-red-500 font-semibold">
+        -3.8%
+      </span>
+    </div>
+
+    <div className="mt-4">
+      <div className="w-full bg-slate-100 rounded-full h-2">
+        <div
+          className="bg-emerald-500 h-2 rounded-full"
+          style={{ width: "96%" }}
+        />
+      </div>
+
+      <p className="text-xs text-slate-400 mt-1">
+        Capaian terhadap RKAP
+      </p>
+    </div>
+  </div>
+
+  {/* BK/PU */}
+  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-sm font-semibold text-slate-500 uppercase">
+        BK/PU
+      </h3>
+
+      <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+        <span className="text-blue-600 text-lg">%</span>
+      </div>
+    </div>
+
+    <h2 className="text-3xl font-bold text-slate-800 mb-2">
+      82%
+    </h2>
+
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-slate-500">
+        RKAP: 85%
+      </span>
+
+      <span className="text-red-500 font-semibold">
+        -3%
+      </span>
+    </div>
+
+    <div className="mt-4">
+      <div className="w-full bg-slate-100 rounded-full h-2">
+        <div
+          className="bg-blue-500 h-2 rounded-full"
+          style={{ width: "82%" }}
+        />
+      </div>
+
+      <p className="text-xs text-slate-400 mt-1">
+        Margin operasional
+      </p>
+    </div>
+  </div>
+
+  {/* LABA KOTOR */}
+  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-sm font-semibold text-slate-500 uppercase">
+        Laba Kotor
+      </h3>
+
+      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+        <span className="text-amber-600 text-lg">▲</span>
+      </div>
+    </div>
+
+    <h2 className="text-3xl font-bold text-slate-800 mb-2">
+      Rp 240 M
+    </h2>
+
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-slate-500">
+        RKAP: Rp 260 M
+      </span>
+
+      <span className="text-red-500 font-semibold">
+        -7.6%
+      </span>
+    </div>
+
+    <div className="mt-4">
+      <div className="w-full bg-slate-100 rounded-full h-2">
+        <div
+          className="bg-amber-500 h-2 rounded-full"
+          style={{ width: "92%" }}
+        />
+      </div>
+
+      <p className="text-xs text-slate-400 mt-1">
+        Gross Profit Performance
+      </p>
+    </div>
+  </div>
+
+  {/* LABA BERSIH */}
+  <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-sm font-semibold text-slate-500 uppercase">
+        Laba Bersih
+      </h3>
+
+      <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center">
+        <span className="text-rose-600 text-lg">◆</span>
+      </div>
+    </div>
+
+    <h2 className="text-3xl font-bold text-slate-800 mb-2">
+      Rp 180 M
+    </h2>
+
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-slate-500">
+        RKAP: Rp 200 M
+      </span>
+
+      <span className="text-red-500 font-semibold">
+        -10%
+      </span>
+    </div>
+
+    <div className="mt-4">
+      <div className="w-full bg-slate-100 rounded-full h-2">
+        <div
+          className="bg-rose-500 h-2 rounded-full"
+          style={{ width: "90%" }}
+        />
+      </div>
+
+      <p className="text-xs text-slate-400 mt-1">
+        Net Profit Achievement
+      </p>
+    </div>
+  </div>
+
+</div>
+
       {/* SEKSI ATAS: GRAFIK FINANSIAL MULTI-TAB TERPADU */}
       <FinancialCharts />
 
