@@ -16,6 +16,7 @@ import {
   Database,
   Maximize2,
   Minimize2,
+  BarChart3,
 } from "lucide-react";
 
 import { formatNumber, formatPercent, formatMiliar } from "./utils/formatters";
@@ -30,6 +31,7 @@ import KeuanganAkuntansi from "./KeuanganAkuntansi";
 import TeknikMutuK3L from "./TeknikMutuK3L";
 import LegalManrisk from "./LegalManrisk";
 import SdmUmum from "./SdmUmum";
+import MonitoringEskalasiComponent from "./MonitoringEskalasiComponent";
 import PusatData from "./PusatData";
 
 import waskitaLogo from "./assets/waskita_logo.png";
@@ -41,6 +43,7 @@ export default function App() {
   const [bkpuValue, setBkpuValue] = useState(0);
   const [cashInValue, setCashInValue] = useState(0);
   const [activeMenu, setActiveMenu] = useState("Executive Dashboard");
+  const [openMenu, setOpenMenu] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [activeChartTab, setActiveChartTab] = useState("PU");
@@ -138,6 +141,17 @@ export default function App() {
       name: "SDM & Umum",
       icon: Search,
     },
+
+    {
+      name: "Monitoring",
+      icon: BarChart3,
+      children: [
+        { name: "Eskalasi" },
+        { name: "Cost Overrun" },
+        { name: "Deviasi Progress" },
+      ],
+    },
+
     {
       name: "Pusat Data & Integrasi",
       icon: Database,
@@ -335,6 +349,9 @@ export default function App() {
       case "SDM & Umum":
         return <SdmUmum />;
 
+      case "Eskalasi":
+        return <MonitoringEskalasiComponent />;
+
       case "Pusat Data & Integrasi":
         return <PusatData />;
 
@@ -392,32 +409,87 @@ export default function App() {
               const isActive = activeMenu === item.name;
 
               return (
-                <button
-                  key={item.name}
-                  onClick={() => setActiveMenu(item.name)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-200 group ${
-                    isActive
-                      ? "bg-gradient-to-r from-[#BD002F] to-[#990022] text-white shadow-xl shadow-red-900/30"
-                      : "text-blue-200/80 hover:bg-white/5 hover:text-white hover:translate-x-1"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon size={17} />
+                <div key={item.name}>
+                  {item.children ? (
+                    <div>
+                      <button
+                        onClick={() =>
+                          setOpenMenu(openMenu === item.name ? null : item.name)
+                        }
+                        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300
+              ${
+                activeMenu === item.name
+                  ? "bg-gradient-to-r from-[#BD002F] to-[#990022] text-white shadow-xl shadow-red-900/30"
+                  : "text-blue-200/80 hover:bg-white/5 hover:text-white hover:translate-x-1"
+              }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon size={17} />
 
-                    <span className="text-[13px] font-semibold tracking-wide">
-                      {item.name}
-                    </span>
-                  </div>
+                          <span className="text-[13px] font-semibold tracking-wide">
+                            {item.name}
+                          </span>
+                        </div>
 
-                  <ChevronRight
-                    size={14}
-                    className={`transition-all ${
-                      isActive
-                        ? "text-white"
-                        : "text-blue-300/50 group-hover:text-white"
+                        <ChevronRight
+                          size={14}
+                          className={`transition-all duration-300 ${
+                            openMenu === item.name
+                              ? "rotate-90 text-blue-300"
+                              : "text-blue-300/50"
+                          }`}
+                        />
+                      </button>
+
+                      {openMenu === item.name && (
+                        <div className="ml-8 mt-2 space-y-1">
+                          {item.children.map((child) => (
+                            <button
+                              key={child.name}
+                              onClick={() => setActiveMenu(child.name)}
+                              className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all
+                    ${
+                      activeMenu === child.name
+                        ? "bg-white text-[#BD002F] font-semibold"
+                        : "text-blue-200/70 hover:bg-white/10"
                     }`}
-                  />
-                </button>
+                            >
+                              {child.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      key={item.name}
+                      onClick={() => setActiveMenu(item.name)}
+                      className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300
+            ${
+              isActive
+                ? "bg-gradient-to-r from-[#BD002F] to-[#990022] text-white shadow-xl shadow-red-900/30"
+                : "text-blue-200/80 hover:bg-white/5 hover:text-white hover:translate-x-1"
+            }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon size={17} />
+
+                        <span className="text-[13px] font-semibold tracking-wide">
+                          {item.name}
+                        </span>
+                      </div>
+
+                      <ChevronRight
+                        size={14}
+                        className={`transition-all ${
+                          isActive
+                            ? "text-white"
+                            : "text-blue-300/50 group-hover:text-white"
+                        }`}
+                      />
+                    </button>
+                  )}
+                </div>
               );
             })}
           </nav>
