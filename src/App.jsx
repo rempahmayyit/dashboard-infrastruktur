@@ -366,37 +366,37 @@ export default function App() {
       <div className="w-72 bg-[#00005a] text-slate-200 min-h-screen flex flex-col justify-between p-5 font-sans border-r border-slate-800/40 shadow-2xl sticky top-0 z-10">
         <div>
           {/* LOGO AREA */}
-          <div className="bg-white rounded-3xl p-4 mb-8 shadow-inner flex flex-col items-center justify-center gap-3">
-            <div className="flex items-center justify-center gap-4 w-full px-2">
+          <div className="bg-white rounded-3xl p-5 mb-8 shadow-inner">
+            {/* TOP LOGO */}
+            <div className="flex items-center justify-center gap-8">
               {/* DANANTARA */}
-              <div className="w-1/2 flex flex-col justify-center">
-                <span className="text-[8px] text-slate-400 font-black tracking-[0.25em] uppercase mb-1">
-                  Member Of
-                </span>
-
+              <div className="flex items-center justify-center">
                 <img
                   src={danantaraLogo}
                   alt="Danantara"
-                  className="h-10 object-contain object-left"
+                  className="h-16 object-contain mix-blend-multiply"
                 />
               </div>
 
               {/* DIVIDER */}
-              <div className="w-[1.5px] h-10 bg-slate-300"></div>
+              <div className="w-px h-16 bg-slate-300"></div>
 
               {/* WASKITA */}
-              <div className="w-1/2 flex items-center justify-center">
+              <div className="flex items-center justify-center">
                 <img
                   src={waskitaLogo}
                   alt="Waskita"
-                  className="h-12 object-contain"
+                  className="h-16 object-contain"
                 />
               </div>
             </div>
 
-            {/* DIVISI */}
-            <div className="w-full text-center border-t border-slate-100 pt-3 mt-1">
-              <p className="text-[10px] font-black tracking-[0.35em] text-[#00005a] uppercase">
+            {/* GARIS */}
+            <div className="border-t border-slate-200 my-4"></div>
+
+            {/* TEXT */}
+            <div className="text-center">
+              <p className="text-[11px] font-black tracking-[0.35em] text-[#00005a] uppercase">
                 Divisi Infrastruktur
               </p>
             </div>
