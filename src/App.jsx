@@ -13,6 +13,7 @@ import KeuanganAkuntansi from "./KeuanganAkuntansi";
 import TeknikMutuK3L from "./TeknikMutuK3L";
 import LegalManrisk from "./LegalManrisk";
 import SdmUmum from "./SdmUmum";
+import ProjectRiskDashboard from "./ProjectRiskDashboard/pages/ProjectRiskDashboard";
 import SapVsQcRekon from "./SapVsQcRekon";
 import MonitoringEskalasiComponent from "./MonitoringEskalasiComponent";
 import PdpkMonitoring from "./PdpkMonitoring";
@@ -32,6 +33,7 @@ import {
   BarChart3,
   Database,
   Video,
+  ShieldAlert,
 } from "lucide-react";
 
 export default function App() {
@@ -66,6 +68,10 @@ export default function App() {
     { name: "Legal & Manrisk", icon: FolderKanban },
     { name: "SDM & Umum", icon: Search },
     {
+      name: "Project Risk Dashboard",
+      icon: ShieldAlert,
+    },
+    {
       name: "Monitoring",
       icon: BarChart3,
       children: [
@@ -95,6 +101,8 @@ export default function App() {
         return <LegalManrisk />;
       case "SDM & Umum":
         return <SdmUmum />;
+      case "Project Risk Dashboard":
+        return <ProjectRiskDashboard />;
       case "SAP vs QC/Rekon":
         return <SapVsQcRekon />;
       case "Eskalasi":
@@ -157,7 +165,6 @@ export default function App() {
 
         <div className="flex-1 overflow-y-auto p-8">{renderContent()}</div>
       </div>
-
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { usePengendalianData } from "../hooks/usePengendalianData";
 
 const FilterContext = createContext();
 
@@ -16,7 +17,6 @@ export function FilterProvider({ children }) {
     db_master_data: [],
     db_rkap_awal: [],
     db_pengendalian_rkap: [],
-    db_pengendalian_realisasi: [],
     db_realisasi: [],
   });
 

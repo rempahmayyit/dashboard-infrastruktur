@@ -1,487 +1,502 @@
 // src/components/FinancialTable.jsx
 
 import React from "react";
+import { useFilter } from "../context/FilterContext";
+import { usePengendalianData } from "../hooks/usePengendalianData";
+import {
+  formatNumber,
+  formatPercent,
+  formatFinancialMiliar,
+} from "../utils/formatters";
 
 export default function FinancialTable({ popupMode = false }) {
-  const textSize = popupMode ? "text-xl" : "text-[10px]";
-  const headerSize = popupMode ? "text-base" : "text-[9px]";
-  const subHeaderSize = popupMode ? "text-sm" : "text-[8px]";
-  const paddingMain = popupMode ? "p-5" : "p-2";
-  const paddingSub = popupMode ? "p-4" : "p-1.5";
-  const stickyWidth = popupMode ? "min-w-[340px]" : "min-w-[120px]";
+  const textSize = popupMode ? "text-sm" : "text-[10px]";
+  const headerSize = popupMode ? "text-xs" : "text-[9px]";
+  const subHeaderSize = popupMode ? "text-[10px]" : "text-[8px]";
+
+  const paddingMain = popupMode ? "p-3" : "p-2";
+  const paddingSub = popupMode ? "p-2.5" : "p-1.5";
+
+  const stickyWidth = popupMode ? "min-w-[180px]" : "min-w-[120px]";
+  const { globalFilter } = useFilter();
+
+  const { financialTableData } = usePengendalianData();
+
+  const monthMap = {
+    Januari: "Jan",
+    Februari: "Feb",
+    Maret: "Mar",
+    April: "Apr",
+    Mei: "Mei",
+    Juni: "Jun",
+    Juli: "Jul",
+    Agustus: "Agu",
+    September: "Sep",
+    Oktober: "Okt",
+    November: "Nov",
+    Desember: "Des",
+    Jan: "Jan",
+    Feb: "Feb",
+    Mar: "Mar",
+    Apr: "Apr",
+    Mei: "Mei",
+    Jun: "Jun",
+    Jul: "Jul",
+    Agu: "Agu",
+    Sep: "Sep",
+    Okt: "Okt",
+    Nov: "Nov",
+    Des: "Des",
+  };
+
+  const currentMonth =
+    monthMap[globalFilter?.bulan] || globalFilter?.bulan || "Apr";
 
   return (
     <div
-      className="
-        w-max
-        min-w-full
-        overflow-visible
-        border border-slate-100
+      className={`
+        relative
+        inline-block
+        overflow-auto
+        border border-slate-200
         rounded-2xl
         bg-white
-        shadow-sm
-      "
+        shadow-md
+        w-fit
+        max-w-full
+        /* KUNCI STICKY: Beri batas tinggi agar tabel punya scrollbar internal */
+        ${popupMode ? "max-h-[85vh]" : "max-h-[500px] 2xl:max-h-[600px]"}
+      `}
     >
       <table
         className={`
           text-left
           border-separate
           border-spacing-0
-          w-max
-          min-w-full
           ${textSize}
+          min-w-max
         `}
       >
         {/* HEADER */}
-        <thead
-          className={`
-            sticky top-0 z-30
-            text-white font-bold text-center
-            ${headerSize}
-          `}
-        >
-          <tr className="bg-slate-800">
+        <thead>
+          <tr>
+            {/* Uraian (Sudut Kiri Atas - Sticky Top & Left z-[60]) */}
             <th
               className={`
                 ${paddingMain}
-                pl-4
-                text-left
+                text-center align-middle
                 sticky left-0 top-0
-                bg-slate-800
-                z-40
+                bg-slate-900 
+                z-[60]
                 ${stickyWidth}
                 border-b border-slate-700
               `}
             >
-              Uraian
+              {/* Teks di-set langsung agar i-catchy dan tidak tertimpa CSS global */}
+              <span className="text-white font-extrabold tracking-wider uppercase drop-shadow-sm">
+                Uraian
+              </span>
             </th>
 
             <th
-              className={`${paddingMain} bg-[#000051] border-b border-slate-700`}
+              className={`${paddingMain} text-center sticky top-0 z-[50] bg-[#000051] border-b border-slate-700`}
             >
-              <div>RKAP Jan-Apr</div>
-              <div className={`${subHeaderSize} font-normal opacity-70`}>1</div>
+              <div className="text-white font-bold tracking-wide">{`RKAP Jan-${currentMonth}`}</div>
+              <div
+                className={`${subHeaderSize} text-blue-200 font-black mt-0.5`}
+              >
+                1
+              </div>
             </th>
 
             <th
-              className={`${paddingMain} bg-red-600 border-b border-slate-700`}
+              className={`${paddingMain} text-center sticky top-0 z-[50] bg-red-600 border-b border-slate-700`}
             >
-              <div>Real Jan-Apr</div>
-              <div className={`${subHeaderSize} font-normal opacity-70`}>2</div>
+              <div className="text-white font-bold tracking-wide">{`Real Jan-${currentMonth}`}</div>
+              <div
+                className={`${subHeaderSize} text-red-200 font-black mt-0.5`}
+              >
+                2
+              </div>
             </th>
 
             <th
-              className={`${paddingMain} bg-[#000075] border-b border-slate-700`}
+              className={`${paddingMain} text-center sticky top-0 z-[50] bg-[#000075] border-b border-slate-700`}
             >
-              <div>% thd RKAP</div>
-              <div className={`${subHeaderSize} font-normal opacity-70`}>
+              <div className="text-white font-bold tracking-wide">
+                % thd RKAP
+              </div>
+              <div
+                className={`${subHeaderSize} text-blue-200 font-black mt-0.5`}
+              >
                 3=2/1
               </div>
             </th>
 
             <th
-              className={`${paddingMain} bg-emerald-600 border-b border-slate-700`}
+              className={`${paddingMain} text-center sticky top-0 z-[50] bg-emerald-700 border-b border-slate-700`}
             >
-              <div>RKAP Jan-Des</div>
-              <div className={`${subHeaderSize} font-normal opacity-70`}>4</div>
+              <div className="text-white font-bold tracking-wide">
+                RKAP Jan-Des
+              </div>
+              <div
+                className={`${subHeaderSize} text-emerald-200 font-black mt-0.5`}
+              >
+                4
+              </div>
             </th>
 
             <th
-              className={`${paddingMain} bg-red-700 border-b border-slate-700`}
+              className={`${paddingMain} text-center sticky top-0 z-[50] bg-red-700 border-b border-slate-700`}
             >
-              <div>Sisa thd RKAP</div>
-              <div className={`${subHeaderSize} font-normal opacity-70`}>
+              <div className="text-white font-bold tracking-wide">
+                Sisa thd RKAP
+              </div>
+              <div
+                className={`${subHeaderSize} text-red-200 font-black mt-0.5`}
+              >
                 5=4-2
               </div>
             </th>
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+        <tbody className="divide-y divide-slate-200 font-medium text-slate-800">
           {/* BARIS PU */}
           <tr className="bg-slate-100 font-bold text-slate-900">
             <td
-              className={`
-                ${paddingMain}
-                pl-4
-                text-left
-                sticky left-0
-                bg-slate-100
-                z-20
-                border-b border-slate-200
-              `}
+              className={`${paddingMain} pl-4 text-left sticky left-0 bg-slate-100 z-[20] border-b border-slate-300 drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               PU
             </td>
-
-            <td className={`${paddingMain} text-right`}>1,045.80</td>
-
-            <td className={`${paddingMain} text-right`}>1,227.93</td>
-
-            <td className={`${paddingMain} text-right text-blue-700`}>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              {formatFinancialMiliar(financialTableData.puRkapTotal)}
+            </td>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              {formatFinancialMiliar(financialTableData.puRealTotal)}
+            </td>
+            <td className={`${paddingMain} text-right text-blue-700 font-bold`}>
               117.42%
             </td>
-
-            <td className={`${paddingMain} text-right`}>5,589.64</td>
-
-            <td className={`${paddingMain} text-right text-emerald-600`}>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              5,589.64
+            </td>
+            <td
+              className={`${paddingMain} text-right text-emerald-700 font-bold`}
+            >
               4,361.71
             </td>
           </tr>
-
           <tr className="hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-white
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-white z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               a. Non JO & JOP
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              721.67
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.puRkapNonJo)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              749.16
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.puRealNonJo)}
             </td>
-
-            <td className={`${paddingSub} text-right`}>103.81%</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              103.81%
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               4,010.45
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               3,261.29
             </td>
           </tr>
-
           <tr className="hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-white
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-white z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               b. JOI
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              324.13
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.puRkapJoi)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              478.78
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.puRealJoi)}
             </td>
-
-            <td className={`${paddingSub} text-right`}>147.71%</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              147.71%
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               1,579.20
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               1,100.42
             </td>
           </tr>
-
           {/* BARIS BK */}
           <tr className="bg-slate-100 font-bold text-slate-900">
             <td
-              className={`
-                ${paddingMain}
-                pl-4
-                text-left
-                sticky left-0
-                bg-slate-100
-                z-20
-                border-b border-slate-200
-              `}
+              className={`${paddingMain} pl-4 text-left sticky left-0 bg-slate-100 z-[20] border-b border-slate-300 drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               BK
             </td>
-
-            <td className={`${paddingMain} text-right`}>1,066.27</td>
-
-            <td className={`${paddingMain} text-right`}>1,378.63</td>
-
-            <td className={`${paddingMain} text-right text-slate-400`}>-</td>
-
-            <td className={`${paddingMain} text-right`}>5,172.31</td>
-
-            <td className={`${paddingMain} text-right text-emerald-600`}>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              {formatFinancialMiliar(financialTableData.bkTotal)}
+            </td>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              {formatFinancialMiliar(financialTableData.bkRealTotal)}
+            </td>
+            <td
+              className={`${paddingMain} text-right text-slate-600 font-black`}
+            >
+              -
+            </td>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              5,172.31
+            </td>
+            <td
+              className={`${paddingMain} text-right text-emerald-700 font-bold`}
+            >
               3,793.69
             </td>
           </tr>
-
           <tr className="hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-white
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-white z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               a. Non JO & JOP
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              716.98
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.bkNonJo)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              930.81
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.bkRealNonJo)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-400`}>-</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td className={`${paddingSub} text-right text-slate-600 font-bold`}>
+              -
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               3,732.13
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               2,801.32
             </td>
           </tr>
-
           <tr className="hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-white
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-white z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               b. JOI
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              349.29
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.bkJoi)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              447.82
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.bkRealJoi)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-400`}>-</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td className={`${paddingSub} text-right text-slate-600 font-bold`}>
+              -
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               1,440.18
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               992.36
             </td>
           </tr>
-
           {/* BK/PU */}
           <tr className="bg-blue-50/60 font-bold text-blue-950">
             <td
-              className={`
-                ${paddingMain}
-                pl-4
-                text-left
-                sticky left-0
-                bg-blue-50
-                z-20
-              `}
+              className={`${paddingMain} pl-4 text-left sticky left-0 bg-blue-100 z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               BK/PU
             </td>
-
-            <td className={`${paddingMain} text-right`}>101.96%</td>
-
-            <td className={`${paddingMain} text-right text-red-600`}>
-              112.27%
+            <td className={`${paddingMain} text-right`}>
+              {formatPercent(financialTableData.bkpuPercent)}
             </td>
-
-            <td className={`${paddingMain} text-right text-slate-400`}>-</td>
-
+            <td className={`${paddingMain} text-right text-red-700 font-bold`}>
+              {formatPercent(financialTableData.bkpuRealPercent)}
+            </td>
+            <td
+              className={`${paddingMain} text-right text-slate-600 font-black`}
+            >
+              -
+            </td>
             <td className={`${paddingMain} text-right`}>92.53%</td>
-
-            <td className={`${paddingMain} text-right text-blue-900`}>
+            <td className={`${paddingMain} text-right text-blue-900 font-bold`}>
               86.98%
             </td>
           </tr>
-
           <tr className="bg-blue-50/20 hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-[#fbfcfe]
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-[#fbfcfe] z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               a. Non JO & JOP
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              99.35%
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatPercent(financialTableData.bkpuNonJoPercent)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              124.25%
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatPercent(financialTableData.bkpuRealNonJoPercent)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-400`}>-</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td className={`${paddingSub} text-right text-slate-600 font-bold`}>
+              -
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               93.06%
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               85.90%
             </td>
           </tr>
-
           <tr className="bg-blue-50/20 hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-[#fbfcfe]
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-[#fbfcfe] z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               b. JOI
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              107.76%
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatPercent(financialTableData.bkpuJoiPercent)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
-              93.53%
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatPercent(financialTableData.bkpuRealJoiPercent)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-400`}>-</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td className={`${paddingSub} text-right text-slate-600 font-bold`}>
+              -
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               91.20%
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               90.18%
             </td>
           </tr>
-
           {/* LK */}
           <tr className="bg-red-50/60 font-bold text-slate-900">
             <td
-              className={`
-                ${paddingMain}
-                pl-4
-                text-left
-                sticky left-0
-                bg-red-50
-                z-20
-              `}
+              className={`${paddingMain} pl-4 text-left sticky left-0 bg-red-100 z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               LK
             </td>
-
-            <td className={`${paddingMain} text-right text-red-600`}>
-              (20.47)
+            <td className={`${paddingMain} text-right text-red-700 font-bold`}>
+              {formatFinancialMiliar(financialTableData.lkTotal)}
             </td>
-
-            <td className={`${paddingMain} text-right text-red-600`}>
-              (150.69)
+            <td className={`${paddingMain} text-right text-red-700 font-bold`}>
+              {formatFinancialMiliar(financialTableData.lkRealTotal)}
             </td>
-
-            <td className={`${paddingMain} text-right`}>13.58%</td>
-
-            <td className={`${paddingMain} text-right`}>417.33</td>
-
-            <td className={`${paddingMain} text-right text-emerald-600`}>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              13.58%
+            </td>
+            <td className={`${paddingMain} text-right text-slate-900`}>
+              417.33
+            </td>
+            <td
+              className={`${paddingMain} text-right text-emerald-700 font-bold`}
+            >
               568.03
             </td>
           </tr>
-
           <tr className="bg-red-50/10 hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-[#fffbfa]
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-[#fffbfa] z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               a. Non JO & JOP
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>4.69</td>
-
-            <td className={`${paddingSub} text-right text-red-600`}>
-              (181.65)
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
+              {formatFinancialMiliar(financialTableData.lkNonJo)}
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-400`}>-</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td className={`${paddingSub} text-right text-red-700 font-bold`}>
+              {formatFinancialMiliar(financialTableData.lkRealNonJo)}
+            </td>
+            <td className={`${paddingSub} text-right text-slate-600 font-bold`}>
+              -
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               278.32
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               459.97
             </td>
           </tr>
-
           <tr className="bg-red-50/10 hover:bg-slate-50/80">
             <td
-              className={`
-                ${paddingSub}
-                pl-6
-                text-left
-                text-slate-500
-                sticky left-0
-                bg-[#fffbfa]
-                z-20
-              `}
+              className={`${paddingSub} pl-6 text-left text-slate-700 font-semibold sticky left-0 bg-[#fffbfa] z-[20] drop-shadow-[2px_0_2px_rgba(0,0,0,0.02)]`}
             >
               b. JOI
             </td>
-
-            <td className={`${paddingSub} text-right text-red-600`}>(25.16)</td>
-
-            <td className={`${paddingSub} text-right text-slate-800`}>30.96</td>
-
-            <td className={`${paddingSub} text-right text-slate-400`}>-</td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td className={`${paddingSub} text-right text-red-700 font-bold`}>
+              {formatFinancialMiliar(financialTableData.lkJoi)}
+            </td>
+            <td className={`${paddingSub} text-right text-slate-900 font-bold`}>
+              {formatFinancialMiliar(financialTableData.lkRealJoi)}
+            </td>
+            <td className={`${paddingSub} text-right text-slate-600 font-bold`}>
+              -
+            </td>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               139.01
             </td>
-
-            <td className={`${paddingSub} text-right text-slate-500`}>
+            <td
+              className={`${paddingSub} text-right text-slate-800 font-medium`}
+            >
               108.06
             </td>
           </tr>

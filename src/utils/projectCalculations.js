@@ -12,21 +12,24 @@ export const getProjectRealisasi = (realisasiData, projectId, selectedDate) => {
   });
 };
 
-export const calculateRiProgress = (realisasiProject, nilaiKontrak) => {
-  const totalPU = realisasiProject.reduce(
-    (sum, row) => sum + Number(row.pu_real_parsial || 0),
-    0,
-  );
+export const calculateRiProgress = (realisasiProject) => {
+  if (!realisasiProject?.length) return 0;
 
-  return nilaiKontrak > 0 ? (totalPU / nilaiKontrak) * 100 : 0;
-};
-
-export const calculateRaProgress = (realisasiProject) => {
   const latest = [...realisasiProject].sort(
     (a, b) => new Date(b.periode) - new Date(a.periode),
   )[0];
 
-  return Number(latest?.progres_scurve || 0) * 100;
+  return Number(latest?.prog_real || 0);
+};
+
+export const calculateRaProgress = (realisasiProject) => {
+  if (!realisasiProject?.length) return 0;
+
+  const latest = [...realisasiProject].sort(
+    (a, b) => new Date(b.periode) - new Date(a.periode),
+  )[0];
+
+  return Number(latest?.progres_scurve || 0);
 };
 
 export const calculateRemainingDays = (endDate) => {
@@ -59,7 +62,7 @@ export const calculateTimeOverrunData = ({
         selectedDate,
       );
 
-      const progress = calculateRiProgress(realisasiProject, nilaiKontrak);
+      calculateRiProgress(realisasiProject);
 
       const remain = calculateRemainingDays(project.end_date);
 

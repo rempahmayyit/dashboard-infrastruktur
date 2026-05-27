@@ -57,7 +57,7 @@ export default function MonitoringTables({
 
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="font-black text-xs text-slate-700">
-                {timeOverrunPercent.toFixed(0)}%
+                {timeOverrunPercent}%
               </span>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function MonitoringTables({
 
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="font-black text-xs text-orange-600">
-                {behindSchedulePercent.toFixed(0)}%
+                {behindSchedulePercent}%
               </span>
             </div>
           </div>
@@ -282,7 +282,7 @@ export default function MonitoringTables({
               </p>
             </div>
           </div>
-          {/* Visual Indikator Lingkaran 49% */}
+          {/* Visual Indikator Lingkaran */}
           <div className="relative w-14 h-14">
             <svg className="w-14 h-14 -rotate-90">
               <circle
@@ -309,7 +309,7 @@ export default function MonitoringTables({
                   138.2 -
                   (138.2 *
                     (totalProject > 0
-                      ? (costOverrunData.length / totalProject) * 100
+                      ? ((bkpuMappProjects.length / totalProject) * 100)
                       : 0)) /
                     100
                 }
@@ -319,7 +319,7 @@ export default function MonitoringTables({
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="font-black text-xs text-[#000075]">
                 {(totalProject > 0
-                  ? (costOverrunData.length / totalProject) * 100
+                  ? ((bkpuMappProjects.length / totalProject) * 100)
                   : 0
                 ).toFixed(0)}
                 %

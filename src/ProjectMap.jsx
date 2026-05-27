@@ -135,7 +135,7 @@ export default function ProjectMap() {
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{
-            scale: 1100, // Zoom yang lebih dekat agar tidak terlalu dempet
+            scale: 1000,
             center: [118, -2],
           }}
           width={1000}
@@ -161,34 +161,39 @@ export default function ProjectMap() {
           </Geographies>
 
           {/* MARKERS KOTAK KLIK */}
-          {projectData.map((project, index) => (
-            <Marker
-              key={`${project.id}-${index}`}
-              coordinates={[project.longitude, project.latitude]}
-              onClick={() => setActiveTooltip(project)} // Memilih proyek saat diklik
-            >
-              <g style={{ cursor: "pointer" }}>
-                {/* Efek Ping/Pulse */}
-                <circle
-                  r={12}
-                  fill={
-                    project.status === "Critical"
-                      ? "rgba(220,38,38,0.18)"
-                      : "rgba(37,99,235,0.18)"
-                  }
-                  className="animate-pulse"
-                />
-                {/* Titik Inti */}
-                <circle
-                  r={5.5}
-                  fill={project.status === "Critical" ? "#DC2626" : "#2563EB"}
-                  stroke="#FFFFFF"
-                  strokeWidth={2}
-                  className="hover:opacity-80 transition-all"
-                />
-              </g>
-            </Marker>
-          ))}
+          {projectData
+            .filter((project) => {
+              const lat = Number(project.latitude);
+              const lng = Number(project.longitude);
+
+              return (
+                !isNaN(lat) &&
+                !isNaN(lng) &&
+                lat >= -90 &&
+                lat <= 90 &&
+                lng >= -180 &&
+                lng <= 180
+              );
+            })
+            .map((project, index) => {
+              const lat = Number(project.latitude);
+              const lng = Number(project.longitude);
+
+              if (isNaN(lat) || isNaN(lng)) return null;
+
+              return (
+                <Marker
+                  key={`${project.id}-${index}`}
+                  coordinates={[lng, lat]}
+                  onClick={() => setActiveTooltip(project)}
+                >
+                  <circle
+                    r={4}
+                    fill={project.status === "Critical" ? "#DC2626" : "#2563EB"}
+                  />
+                </Marker>
+              );
+            })}
         </ComposableMap>
 
         {/* OVERLAY POPUP INFORMASI (Akan muncul saat Marker diklik) */}
