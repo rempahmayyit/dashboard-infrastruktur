@@ -31,7 +31,7 @@ export default function KeuanganAkuntansi() {
     <div className="space-y-6 animate-fadeIn font-sans">
       
       {/* SEKSI UTAMA ATAS (2 KOLOM: TABEL CASH IN VS TABEL KOMITMEN MEI) */}
-      <div className="flex flex-col xl:flex-row gap-6 items-stretch">
+      <div className="dashboard-card flex flex-col xl:flex-row gap-6 items-stretch">
         
         {/* SISI KIRI: CASH IN APRIL & RESUME CF (LEBAR 40%) */}
         <div className="w-full xl:w-[40%] flex flex-col gap-6 justify-between">

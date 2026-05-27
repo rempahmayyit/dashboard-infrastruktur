@@ -77,7 +77,7 @@ export default function PemasaranAnggaran() {
       </div>
 
       {/* KARTU METRIK UTAMA PEMASARAN */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="dashboard-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
           <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Pipeline Tender</p>
           <h3 className="text-2xl font-black text-slate-900 mt-2">2.930 M</h3>
@@ -102,7 +102,7 @@ export default function PemasaranAnggaran() {
 
       {/* STRUKTUR GRID BAWAH */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        <div className="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+        <div className="dashboard-card lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white h-full flex flex-col">
             <div className="bg-slate-50 p-3 border-b border-slate-200 flex items-center gap-2">
               <FileText size={14} className="text-[#000075]" />

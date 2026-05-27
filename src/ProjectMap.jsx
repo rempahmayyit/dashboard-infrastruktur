@@ -1,192 +1,252 @@
 // src/ProjectMap.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "./lib/supabase";
 import {
-  ResponsiveContainer,
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  ZAxis,
-  Tooltip,
-} from "recharts";
-import indonesiaMap from "./assets/indonesia-map.svg";
+  ComposableMap,
+  Geographies,
+  Geography,
+  Marker,
+} from "react-simple-maps";
+import { Video, X } from "lucide-react";
 
-// Data koordinat kartesian proyek disesuaikan dengan posisi peta Indonesia asli
-const projectData = [
-  {
-    id: "1323020",
-    name: "Tol Probolinggo-Banyuwangi Pkt 3",
-    x: 43,
-    y: 70,
-    gap: "Potensi Delay",
-    status: "Critical",
-  },
-
-  {
-    id: "1323042",
-    name: "Jalan Tol Ciawi Sukabumi Seksi 3A",
-    x: 34,
-    y: 68,
-    gap: "-15 M",
-    status: "Critical",
-  },
-
-  {
-    id: "1324010",
-    name: "Jalan Tol Ciawi Sukabumi Seksi 3B",
-    x: 36,
-    y: 68,
-    gap: "-34 M",
-    status: "Critical",
-  },
-
-  {
-    id: "1425013",
-    name: "Irigasi Belitang Lempuing Pkt 2",
-    x: 49,
-    y: 58,
-    gap: "Dispute",
-    status: "On Going",
-  },
-
-  {
-    id: "MERAUKE",
-    name: "Irigasi Rawa KSPP Merauke",
-    x: 92,
-    y: 69,
-    gap: "Nilai 48.6",
-    status: "Critical",
-  },
-
-  {
-    id: "IKN-IPAL",
-    name: "IPAL 1,2,3 IKN",
-    x: 63,
-    y: 50,
-    gap: "Nilai 79.77",
-    status: "Critical",
-  },
-];
-
-const CustomTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-slate-900/95 text-white p-3 rounded-xl border border-slate-700 shadow-xl text-xs max-w-xs font-sans">
-        <p className="font-bold text-blue-400 mb-0.5">{data.id}</p>
-        <p className="font-black text-sm mb-1">{data.name}</p>
-        <p className="text-slate-300">
-          Status:{" "}
-          <span
-            className={
-              data.status === "Critical"
-                ? "text-red-400 font-bold"
-                : "text-emerald-400 font-bold"
-            }
-          >
-            {data.status}
-          </span>
-        </p>
-        <p className="text-slate-300 mt-0.5">
-          Keterangan:{" "}
-          <span className="text-amber-400 font-semibold">{data.gap}</span>
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
+const geoUrl = "/indonesia.json";
 
 export default function ProjectMap() {
+  const [projectData, setProjectData] = useState([]);
+
+  // State untuk menyimpan data proyek mana yang SEDANG DIKLIK
+  const [activeTooltip, setActiveTooltip] = useState(null);
+
+  useEffect(() => {
+    fetchLokasi();
+  }, []);
+
+  const fetchLokasi = async () => {
+    try {
+      // Pastikan nama tabel disesuaikan dengan yang ada di Supabase Anda
+      const { data, error } = await supabase.from("master_project").select("*");
+
+      if (error) {
+        console.error("Supabase error:", error);
+        return;
+      }
+
+      const formatted = (data || [])
+        .map((item) => {
+          // FIX FORMAT KOORDINAT
+          const longitude = parseFloat(
+            String(item?.longitude || "0")
+              .replace(",", ".")
+              .trim(),
+          );
+
+          const latitude = parseFloat(
+            String(item?.latitude || "0")
+              .replace(",", ".")
+              .trim(),
+          );
+
+          // VALIDASI ANTI NaN
+          const isValid =
+            Number.isFinite(longitude) &&
+            Number.isFinite(latitude) &&
+            longitude !== 0 &&
+            latitude !== 0;
+
+          if (!isValid) return null;
+
+          // FILTER STATUS ON GOING
+          const rawStatus = String(
+            item?.status_proyek || item?.status_project_current || "",
+          ).toUpperCase();
+
+          const isOnGoing =
+            rawStatus.includes("ON GOING") ||
+            rawStatus.includes("SAP NOT UPDATE");
+
+          if (!isOnGoing) return null;
+
+          return {
+            id: item?.id_project || "-",
+
+            name:
+              item?.project_name ||
+              item?.nama_proyek_current ||
+              "Unknown Project",
+
+            longitude,
+            latitude,
+
+            // MARKER MERAH JIKA BEHIND
+            status: String(item?.status_schedule || "")
+              .toUpperCase()
+              .includes("BEHIND")
+              ? "Critical"
+              : "On Going",
+
+            gap: String(item?.status_schedule || "")
+              .toUpperCase()
+              .includes("BEHIND")
+              ? "Behind Schedule"
+              : "Normal",
+
+            link_drone: item?.link_drone || null,
+          };
+        })
+        .filter(Boolean);
+
+      setProjectData(formatted);
+    } catch (err) {
+      console.error("FETCH ERROR:", err);
+      setProjectData([]);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 w-full break-inside-avoid">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+    <div className="w-full bg-white rounded-[28px] border border-slate-200 shadow-sm p-6 mt-8 relative">
+      {/* HEADER */}
+      <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-base font-bold text-slate-900">
-            Sebaran Geografis Proyek Klaster Nusantara
-          </h3>
-          <p className="text-slate-500 text-xs mt-0.5">
-            Peta interaktif koordinat lokasi log proyek kritis dan berjalan s.d
-            April 2026
+          <h2 className="text-[18px] font-bold text-slate-800">
+            Sebaran Geografis Proyek
+          </h2>
+          <p className="text-slate-500 text-sm mt-1">
+            Klik titik koordinat proyek untuk melihat detail dan pantauan drone
           </p>
         </div>
-        <div className="flex gap-4 text-xs font-semibold">
-          <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-[#000075]"></span>
-            <span className="text-slate-600">On Going</span>
+
+        {/* LEGENDA */}
+        <div className="flex items-center gap-5 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+            <span className="font-medium text-slate-600 text-xs">On Going</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-[#BD002F]"></span>
-            <span className="text-slate-600">Critical / Delay</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-600"></div>
+            <span className="font-medium text-slate-600 text-xs">
+              Critical / Delay
+            </span>
           </div>
         </div>
       </div>
 
-      {/* RENDER BOX REALISTIS MAP BACKGROUND */}
-      <div className="w-full bg-[#f8fafc] rounded-xl border border-slate-100 relative p-2 overflow-hidden min-h-[340px]">
-        {/* GAMBAR SILUET PETA ASLI INDONESIA DARI REPOSITORI WIKIMEDIA */}
-        {/* BACKGROUND MAP */}
-        <div className="absolute inset-0 z-0 opacity-25 pointer-events-none">
-          <img
-            src={indonesiaMap}
-            alt="Peta Indonesia"
-            className="w-full h-full object-contain"
-          />
-        </div>
+      {/* MAP CONTAINER */}
+      <div className="bg-[#F3F4F6] rounded-[24px] overflow-hidden relative min-h-[450px]">
+        <ComposableMap
+          projection="geoMercator"
+          projectionConfig={{
+            scale: 1100, // Zoom yang lebih dekat agar tidak terlalu dempet
+            center: [118, -2],
+          }}
+          width={1000}
+          height={450}
+        >
+          <Geographies geography={geoUrl}>
+            {({ geographies }) =>
+              geographies.map((geo) => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill="#DCDCE1"
+                  stroke="#FFFFFF"
+                  strokeWidth={0.75}
+                  style={{
+                    default: { outline: "none" },
+                    hover: { fill: "#C8C8CE", outline: "none" },
+                    pressed: { outline: "none" },
+                  }}
+                />
+              ))
+            }
+          </Geographies>
 
-        {/* CONTAINER PLACEMENT SCATTER PLOT */}
-        <div className="w-full h-[320px] relative z-10">
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-              <XAxis type="number" dataKey="x" domain={[0, 100]} hide />
-              <YAxis type="number" dataKey="y" domain={[0, 100]} hide />
-              <ZAxis type="number" range={[320, 320]} />
-              <Tooltip
-                content={<CustomTooltip />}
-                cursor={false}
-                wrapperStyle={{
-                  pointerEvents: "none",
-                  zIndex: 1000,
-                }}
-              />
-              <Scatter
-                data={projectData}
-                fill="#1D4ED8"
-                shape={(props) => {
-                  const { cx, cy, payload } = props;
+          {/* MARKERS KOTAK KLIK */}
+          {projectData.map((project, index) => (
+            <Marker
+              key={`${project.id}-${index}`}
+              coordinates={[project.longitude, project.latitude]}
+              onClick={() => setActiveTooltip(project)} // Memilih proyek saat diklik
+            >
+              <g style={{ cursor: "pointer" }}>
+                {/* Efek Ping/Pulse */}
+                <circle
+                  r={12}
+                  fill={
+                    project.status === "Critical"
+                      ? "rgba(220,38,38,0.18)"
+                      : "rgba(37,99,235,0.18)"
+                  }
+                  className="animate-pulse"
+                />
+                {/* Titik Inti */}
+                <circle
+                  r={5.5}
+                  fill={project.status === "Critical" ? "#DC2626" : "#2563EB"}
+                  stroke="#FFFFFF"
+                  strokeWidth={2}
+                  className="hover:opacity-80 transition-all"
+                />
+              </g>
+            </Marker>
+          ))}
+        </ComposableMap>
 
-                  return (
-                    <g>
-                      {/* Outer Glow */}
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={10}
-                        fill={
-                          payload.status === "Critical"
-                            ? "rgba(225,29,72,0.25)"
-                            : "rgba(29,78,216,0.25)"
-                        }
-                      />
+        {/* OVERLAY POPUP INFORMASI (Akan muncul saat Marker diklik) */}
+        {activeTooltip && (
+          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-xl border border-slate-200 w-72 z-50 font-sans transition-all animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-3">
+              <h4 className="font-black text-sm text-slate-800 leading-snug pr-4">
+                {activeTooltip.name}
+              </h4>
+              <button
+                onClick={() => setActiveTooltip(null)}
+                className="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 rounded-full p-1 transition-colors"
+                title="Tutup"
+              >
+                <X size={14} />
+              </button>
+            </div>
 
-                      {/* Main Dot */}
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={5}
-                        fill={
-                          payload.status === "Critical" ? "#E11D48" : "#1D4ED8"
-                        }
-                        stroke="#ffffff"
-                        strokeWidth={2}
-                      />
-                    </g>
-                  );
-                }}
-              />
-            </ScatterChart>
-          </ResponsiveContainer>
-        </div>
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-medium">
+                  Status Pekerjaan
+                </span>
+                <span
+                  className={`font-black px-2 py-0.5 rounded ${activeTooltip.status === "Critical" ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600"}`}
+                >
+                  {activeTooltip.status}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-medium">
+                  Kondisi Deviasi
+                </span>
+                <span className="font-bold text-slate-700">
+                  {activeTooltip.gap}
+                </span>
+              </div>
+            </div>
+
+            {/* TOMBOL DRONE */}
+            {activeTooltip.link_drone &&
+            activeTooltip.link_drone.trim() !== "" &&
+            activeTooltip.link_drone !== "-" ? (
+              <a
+                href={activeTooltip.link_drone}
+                target="_blank"
+                rel="noreferrer"
+                className="flex justify-center items-center gap-1.5 w-full bg-[#000075] hover:bg-blue-900 text-white text-[11px] font-bold py-2.5 rounded-xl transition-all shadow-md shadow-blue-900/20"
+              >
+                <Video size={14} /> Lihat Pantauan Drone
+              </a>
+            ) : (
+              <div className="flex justify-center items-center w-full bg-slate-100 text-slate-400 text-[11px] font-bold py-2.5 rounded-xl cursor-not-allowed border border-slate-200 border-dashed">
+                Video Drone Tidak Tersedia
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
