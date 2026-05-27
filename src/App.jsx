@@ -81,25 +81,43 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeMenu) {
-      case "Executive Dashboard": return <ExecutiveDashboard />;
-      case "Pemasaran & Anggaran": return <PemasaranAnggaran />;
-      case "Pengendalian Proyek": return <PengendalianProyek />;
-      case "Keuangan & Akuntansi": return <KeuanganAkuntansi />;
-      case "Teknik, Mutu & K3L": return <TeknikMutuK3L />;
-      case "Legal & Manrisk": return <LegalManrisk />;
-      case "SDM & Umum": return <SdmUmum />;
-      case "SAP vs QC/Rekon": return <SapVsQcRekon />;
-      case "Eskalasi": return <MonitoringEskalasiComponent />;
-      case "PDPK": return <PdpkMonitoring />;
-      case "Drone & Live CCTV": return <MonitoringCCTV />;
-      case "Pusat Data & Integrasi": return <PusatData />;
-      case "Form Pemasaran & Anggaran": return <PusatData />;
-      default: return null;
+      case "Executive Dashboard":
+        return <ExecutiveDashboard />;
+      case "Pemasaran & Anggaran":
+        return <PemasaranAnggaran />;
+      case "Pengendalian Proyek":
+        return <PengendalianProyek />;
+      case "Keuangan & Akuntansi":
+        return <KeuanganAkuntansi />;
+      case "Teknik, Mutu & K3L":
+        return <TeknikMutuK3L />;
+      case "Legal & Manrisk":
+        return <LegalManrisk />;
+      case "SDM & Umum":
+        return <SdmUmum />;
+      case "SAP vs QC/Rekon":
+        return <SapVsQcRekon />;
+      case "Eskalasi":
+        return <MonitoringEskalasiComponent />;
+      case "PDPK":
+        return <PdpkMonitoring />;
+      case "Drone & Live CCTV":
+        return <MonitoringCCTV />;
+      case "Pusat Data & Integrasi":
+        return <PusatData />;
+      case "Form Pemasaran & Anggaran":
+        return <PusatData />;
+      default:
+        return null;
     }
   };
 
   if (loading) {
-    return <div className="h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   if (!session) {
@@ -109,7 +127,12 @@ export default function App() {
   // Identitas Profil
   const userName = session?.user?.user_metadata?.full_name || "Vidi Handoko";
   const userEmail = session?.user?.email || "vidi.handoko@waskita.co.id";
-  const userInitials = userName.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
+  const userInitials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
 
   return (
     <div className="h-screen bg-slate-50 text-slate-900 flex font-sans antialiased relative overflow-hidden print:block">
@@ -124,18 +147,17 @@ export default function App() {
         userName={userName}
         userEmail={userEmail}
       />
-      
+
       <div className="flex-1 flex flex-col h-screen overflow-hidden print:block">
-        <Topbar 
-          isCollapsed={isCollapsed} 
-          setIsCollapsed={setIsCollapsed} 
-          activeMenu={activeMenu} 
+        <Topbar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          activeMenu={activeMenu}
         />
-        
-        <div className="flex-1 overflow-y-auto p-8">
-          {renderContent()}
-        </div>
+
+        <div className="flex-1 overflow-y-auto p-8">{renderContent()}</div>
       </div>
+
     </div>
   );
 }
