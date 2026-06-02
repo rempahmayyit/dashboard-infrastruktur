@@ -3,13 +3,15 @@ export const getSelectedDate = (selectedYear, selectedMonth) => {
 };
 
 export const getProjectRealisasi = (realisasiData, projectId, selectedDate) => {
-  return realisasiData.filter((row) => {
+  const hasil = realisasiData.filter((row) => {
     const rowId = row.id_project || row.id_proyect || row.id_proyek;
 
     const rowDate = new Date(row.periode);
 
     return String(rowId) === String(projectId) && rowDate <= selectedDate;
   });
+
+    return hasil;
 };
 
 export const calculateRiProgress = (realisasiProject) => {

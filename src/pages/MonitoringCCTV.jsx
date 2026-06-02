@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 import { Camera, Play, X, MapPin, Search } from "lucide-react";
-
 import { supabase } from "../lib/supabase";
 
 export default function MonitoringCCTV() {

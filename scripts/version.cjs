@@ -2,7 +2,11 @@ const fs = require("fs");
 
 const packageJson = require("../package.json");
 
-const now = new Date();
+const now = new Date(
+  new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Jakarta",
+  })
+);
 
 const pad = (n) => String(n).padStart(2, "0");
 

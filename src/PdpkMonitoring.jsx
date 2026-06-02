@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ModuleOverlay from "./components/ModuleOverlay";
 
 function PdpkMonitoring() {
   // Data Riil Berdasarkan Laporan Piutang Bermasalah Dokumen Lampiran Resmi
@@ -258,9 +259,12 @@ function PdpkMonitoring() {
             </tbody>
           </table>
         </div>
+        <ModuleOverlay/>
       </div>
+      
     </div>
   );
+  
 }
 
 export default PdpkMonitoring;

@@ -176,15 +176,15 @@ export default function FinancialTable({ popupMode = false }) {
               {formatFinancialMiliar(financialTableData.puRealTotal)}
             </td>
             <td className={`${paddingMain} text-right text-blue-700 font-bold`}>
-              117.42%
+              {formatPercent(financialTableData.puPercent)}
             </td>
             <td className={`${paddingMain} text-right text-slate-900`}>
-              5,589.64
+              {formatFinancialMiliar(financialTableData.puRkapTahunan)}
             </td>
             <td
               className={`${paddingMain} text-right text-emerald-700 font-bold`}
             >
-              4,361.71
+              {formatFinancialMiliar(financialTableData.sisaPuTotal)}
             </td>
           </tr>
           <tr className="hover:bg-slate-50/80">
@@ -206,17 +206,17 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              103.81%
+              {formatPercent(financialTableData.puNonJoPercent)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              4,010.45
+              {formatFinancialMiliar(financialTableData.puRkapTahunanNonJo)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              3,261.29
+              {formatFinancialMiliar(financialTableData.sisaPuNonJo)}
             </td>
           </tr>
           <tr className="hover:bg-slate-50/80">
@@ -238,17 +238,17 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              147.71%
+              {formatPercent(financialTableData.puJoiPercent)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              1,579.20
+              {formatFinancialMiliar(financialTableData.puRkapTahunanJoi)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              1,100.42
+              {formatFinancialMiliar(financialTableData.sisaPuJoi)}
             </td>
           </tr>
           {/* BARIS BK */}
@@ -270,12 +270,12 @@ export default function FinancialTable({ popupMode = false }) {
               -
             </td>
             <td className={`${paddingMain} text-right text-slate-900`}>
-              5,172.31
+              {formatFinancialMiliar(financialTableData.bkRkapTahunan)}
             </td>
             <td
               className={`${paddingMain} text-right text-emerald-700 font-bold`}
             >
-              3,793.69
+              {formatFinancialMiliar(financialTableData.sisaBkTotal)}
             </td>
           </tr>
           <tr className="hover:bg-slate-50/80">
@@ -300,12 +300,12 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              3,732.13
+              {formatFinancialMiliar(financialTableData.bkRkapTahunanNonJo)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              2,801.32
+              {formatFinancialMiliar(financialTableData.sisaBkNonJo)}
             </td>
           </tr>
           <tr className="hover:bg-slate-50/80">
@@ -330,12 +330,12 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              1,440.18
+              {formatFinancialMiliar(financialTableData.bkRkapTahunanJoi)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              992.36
+              {formatFinancialMiliar(financialTableData.sisaBkJoi)}
             </td>
           </tr>
           {/* BK/PU */}
@@ -356,9 +356,9 @@ export default function FinancialTable({ popupMode = false }) {
             >
               -
             </td>
-            <td className={`${paddingMain} text-right`}>92.53%</td>
+            <td className={`${paddingMain} text-right`}>{formatPercent(financialTableData.bkpuRkapTahunan)}</td>
             <td className={`${paddingMain} text-right text-blue-900 font-bold`}>
-              86.98%
+              {formatPercent(financialTableData.sisaBkpuTotal)}
             </td>
           </tr>
           <tr className="bg-blue-50/20 hover:bg-slate-50/80">
@@ -383,12 +383,12 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              93.06%
+              {formatPercent(financialTableData.bkpuRkapTahunanNonJo)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              85.90%
+              {formatPercent(financialTableData.sisaBkpuNonJo)}
             </td>
           </tr>
           <tr className="bg-blue-50/20 hover:bg-slate-50/80">
@@ -413,12 +413,12 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              91.20%
+              {formatPercent(financialTableData.bkpuRkapTahunanJoi)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              90.18%
+              {formatPercent(financialTableData.sisaBkpuJoi)}
             </td>
           </tr>
           {/* LK */}
@@ -435,15 +435,15 @@ export default function FinancialTable({ popupMode = false }) {
               {formatFinancialMiliar(financialTableData.lkRealTotal)}
             </td>
             <td className={`${paddingMain} text-right text-slate-900`}>
-              13.58%
+              {formatPercent(financialTableData.lkPercent)}
             </td>
             <td className={`${paddingMain} text-right text-slate-900`}>
-              417.33
+              {formatFinancialMiliar(financialTableData.lkRkapTahunan)}
             </td>
             <td
               className={`${paddingMain} text-right text-emerald-700 font-bold`}
             >
-              568.03
+              {formatFinancialMiliar(financialTableData.sisaLkTotal)}
             </td>
           </tr>
           <tr className="bg-red-50/10 hover:bg-slate-50/80">
@@ -466,12 +466,12 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              278.32
+              {formatFinancialMiliar(financialTableData.lkRkapTahunanNonJo)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              459.97
+              {formatFinancialMiliar(financialTableData.sisaLkNonJo)}
             </td>
           </tr>
           <tr className="bg-red-50/10 hover:bg-slate-50/80">
@@ -492,12 +492,12 @@ export default function FinancialTable({ popupMode = false }) {
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              139.01
+              {formatFinancialMiliar(financialTableData.lkRkapTahunanJoi)}
             </td>
             <td
               className={`${paddingSub} text-right text-slate-800 font-medium`}
             >
-              108.06
+              {formatFinancialMiliar(financialTableData.sisaLkJoi)}
             </td>
           </tr>
         </tbody>

@@ -6,9 +6,9 @@ import LoginPage from "./LoginPage";
 
 // --- Import Halaman Konten ---
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
-import MonitoringCCTV from "./pages/MonitoringCCTV";
+//import MonitoringCCTV from "./pages/MonitoringCCTV";
 import PemasaranAnggaran from "./PemasaranAnggaran";
-import PengendalianProyek from "./PengendalianProyek";
+import PengendalianProyek from "./Pengendalian/pages/PengendalianProyek";
 import KeuanganAkuntansi from "./KeuanganAkuntansi";
 import TeknikMutuK3L from "./TeknikMutuK3L";
 import LegalManrisk from "./LegalManrisk";
@@ -42,6 +42,7 @@ export default function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showIdleWarning, setShowIdleWarning] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -58,6 +59,58 @@ export default function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // AUTO LOGOUT 30 MENIT + WARNING 5 MENIT SEBELUMNYA
+  useEffect(() => {
+    if (!session) return;
+
+    let warningTimer;
+    let logoutTimer;
+
+    const resetTimer = () => {
+      clearTimeout(warningTimer);
+      clearTimeout(logoutTimer);
+
+      setShowIdleWarning(false);
+
+      // Popup warning di menit ke-25
+      warningTimer = setTimeout(
+        () => {
+          setShowIdleWarning(true);
+        },
+        25 * 60 * 1000,
+      );
+
+      // Logout di menit ke-30
+      logoutTimer = setTimeout(
+        async () => {
+          await supabase.auth.signOut();
+          setSession(null);
+        },
+        30 * 60 * 1000,
+      );
+    };
+
+    const events = [
+      "mousemove",
+      "mousedown",
+      "click",
+      "scroll",
+      "keypress",
+      "touchstart",
+    ];
+
+    events.forEach((event) => window.addEventListener(event, resetTimer));
+
+    resetTimer();
+
+    return () => {
+      clearTimeout(warningTimer);
+      clearTimeout(logoutTimer);
+
+      events.forEach((event) => window.removeEventListener(event, resetTimer));
+    };
+  }, [session]);
 
   const menuItems = [
     { name: "Executive Dashboard", icon: LayoutDashboard },
@@ -81,8 +134,7 @@ export default function App() {
         { name: "Under Development" },
       ],
     },
-    { name: "Drone & Live CCTV", icon: Video },
-    { name: "Pusat Data & Integrasi", icon: Database },
+        { name: "Pusat Data & Integrasi", icon: Database },
   ];
 
   const renderContent = () => {
@@ -109,8 +161,6 @@ export default function App() {
         return <MonitoringEskalasiComponent />;
       case "PDPK":
         return <PdpkMonitoring />;
-      case "Drone & Live CCTV":
-        return <MonitoringCCTV />;
       case "Pusat Data & Integrasi":
         return <PusatData />;
       case "Form Pemasaran & Anggaran":
@@ -133,14 +183,34 @@ export default function App() {
   }
 
   // Identitas Profil
-  const userName = session?.user?.user_metadata?.full_name || "Vidi Handoko";
-  const userEmail = session?.user?.email || "vidi.handoko@waskita.co.id";
+  const userEmail = session?.user?.email || "";
+
+  const userName =
+    session?.user?.user_metadata?.full_name ||
+    (userEmail
+      ? userEmail
+          .split("@")[0]
+          .split(".")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")
+      : "Guest User");
+
   const userInitials = userName
     .split(" ")
     .map((n) => n[0])
     .join("")
     .substring(0, 2)
     .toUpperCase();
+
+  const stayLoggedIn = () => {
+    setShowIdleWarning(false);
+
+    window.dispatchEvent(
+      new MouseEvent("mousemove", {
+        bubbles: true,
+      }),
+    );
+  };
 
   return (
     <div className="h-screen bg-slate-50 text-slate-900 flex font-sans antialiased relative overflow-hidden print:block">
@@ -165,6 +235,44 @@ export default function App() {
 
         <div className="flex-1 overflow-y-auto p-8">{renderContent()}</div>
       </div>
+
+      {showIdleWarning && (
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl w-[420px] border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900">
+                Sesi Akan Berakhir
+              </h3>
+            </div>
+
+            <div className="p-6">
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Tidak ada aktivitas selama 25 menit. Sistem akan melakukan
+                logout otomatis dalam 5 menit untuk alasan keamanan.
+              </p>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    setSession(null);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50"
+                >
+                  Logout Sekarang
+                </button>
+
+                <button
+                  onClick={stayLoggedIn}
+                  className="px-4 py-2 rounded-xl bg-[#000075] text-white hover:bg-[#00005c] font-semibold"
+                >
+                  Tetap Login
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

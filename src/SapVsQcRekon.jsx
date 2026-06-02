@@ -1,357 +1,364 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
+import {
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  AlertTriangle,
+  Search,
+} from "lucide-react";
+import { usePengendalianData } from "./hooks/usePengendalianData"; // Sesuaikan path jika berbeda
+import { useFilter } from "./context/FilterContext"; // Sesuaikan path jika berbeda
 
-function RealisasiSapTable() {
-  const tableData = [
-    {
-      id: "1726012",
-      project: "Perkuatan Dermaga JICT Tj Priok JOI 60%",
-      nk: "903,000",
-      qc_pu: "39",
-      qc_bk: "15",
-      sap_pu: "64",
-      sap_bk: "24",
-      dev_pu: "(25,786,100)",
-      dev_bk: "(8,677,502)",
-      ket: "Deviasi PU & BK",
-    },
+export default function RealisasiSapTable() {
+  // Panggil data hasil kalkulasi dari hook
+  const { rekonsiliasiTableData } = usePengendalianData();
+  const { dataStatus } = useFilter();
 
-    {
-      id: "1425023",
-      project: "Irigasi Belitang Lempuing Pkt 1 JOP 34%",
-      nk: "83,812",
-      qc_pu: "4,762",
-      qc_bk: "7,800",
-      sap_pu: "4,762",
-      sap_bk: "7,800",
-      dev_pu: "-",
-      dev_bk: "-",
-      ket: "Sinkron",
-    },
+  // State untuk Search dan Toggle JO/JOI
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showJoJoi, setShowJoJoi] = useState(true); // true = Tampilkan Semua, false = Hanya Non JO/JOI
 
-    {
-      id: "1425034",
-      project: "Irigasi KSPP Kab. Merauke Pkt 1 JOP 50%",
-      nk: "238,390",
-      qc_pu: "40,705",
-      qc_bk: "38,401",
-      sap_pu: "40,705",
-      sap_bk: "38,401",
-      dev_pu: "-",
-      dev_bk: "-",
-      ket: "Sinkron",
-    },
+  // Helper Format Angka Full Amount (Rupiah Standard)
+  const formatFullAmount = (val) => {
+    const num = Number(val);
+    if (!num || num === 0) return "-";
+    // Jika minus, pakai format (X.XXX.XXX)
+    if (num < 0) return `(${Math.abs(num).toLocaleString("id-ID")})`;
+    return num.toLocaleString("id-ID");
+  };
 
-    {
-      id: "1424022",
-      project: "Bendungan Jragung Paket 4",
-      nk: "60,553",
-      qc_pu: "5,054",
-      qc_bk: "4,164",
-      sap_pu: "5,054",
-      sap_bk: "4,164",
-      dev_pu: "(0)",
-      dev_bk: "(0)",
-      ket: "Sinkron",
-    },
+  // Helper khusus Deviasi agar UI lebih intuitif
+  const renderDeviasiCell = (val) => {
+    const num = Number(val);
+    if (!num || num === 0)
+      return <span className="text-slate-300 font-normal">-</span>;
+    if (num < 0) {
+      return (
+        <span className="text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded">
+          ({Math.abs(num).toLocaleString("id-ID")})
+        </span>
+      );
+    }
+    return (
+      <span className="text-slate-700 font-semibold">
+        {num.toLocaleString("id-ID")}
+      </span>
+    );
+  };
 
-    {
-      id: "1418018",
-      project: "Bendungan Bener Paket II JOP 83,5%",
-      nk: "589,747",
-      qc_pu: "20,929",
-      qc_bk: "28,209",
-      sap_pu: "20,929",
-      sap_bk: "28,209",
-      dev_pu: "(0)",
-      dev_bk: "(0)",
-      ket: "Sinkron",
-    },
+  // Helper untuk render lencana (badge) status yang cantik
+  const renderBadge = (ket) => {
+    const text = ket?.toLowerCase() || "";
+    if (text.includes("sinkron")) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
+          <CheckCircle2 size={12} /> {ket}
+        </span>
+      );
+    }
+    if (text.includes("deviasi")) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold uppercase tracking-wider">
+          <AlertCircle size={12} /> {ket}
+        </span>
+      );
+    }
+    if (text.includes("review")) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-orange-50 text-orange-700 border border-orange-200 text-[10px] font-bold uppercase tracking-wider">
+          <AlertTriangle size={12} /> {ket}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold uppercase tracking-wider">
+        <Info size={12} /> {ket}
+      </span>
+    );
+  };
 
-    {
-      id: "1323020",
-      project: "Probolinggo-Banyuwangi Paket 3 (JOP 25%)",
-      nk: "996,822",
-      qc_pu: "25,227",
-      qc_bk: "47,470",
-      sap_pu: "25,227",
-      sap_bk: "47,470",
-      dev_pu: "(0)",
-      dev_bk: "(0)",
-      ket: "Sinkron",
-    },
+  // FILTERING DATA: Berdasarkan Search Box dan Toggle JO/JOI
+  const filteredData = useMemo(() => {
+    if (!rekonsiliasiTableData) return [];
 
-    {
-      id: "1421039",
-      project: "PROYEK BENDUNGAN MBAY JOP 70%",
-      nk: "485,958",
-      qc_pu: "3,664",
-      qc_bk: "4,787",
-      sap_pu: "3,664",
-      sap_bk: "4,787",
-      dev_pu: "0",
-      dev_bk: "(0)",
-      ket: "Sinkron",
-    },
+    return rekonsiliasiTableData.filter((row) => {
+      // 1. Logika Pencarian (Search by Project Name atau ID)
+      const matchesSearch =
+        row.project?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    {
-      id: "1424020",
-      project: "Pembangunan Struktur Jembatan Musi",
-      nk: "345,105",
-      qc_pu: "18,376",
-      qc_bk: "33,773",
-      sap_pu: "18,376",
-      sap_bk: "33,773",
-      dev_pu: "0",
-      dev_bk: "-",
-      ket: "Sinkron",
-    },
+      // 2. Logika Filter JO / JOI
+      // Asumsi: Kita mengecek dari nama project. Jika punya field khusus (misal: row.tipe_proyek), silakan disesuaikan.
+      const kategori = String(row.nonjo_joi || "")
+        .trim()
+        .toUpperCase();
 
-    {
-      id: "1526008",
-      project: "Semarang Sewerage - CWIS JOI 50%",
-      nk: "290,628",
-      qc_pu: "100",
-      qc_bk: "(932)",
-      sap_pu: "100",
-      sap_bk: "258",
-      dev_pu: "-",
-      dev_bk: "(1,190,697,162)",
-      ket: "JOI Leader",
-    },
+      const isJoOrJoi = kategori === "JOI";
 
-    {
-      id: "1423029",
-      project: "Bendungan Cibeet JOI 57,9%",
-      nk: "1,325,526",
-      qc_pu: "6,490",
-      qc_bk: "6,568",
-      sap_pu: "6,490",
-      sap_bk: "6,412",
-      dev_pu: "0",
-      dev_bk: "(155,631,472)",
-      ket: "Deviasi BK",
-    },
+      const matchesJoJoi = showJoJoi ? true : !isJoOrJoi;
 
-    {
-      id: "1424021",
-      project: "Rehabilitasi D.I Cibaliung JOI 49%",
-      nk: "233,828",
-      qc_pu: "17,632",
-      qc_bk: "15,871",
-      sap_pu: "17,632",
-      sap_bk: "15,911",
-      dev_pu: "(0)",
-      dev_bk: "(39,258,907)",
-      ket: "Perlu Review",
-    },
+      return matchesSearch && matchesJoJoi;
+    });
+  }, [rekonsiliasiTableData, searchTerm, showJoJoi]);
 
-    {
-      id: "1323026",
-      project: "Pembangunan Jalan Baru Kretek - Girijati",
-      nk: "341,092",
-      qc_pu: "2,292",
-      qc_bk: "3,507",
-      sap_pu: "2,292",
-      sap_bk: "3,517",
-      dev_pu: "0",
-      dev_bk: "(9,164,631)",
-      ket: "Closing Minor",
-    },
-  ];
+  // KALKULASI SUMMARY (TOTAL) DARI DATA YANG SUDAH DI-FILTER
+  const summary = useMemo(() => {
+    return filteredData.reduce(
+      (acc, row) => ({
+        nk: acc.nk + (Number(row.nk) || 0),
+        qc_pu: acc.qc_pu + (Number(row.qc_pu) || 0),
+        qc_bk: acc.qc_bk + (Number(row.qc_bk) || 0),
+        sap_pu: acc.sap_pu + (Number(row.sap_pu) || 0),
+        sap_bk: acc.sap_bk + (Number(row.sap_bk) || 0),
+        dev_pu: acc.dev_pu + (Number(row.dev_pu) || 0),
+        dev_bk: acc.dev_bk + (Number(row.dev_bk) || 0),
+      }),
+      { nk: 0, qc_pu: 0, qc_bk: 0, sap_pu: 0, sap_bk: 0, dev_pu: 0, dev_bk: 0 },
+    );
+  }, [filteredData]);
+
+  // State loading atau empty
+  if (!rekonsiliasiTableData || rekonsiliasiTableData.length === 0) {
+    return (
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-10 text-center text-slate-500 flex flex-col items-center">
+        <RefreshCw size={24} className="animate-spin text-blue-500 mb-3" />
+        <p>Memuat / Mengkalkulasi Data Rekonsiliasi...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* TABLE */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        {/* HEADER BIRU */}
-        <div className="bg-[#000075] px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col font-sans">
+      {/* HEADER CARD */}
+      <div className="px-6 py-5 border-b border-slate-200 bg-white flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Title Section */}
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-blue-50 rounded-xl border border-blue-100 text-blue-700">
+            <RefreshCw size={20} strokeWidth={2.5} />
+          </div>
           <div>
-            <h2 className="text-white font-black text-lg">
-              Matriks Realisasi SAP vs Quick Count
-            </h2>
-
-            <p className="text-blue-100 text-sm mt-1">
-              Annual Monitoring PU & BK Tahun 2026
-            </p>
-          </div>
-
-          <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-blue-200 font-bold">
-              Last Update
-            </p>
-
-            <p className="text-white font-black text-sm mt-1">
-              04 Mei 2026 • 23:09
+            <h3 className="text-base font-black text-slate-900 uppercase tracking-wide">
+              Rekonsiliasi Data SAP vs Quick Count
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Monitoring anomali dan sinkronisasi realisasi keuangan proyek
+              (YTD)
             </p>
           </div>
         </div>
 
-        {/* TABLE */}
-        <div className="overflow-auto">
-          <table className="w-full border-collapse text-sm">
-            {/* HEADER */}
-            <thead className="sticky top-0 z-10">
-              {/* HEADER ATAS */}
-              <tr className="bg-slate-100 text-slate-700 uppercase text-[11px] tracking-wider">
-                <th
-                  rowSpan="2"
-                  className="px-4 py-4 text-left border-b border-slate-200"
+        {/* Action Section (Search, Toggle, Status) */}
+        <div className="flex flex-wrap items-center gap-4 lg:justify-end">
+          {/* Toggle Non JO & JOI */}
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg h-[42px]">
+            <span className="text-xs font-semibold text-slate-600">
+              Tampilkan JOI
+            </span>
+            <button
+              onClick={() => setShowJoJoi(!showJoJoi)}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${showJoJoi ? "bg-blue-600" : "bg-slate-300"}`}
+            >
+              <span
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition duration-200 ease-in-out ${showJoJoi ? "translate-x-4.5" : "translate-x-1"}`}
+                style={{
+                  transform: showJoJoi ? "translateX(18px)" : "translateX(4px)",
+                }}
+              />
+            </button>
+          </div>
+
+          {/* Search Box */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Search className="w-4 h-4 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cari Proyek / ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-9 p-2.5 h-[42px] outline-none transition-all"
+            />
+          </div>
+
+          {/* Data Status Badge */}
+          <div className="flex flex-col items-end justify-center bg-slate-50 border border-slate-200 px-3 rounded-lg h-[42px] min-w-[120px]">
+            <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">
+              Data Status
+            </div>
+            <div className="text-xs font-black text-slate-700">
+              {dataStatus
+                ? `${dataStatus.type} - ${dataStatus.bulan} ${dataStatus.tahun}`
+                : "LIVE"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* WRAPPER TABEL DENGAN SCROLLBAR KUSTOM */}
+      <div className="overflow-x-auto max-h-[600px] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+        <table className="w-full text-left text-xs whitespace-nowrap border-collapse relative">
+          {/* HEADER TABEL */}
+          <thead className="sticky top-0 z-20 shadow-sm">
+            <tr className="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider font-bold">
+              <th
+                rowSpan="2"
+                className="px-5 py-3 border-b border-slate-200 bg-slate-50 sticky left-0 z-30 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]"
+              >
+                Informasi Proyek
+              </th>
+              <th
+                rowSpan="2"
+                className="px-4 py-3 text-right border-b border-slate-200 bg-slate-50"
+              >
+                Nilai Kontrak
+              </th>
+              <th
+                colSpan="2"
+                className="px-4 py-2 text-center border-b border-l border-slate-200 bg-slate-50/80"
+              >
+                Quick Count (YTD)
+              </th>
+              <th
+                colSpan="2"
+                className="px-4 py-2 text-center border-b border-l border-slate-200 bg-blue-50/50 text-[#000075]"
+              >
+                SAP Realisasi (Annual)
+              </th>
+              <th
+                colSpan="2"
+                className="px-4 py-2 text-center border-b border-l border-slate-200 bg-red-50/50 text-red-700"
+              >
+                Deviasi (QC - SAP)
+              </th>
+              <th
+                rowSpan="2"
+                className="px-5 py-3 border-b border-l border-slate-200 bg-slate-50 text-center"
+              >
+                Status Validasi
+              </th>
+            </tr>
+            <tr className="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider font-semibold">
+              <th className="px-4 py-2 text-right border-b border-l border-slate-200 bg-slate-50/80">
+                PU
+              </th>
+              <th className="px-4 py-2 text-right border-b border-slate-200 bg-slate-50/80">
+                BK
+              </th>
+              <th className="px-4 py-2 text-right border-b border-l border-slate-200 bg-blue-50/50">
+                PU
+              </th>
+              <th className="px-4 py-2 text-right border-b border-slate-200 bg-blue-50/50">
+                BK
+              </th>
+              <th className="px-4 py-2 text-right border-b border-l border-slate-200 bg-red-50/50">
+                PU
+              </th>
+              <th className="px-4 py-2 text-right border-b border-slate-200 bg-red-50/50">
+                BK
+              </th>
+            </tr>
+          </thead>
+
+          {/* ISI TABEL */}
+          <tbody className="divide-y divide-slate-100">
+            {filteredData.length > 0 ? (
+              filteredData.map((row, index) => (
+                <tr
+                  key={index}
+                  className="hover:bg-slate-50/80 transition-colors group"
                 >
-                  ID Project
-                </th>
-
-                <th
-                  rowSpan="2"
-                  className="px-4 py-4 text-left border-b border-slate-200 min-w-[280px]"
-                >
-                  Nama Proyek
-                </th>
-
-                <th
-                  rowSpan="2"
-                  className="px-4 py-4 text-right border-b border-slate-200"
-                >
-                  Nilai Kontrak
-                </th>
-
-                <th
-                  colSpan="2"
-                  className="px-4 py-3 text-center border-b border-slate-200"
-                >
-                  Quick Count
-                </th>
-
-                <th
-                  colSpan="2"
-                  className="px-4 py-3 text-center border-b border-slate-200"
-                >
-                  SAP Realisasi
-                </th>
-
-                <th
-                  colSpan="2"
-                  className="px-4 py-3 text-center border-b border-slate-200"
-                >
-                  Deviasi (SAP - QC)
-                </th>
-
-                <th
-                  rowSpan="2"
-                  className="px-4 py-4 text-left border-b border-slate-200 min-w-[240px]"
-                >
-                  Keterangan
-                </th>
-              </tr>
-
-              {/* SUB HEADER */}
-              <tr className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500">
-                <th className="px-4 py-3 text-right border-b border-slate-200">
-                  PU
-                </th>
-
-                <th className="px-4 py-3 text-right border-b border-slate-200">
-                  BK
-                </th>
-
-                <th className="px-4 py-3 text-right border-b border-slate-200">
-                  PU
-                </th>
-
-                <th className="px-4 py-3 text-right border-b border-slate-200">
-                  BK
-                </th>
-
-                <th className="px-4 py-3 text-right border-b border-slate-200 bg-red-50/40">
-                  PU
-                </th>
-
-                <th className="px-4 py-3 text-right border-b border-slate-200 bg-red-50/40">
-                  BK
-                </th>
-              </tr>
-            </thead>
-
-            {/* BODY */}
-            <tbody>
-              {tableData.map((row, index) => {
-                const isDevPuMinus = row.dev_pu.includes("(");
-                const isDevBkMinus = row.dev_bk.includes("(");
-
-                return (
-                  <tr
-                    key={index}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-all"
-                  >
-                    {/* ID */}
-                    <td className="px-4 py-4 text-slate-500 font-semibold">
-                      {row.id}
-                    </td>
-
-                    {/* PROJECT */}
-                    <td className="px-4 py-4 font-bold text-slate-800">
+                  {/* INFO PROYEK */}
+                  <td className="px-5 py-3 bg-white group-hover:bg-slate-50/80 transition-colors sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                    <div className="font-bold text-slate-800 break-words whitespace-normal max-w-[280px] leading-snug">
                       {row.project}
-                    </td>
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-400 mt-0.5">
+                      ID: {row.id}
+                    </div>
+                  </td>
 
-                    {/* NK */}
-                    <td className="px-4 py-4 text-right font-mono text-slate-700">
-                      {row.nk}
-                    </td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-600 font-medium">
+                    {formatFullAmount(row.nk)}
+                  </td>
 
-                    {/* QC */}
-                    <td className="px-4 py-4 text-right font-mono text-slate-700">
-                      {row.qc_pu}
-                    </td>
+                  {/* QUICK COUNT */}
+                  <td className="px-4 py-3 text-right font-mono text-slate-600 border-l border-slate-100">
+                    {formatFullAmount(row.qc_pu)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-600">
+                    {formatFullAmount(row.qc_bk)}
+                  </td>
 
-                    <td className="px-4 py-4 text-right font-mono text-slate-700">
-                      {row.qc_bk}
-                    </td>
+                  {/* SAP REALISASI */}
+                  <td className="px-4 py-3 text-right font-mono text-slate-800 font-semibold border-l border-slate-100 bg-blue-50/10">
+                    {formatFullAmount(row.sap_pu)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono text-slate-800 font-semibold bg-blue-50/10">
+                    {formatFullAmount(row.sap_bk)}
+                  </td>
 
-                    {/* SAP */}
-                    <td className="px-4 py-4 text-right font-mono text-slate-700">
-                      {row.sap_pu}
-                    </td>
+                  {/* DEVIASI */}
+                  <td className="px-4 py-3 text-right font-mono border-l border-slate-100 bg-red-50/10">
+                    {renderDeviasiCell(row.dev_pu)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-mono bg-red-50/10">
+                    {renderDeviasiCell(row.dev_bk)}
+                  </td>
 
-                    <td className="px-4 py-4 text-right font-mono text-slate-700">
-                      {row.sap_bk}
-                    </td>
+                  {/* KETERANGAN BADGE */}
+                  <td className="px-5 py-3 text-center border-l border-slate-100">
+                    {renderBadge(row.ket)}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="9"
+                  className="px-5 py-10 text-center text-slate-400"
+                >
+                  Data tidak ditemukan berdasarkan filter / pencarian.
+                </td>
+              </tr>
+            )}
+          </tbody>
 
-                    {/* DEV PU */}
-                    <td
-                      className={`px-4 py-4 text-right font-mono font-bold bg-red-50/20 ${
-                        isDevPuMinus ? "text-red-600" : "text-slate-400"
-                      }`}
-                    >
-                      {row.dev_pu}
-                    </td>
-
-                    {/* DEV BK */}
-                    <td
-                      className={`px-4 py-4 text-right font-mono font-bold bg-red-50/20 ${
-                        isDevBkMinus ? "text-red-600" : "text-slate-400"
-                      }`}
-                    >
-                      {row.dev_bk}
-                    </td>
-
-                    {/* KETERANGAN */}
-                    <td className="px-4 py-4">
-                      {row.ket === "Member" ? (
-                        <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold">
-                          Member
-                        </span>
-                      ) : (
-                        <span className="text-slate-600">{row.ket}</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+          {/* FOOTER TABEL: SUMMARY TOTAL */}
+          <tfoot className="sticky bottom-0 z-20 shadow-[0_-2px_10px_-2px_rgba(0,0,0,0.1)]">
+            <tr className="bg-slate-100 font-black text-slate-800 uppercase tracking-wide">
+              <td className="px-5 py-3 bg-slate-100 sticky left-0 z-30 border-t border-slate-300 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] text-right">
+                TOTAL KESELURUHAN
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-[11px] border-t border-slate-300 text-blue-700">
+                {formatFullAmount(summary.nk)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-[11px] border-t border-l border-slate-300">
+                {formatFullAmount(summary.qc_pu)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-[11px] border-t border-slate-300">
+                {formatFullAmount(summary.qc_bk)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-[11px] border-t border-l border-slate-300 bg-blue-100/50">
+                {formatFullAmount(summary.sap_pu)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-[11px] border-t border-slate-300 bg-blue-100/50">
+                {formatFullAmount(summary.sap_bk)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-[11px] border-t border-l border-slate-300 bg-red-100/50">
+                {renderDeviasiCell(summary.dev_pu)}
+              </td>
+              <td className="px-4 py-3 text-right font-mono text-[11px] border-t border-slate-300 bg-red-100/50">
+                {renderDeviasiCell(summary.dev_bk)}
+              </td>
+              <td className="px-5 py-3 border-t border-l border-slate-300 bg-slate-100 text-center">
+                -
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   );
 }
-
-export default RealisasiSapTable;

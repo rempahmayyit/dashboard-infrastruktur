@@ -1,95 +1,176 @@
 // src/pages/ExecutiveDashboard.jsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "../lib/supabase";
-import { formatNumber, formatPercent, formatMiliar } from "../utils/formatters";
-import { nkbProjectList } from "../data";
+import { formatPercent, formatMiliar } from "../utils/formatters";
 import ProjectMap from "../ProjectMap";
 import FinancialCharts from "../FinancialCharts";
 import CashFlowSummary from "../components/CashFlowSummary";
+import ProjectRiskDashboard from "../ProjectRiskDashboard/pages/ProjectRiskDashboard";
+import ExecutiveKPICards from "../components/ExecutiveKPICards";
 import {
   AlertCircle,
   ListOrdered,
-  Briefcase,
-  BarChart3,
-  Percent,
-  Wallet,
-  ArrowUpRight,
+  CheckCircle2,
 } from "lucide-react";
 
+import { usePemasaranData } from "../hooks/usePemasaranData";
+import { usePengendalianData } from "../hooks/usePengendalianData"; 
+import { useFilter } from "../context/FilterContext";
+
+const safeParseNumber = (val) => {
+  if (val === null || val === undefined || val === "") return 0;
+  const cleanStr = String(val).replace(/[^0-9.-]/g, "");
+  const num = Number(cleanStr);
+  return isNaN(num) ? 0 : num;
+};
+
 export default function ExecutiveDashboard() {
-  const [totalProject, setTotalProject] = useState(0);
-  const [produksiUsaha, setProduksiUsaha] = useState(0);
-  const [bkpuValue, setBkpuValue] = useState(0);
-  const [cashInValue, setCashInValue] = useState(0);
+  const { excelData, globalFilter } = useFilter();
   const [activeChartTab, setActiveChartTab] = useState("PU");
+  const [selectedStatus, setSelectedStatus] = useState("A0");
 
-  useEffect(() => {
-    // fetchExecutiveKPI();
-  }, []);
+  const {
+    marketingPipeline,
+    totalRealisasiA0, 
+    totalPrognosa,    
+    loading: pemasaranLoading,
+  } = usePemasaranData();
 
-  const fetchExecutiveKPI = async () => {
-    // TOTAL PROJECT
-    try {
-      const { count, error } = await supabase
-        .from("project_progress")
-        .select("*", { count: "exact", head: true });
-      if (!error) setTotalProject(Number(count) || 0);
-    } catch (err) {
-      setTotalProject(0);
-    }
+  const pengendalian = usePengendalianData(); 
+  const { kpiData } = pengendalian; 
 
-    // PRODUKSI USAHA
-    try {
-      const { data, error } = await supabase.from("tren_keuangan").select("*");
-      if (!error) {
-        const totalPU = (data || []).reduce(
-          (sum, item) => sum + (Number(item?.realisasi) || 0),
-          0,
-        );
-        setProduksiUsaha(totalPU);
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  const selectedMonthNum = monthNames.findIndex((m) => m.toLowerCase() === globalFilter?.bulan?.toLowerCase()) + 1;
+  const selectedYear = safeParseNumber(globalFilter?.tahun || 2026);
+  const selectedMonthLabelFull = globalFilter?.bulan || "Jan";
+  const selectedMonthLabelCaps = selectedMonthLabelFull.toUpperCase();
+
+  const { totalRkapTahunan, targetSdBulanIni } = useMemo(() => {
+    const rawRkapData = excelData?.db_pemasaran_rkap || [];
+    let rkapTotal = 0;
+    let targetKumulatif = 0;
+
+    rawRkapData.forEach((item) => {
+      const nilaiEstimasi = safeParseNumber(item.estimasi_nilai) / 1_000_000_000;
+      rkapTotal += nilaiEstimasi;
+
+      let itemMonth = 0;
+      const monthStr = String(item.bulan_perolehan || item.periode || "").toLowerCase().trim();
+      const parsedMonth = parseInt(monthStr, 10);
+      
+      if (!isNaN(parsedMonth) && parsedMonth >= 1 && parsedMonth <= 12) {
+        itemMonth = parsedMonth;
+      } else {
+        const arrayBulan = ["jan", "feb", "mar", "apr", "mei", "jun", "jul", "agu", "sep", "okt", "nov", "des"];
+        const indexM = arrayBulan.findIndex((b) => monthStr.startsWith(b));
+        if (indexM !== -1) itemMonth = indexM + 1;
       }
-    } catch (err) {
-      setProduksiUsaha(0);
-    }
 
-    // BKPU
-    try {
-      const { data, error } = await supabase.from("tren_bk_pu").select("*");
-      if (!error) {
-        const safeData = data || [];
-        const totalBKPU = safeData.reduce(
-          (sum, item) => sum + (Number(item?.realisasi) || 0),
-          0,
-        );
-        const avgBKPU = safeData.length > 0 ? totalBKPU / safeData.length : 0;
-        setBkpuValue(Number(avgBKPU) || 0);
+      if (itemMonth > 0 && itemMonth <= selectedMonthNum) {
+        targetKumulatif += nilaiEstimasi;
       }
-    } catch (err) {
-      setBkpuValue(0);
-    }
+    });
 
-    // CASH IN
-    try {
-      const { data, error } = await supabase.from("aging_invoice").select("*");
-      if (!error) {
-        const totalCash = (data || []).reduce((sum, item) => {
-          const cleanValue = Number(
-            String(item?.total || 0).replace(/[^\d]/g, ""),
-          );
-          return sum + (cleanValue || 0);
-        }, 0);
-        setCashInValue(totalCash / 1000000000);
-      }
-    } catch (err) {
-      setCashInValue(0);
-    }
+    return { totalRkapTahunan: rkapTotal, targetSdBulanIni: targetKumulatif };
+  }, [excelData, selectedMonthNum]);
+
+  const progresRkapKumulatif = totalRkapTahunan > 0 ? (totalRealisasiA0 / totalRkapTahunan) * 100 : 0;
+  const deviasiRkap = totalRealisasiA0 - targetSdBulanIni;
+  const progresPrognosa = totalPrognosa > 0 ? (totalRealisasiA0 / totalPrognosa) * 100 : 0;
+  const sisaPrognosa = Math.max(0, totalPrognosa - totalRealisasiA0);
+
+  const filteredPipeline = marketingPipeline.filter((proj) => proj.status === selectedStatus);
+
+  const dynamicNkbData = {
+    mainValue: totalRealisasiA0 * 1_000_000_000,
+    targetPeriode: targetSdBulanIni * 1_000_000_000,
+    realPeriode: totalRealisasiA0 * 1_000_000_000,
+    persenPeriode: targetSdBulanIni > 0 ? (totalRealisasiA0 / targetSdBulanIni) * 100 : 0,
+    targetTahun: totalRkapTahunan * 1_000_000_000,
+    persenTahun: totalRkapTahunan > 0 ? (totalRealisasiA0 / totalRkapTahunan) * 100 : 0,
   };
+
+  const realGpm = 100 - (kpiData?.bkpu?.realPeriode || 0);
+  const targetGpmPeriode = 100 - (kpiData?.bkpu?.targetPeriode || 0);
+  const targetGpmTahun = 100 - (kpiData?.bkpu?.targetTahun || 0);
+
+  const dynamicGpmData = {
+    mainValue: realGpm,
+    targetPeriode: targetGpmPeriode,
+    realPeriode: realGpm,
+    persenPeriode: targetGpmPeriode > 0 ? (realGpm / targetGpmPeriode) * 100 : 0,
+    targetTahun: targetGpmTahun,
+    persenTahun: targetGpmTahun > 0 ? (realGpm / targetGpmTahun) * 100 : 0,
+  };
+
+  const dynamicKpiData = {
+    pendapatanUsaha: kpiData?.pendapatanUsaha || {},
+    labaKotor: kpiData?.labaKotor || {},
+    labaBersih: kpiData?.labaBersih || {},
+    gpm: dynamicGpmData,
+  };
+
+  const dynamicCashflowData = useMemo(() => {
+    const rawCashflow = excelData?.db_cashflow || [];
+    let saldoAwal = 0;
+    let cashIn = 0;
+    let cashOut = 0;
+
+    // Array referensi untuk mengubah teks bulan menjadi angka (1-12)
+    const arrayBulan = ["jan", "feb", "mar", "apr", "mei", "jun", "jul", "agu", "sep", "okt", "nov", "des"];
+
+    // 1. Ekstrak dan filter data yang tahun dan bulannya valid (<= bulan yang dipilih)
+    const validRows = rawCashflow.map(row => {
+      let rowYear = safeParseNumber(row.tahun);
+      let rowMonth = 0;
+      
+      // Deteksi angka bulan dari teks (misal: "Jan" -> 1, "Apr" -> 4)
+      if (row.bulan) {
+        const monthStr = String(row.bulan).toLowerCase().trim();
+        const indexM = arrayBulan.findIndex((b) => monthStr.startsWith(b));
+        if (indexM !== -1) rowMonth = indexM + 1;
+      }
+      
+      return { ...row, rowYear, rowMonth };
+    }).filter(r => r.rowYear === selectedYear && r.rowMonth > 0 && r.rowMonth <= selectedMonthNum);
+
+    // 2. Urutkan berdasarkan bulan (dari terkecil ke terbesar)
+    validRows.sort((a, b) => a.rowMonth - b.rowMonth);
+
+    // 3. Kalkulasi Data Cashflow
+    if (validRows.length > 0) {
+      // a. Ambil Saldo Awal HANYA dari data bulan pertama yang ditemukan (Bulan Januari)
+      saldoAwal = safeParseNumber(validRows[0].saldo_awal);
+
+      // b. Akumulasi seluruh Cash In dan Cash Out dari bulan awal hingga bulan yang difilter
+      validRows.forEach(row => {
+        cashIn += safeParseNumber(row.cash_in);
+        cashOut += safeParseNumber(row.cash_out);
+      });
+    }
+
+    return {
+      saldoAwal,
+      cashIn,
+      cashOut,
+      // Saldo Akhir didapat dari: Saldo Awal + Total Cash In - Total Cash Out
+      saldoAkhir: saldoAwal + cashIn - cashOut, 
+    };
+  }, [excelData, selectedMonthNum, selectedYear]);
 
   return (
     <>
-      {/* NKB */}
-      <div className="flex flex-col lg:flex-row gap-6 mb-8 items-stretch">
+      {/* 1. EXECUTIVE KPI CARDS 6 KOLOM */}
+      <ExecutiveKPICards
+        nkbData={dynamicNkbData}
+        kpiData={dynamicKpiData}
+        cashflowData={dynamicCashflowData}
+        setActiveChartTab={setActiveChartTab}
+      />
+
+      {/* 2. NKB / COMMERCIAL PERFORMANCE */}
+      <div className="flex flex-col lg:flex-row gap-6 mb-8 items-stretch font-sans mt-8">
         <div className="w-full lg:w-[45%] bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
@@ -97,89 +178,161 @@ export default function ExecutiveDashboard() {
                 Commercial Performance
               </h2>
               <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-lg text-[10px] font-bold">
-                RKAP: {formatPercent(18.66)}
+                RKAP: {formatPercent(progresRkapKumulatif)}
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/60 text-center">
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">
-                  RKAP Des '26
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+              <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-200/60 text-center flex flex-col justify-center">
+                <p className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">
+                  RKAP Des '{String(globalFilter?.tahun || "").slice(-2)}
                 </p>
-                <h3 className="text-base font-black text-slate-900 mt-1">
-                  {formatMiliar(6690)}
+                <h3 className="text-sm font-black text-slate-900 mt-1 truncate">
+                  {formatMiliar(totalRkapTahunan)}
                 </h3>
               </div>
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/60 text-center">
-                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                  Target s.d Apr
+              <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-200/60 text-center flex flex-col justify-center">
+                <p className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">
+                  Target s.d {selectedMonthLabelCaps}
                 </p>
-                <h3 className="text-base font-black text-[#000075] mt-1">
-                  {formatMiliar(1525)}
+                <h3 className="text-sm font-black text-[#000075] mt-1 truncate">
+                  {formatMiliar(targetSdBulanIni)}
                 </h3>
               </div>
-              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/60 text-center">
-                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                  Real s.d Apr
+              <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-200/60 text-center flex flex-col justify-center">
+                <p className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">
+                  Real s.d {selectedMonthLabelCaps}
                 </p>
-                <h3 className="text-base font-black text-emerald-600 mt-1">
-                  {formatMiliar(1273.6)}
+                <h3 className="text-sm font-black text-emerald-600 mt-1 truncate">
+                  {pemasaranLoading ? "..." : formatMiliar(totalRealisasiA0, 1)}
+                </h3>
+              </div>
+
+              <div className="bg-blue-50/50 rounded-xl p-2.5 border border-blue-100 text-center flex flex-col justify-center">
+                <p className="text-blue-500 text-[9px] font-bold uppercase tracking-wider">
+                  Prognosa '{String(globalFilter?.tahun || "").slice(-2)}
+                </p>
+                <h3 className="text-sm font-black text-blue-700 mt-1 truncate">
+                  {pemasaranLoading ? "..." : formatMiliar(totalPrognosa, 1)}
                 </h3>
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/40">
-            <div className="flex justify-between mb-1 text-[11px] font-semibold text-slate-600">
-              <span>Progres Kumulatif Realisasi terhadap RKAP</span>
-              <span className="font-black text-slate-800">
-                {formatPercent(18.66)}
-              </span>
+          <div className="flex flex-col gap-3">
+            {/* BAR 1: RKAP */}
+            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/40">
+              <div className="flex justify-between mb-1 text-[11px] font-semibold text-slate-600">
+                <span>Progres Kumulatif Realisasi terhadap RKAP</span>
+                <span className="font-black text-slate-800">
+                  {formatPercent(progresRkapKumulatif)}
+                </span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div
+                  className="bg-[#000075] h-2.5 rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(progresRkapKumulatif, 100)}%` }}
+                ></div>
+              </div>
+              <p
+                className={`text-[10px] font-bold mt-1.5 flex items-center gap-1 ${deviasiRkap < 0 ? "text-[#BD002F]" : "text-emerald-600"}`}
+              >
+                {deviasiRkap < 0 ? <AlertCircle size={12} /> : <CheckCircle2 size={12} />}
+                {deviasiRkap < 0 ? "Deviasi Negatif" : "Surplus"} terhadap
+                Target {selectedMonthLabelFull}: {formatMiliar(deviasiRkap)}
+              </p>
             </div>
-            <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-              <div
-                className="bg-[#000075] h-2.5 rounded-full"
-                style={{ width: "18.66%" }}
-              ></div>
+
+            {/* BAR 2: PROGNOSA */}
+            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/40">
+              <div className="flex justify-between mb-1 text-[11px] font-semibold text-slate-600">
+                <span>
+                  Progres Pencapaian terhadap Prognosa '{String(globalFilter?.tahun || "").slice(-2)}
+                </span>
+                <span className="font-black text-slate-800">
+                  {pemasaranLoading ? "..." : formatPercent(progresPrognosa)}
+                </span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                <div
+                  className="bg-blue-500 h-2.5 rounded-full transition-all duration-700"
+                  style={{ width: `${Math.min(progresPrognosa, 100)}%` }}
+                ></div>
+              </div>
+              <p className="text-[10px] text-slate-500 font-medium mt-1.5 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                Sisa Target Prognosa:{" "}
+                <span className="font-bold">{formatMiliar(sisaPrognosa)}</span>
+              </p>
             </div>
-            <p className="text-[10px] text-[#BD002F] font-bold mt-1.5 flex items-center gap-1">
-              <AlertCircle size={12} />
-              Deviasi Negatif terhadap Target April: {formatMiliar(-251.4)}
-            </p>
           </div>
         </div>
 
-        {/* TABLE */}
+        {/* 3. TABLE LOG REALISASI */}
         <div className="w-full lg:w-[55%] bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-col justify-between">
           <div className="border border-slate-200 rounded-xl overflow-hidden bg-white h-full flex flex-col">
-            <div className="bg-slate-50 p-3 border-b border-slate-200 flex items-center gap-2">
-              <ListOrdered size={14} className="text-[#000075]" />
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                Breakdown Log Realisasi Perolehan NKB 2026
-              </span>
+            <div className="bg-slate-50 p-2.5 border-b border-slate-200 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <ListOrdered size={14} className="text-[#000075]" />
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wide truncate">
+                  Breakdown Log Realisasi Perolehan & Prognosa NKB {globalFilter?.tahun || 2026}
+                </span>
+              </div>
+
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="text-[10px] font-bold border border-slate-200 rounded-md py-1 px-2 text-slate-700 bg-white shadow-sm focus:outline-none focus:border-[#000075] focus:ring-1 focus:ring-[#000075] cursor-pointer"
+              >
+                <option value="A0">A0</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+              </select>
             </div>
-            <div className="overflow-y-auto max-h-[175px] flex-1 scrollbar-thin">
+
+            <div className="overflow-y-auto max-h-[220px] flex-1 scrollbar-thin">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-slate-100 text-slate-500 font-semibold sticky top-0 border-b border-slate-200 shadow-sm backdrop-blur-sm z-10">
                   <tr>
-                    <th className="p-2.5 pl-4">Nama Paket</th>
-                    <th className="p-2.5 pr-4 text-right w-28">NK</th>
+                    <th className="p-2.5 text-center w-[50%]">Nama Paket</th>
+                    <th className="p-2.5 text-center w-[15%] max-w-[70px]">Owner</th>
+                    <th className="p-2.5 text-center w-[20%]">Nilai</th>
+                    <th className="p-2.5 text-center w-[15%]">Bulan</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {nkbProjectList.map((proj) => (
-                    <tr
-                      key={proj.id}
-                      className="hover:bg-slate-50/80 transition-colors"
-                    >
-                      <td className="p-2.5 pl-4 font-bold text-slate-800 truncate max-w-[260px]">
-                        {proj.name}
-                      </td>
-                      <td className="p-2.5 pr-4 text-right font-black text-emerald-600">
-                        {proj.nilai}
+                  {pemasaranLoading ? (
+                    <tr>
+                      <td colSpan="4" className="p-4 text-center text-xs text-slate-500 animate-pulse">
+                        Memuat data...
                       </td>
                     </tr>
-                  ))}
+                  ) : filteredPipeline.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="p-4 text-center text-xs text-slate-500">
+                        Belum ada data (Status {selectedStatus}).
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredPipeline.map((proj) => (
+                      <tr key={proj.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-2.5 pl-4 font-bold text-slate-800 whitespace-normal break-words">
+                          {proj.paket}
+                        </td>
+                        <td className="p-2.5 text-slate-600 text-center font-medium text-[11px] whitespace-normal break-words min-w-[50px] max-w-[70px]">
+                          {proj.owner}
+                        </td>
+                        <td className="p-2.5 text-center font-black text-emerald-600 whitespace-nowrap align-top pt-3">
+                          {proj.nilai}
+                        </td>
+                        <td className="p-2.5 text-center font-bold text-slate-500 whitespace-nowrap align-top pt-3">
+                          {proj.bulan}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -187,137 +340,20 @@ export default function ExecutiveDashboard() {
         </div>
       </div>
 
-      {/* KPI MODERN */}
-      <div className="page-break grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch mb-8 font-sans">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:border-slate-300 transition-all">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                Total Proyek On-Going
-              </p>
-              <h3 className="text-2xl font-black text-slate-950 mt-1 tracking-tight">
-                {formatNumber(totalProject)}{" "}
-                <span className="text-xs font-bold text-slate-400">Paket</span>
-              </h3>
-            </div>
-            <div className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-600">
-              <Briefcase size={16} />
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[10px]">
-            <span className="flex items-center font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md">
-              <ArrowUpRight size={10} strokeWidth={3} className="mr-0.5" />{" "}
-              Active
-            </span>
-            <span className="text-slate-400 font-medium">
-              Proyek berjalan aktif
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:border-slate-300 transition-all">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                Produksi Usaha (PU)
-              </p>
-              <h3 className="text-2xl font-black text-slate-950 mt-1 tracking-tight">
-                {formatMiliar(produksiUsaha)}{" "}
-                <span className="text-xs font-black text-blue-700">M</span>
-              </h3>
-            </div>
-            <div className="p-2 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-700">
-              <BarChart3 size={16} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
-              <div
-                className="bg-blue-600 h-full rounded-full"
-                style={{ width: "78%" }}
-              ></div>
-            </div>
-            <div className="flex justify-between items-center mt-2 text-[10px] font-bold">
-              <span className="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-md">
-                RKAP Tracking
-              </span>
-              <span className="text-slate-400 font-mono">
-                {formatPercent(78)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:border-slate-300 transition-all">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                Rasio BK / PU
-              </p>
-              <h3 className="text-2xl font-black text-orange-600 mt-1 tracking-tight">
-                {formatPercent(bkpuValue)}
-              </h3>
-            </div>
-            <div className="p-2 bg-orange-50 text-orange-600 border border-orange-100 rounded-xl">
-              <Percent size={16} />
-            </div>
-          </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[10px]">
-            <span className="flex items-center font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-md">
-              Monitoring
-            </span>
-            <span className="text-slate-400 font-medium">
-              Efisiensi biaya usaha
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:border-slate-300 transition-all">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                Realisasi Cash In
-              </p>
-              <h3 className="text-2xl font-black text-emerald-600 mt-1 tracking-tight">
-                {formatMiliar(Number(cashInValue))}
-              </h3>
-            </div>
-            <div className="p-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl">
-              <Wallet size={16} />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden flex">
-              <div
-                className="bg-emerald-500 h-full rounded-full"
-                style={{ width: "92%" }}
-              ></div>
-            </div>
-            <div className="flex justify-between items-center mt-2 text-[10px] font-bold">
-              <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md">
-                Cash Flow
-              </span>
-              <span className="text-slate-400 font-mono">
-                {formatPercent(92)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="page-break">
-        <FinancialCharts
-          activeChartTab={activeChartTab}
-          setActiveChartTab={setActiveChartTab}
-        />
+        <FinancialCharts activeChartTab={activeChartTab} setActiveChartTab={setActiveChartTab} />
       </div>
-      {/* CASH FLOW SUMMARY */}
+
       <div className="page-break mb-8">
         <CashFlowSummary />
       </div>
-      
+
       <div className="page-break mb-8">
         <ProjectMap />
+      </div>
+
+      <div className="mt-6">
+        <ProjectRiskDashboard />
       </div>
     </>
   );

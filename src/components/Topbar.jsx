@@ -6,7 +6,8 @@ import { supabase } from "../lib/supabase";
 import { useFilter } from "../context/FilterContext";
 
 export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
-  const { globalFilter, setGlobalFilter } = useFilter();
+  const { globalFilter, setGlobalFilter, dataStatus, dataMode, setDataMode } =
+    useFilter();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = async () => {
@@ -34,20 +35,92 @@ export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
         </button>
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-            {activeMenu === "PDPK" ? "Proyek Dalam Penanganan Khusus" : activeMenu}
+            {activeMenu === "PDPK"
+              ? "Proyek Dalam Penanganan Khusus"
+              : activeMenu}
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Dashboard Portofolio Divisi Infrastruktur</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Dashboard Portofolio Divisi Infrastruktur
+          </p>
         </div>
       </div>
 
       <div className="flex items-center gap-3 print:hidden">
+        {/* TOGGLE MODE DATA */}
+        <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200 shadow-sm">
+          <button
+            onClick={() => setDataMode("FINAL")}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition-all
+      ${
+        dataMode === "FINAL"
+          ? "bg-emerald-600 text-white shadow"
+          : "text-slate-600 hover:bg-white"
+      }`}
+          >
+            FINAL
+          </button>
+
+          <button
+            onClick={() => setDataMode("QUICK")}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition-all
+      ${
+        dataMode === "QUICK"
+          ? "bg-amber-500 text-white shadow"
+          : "text-slate-600 hover:bg-white"
+      }`}
+          >
+            QUICK
+          </button>
+        </div>
+
+        {dataStatus && (
+          <div
+            className={`relative flex items-center gap-2 px-3 py-2 rounded-xl border shadow-sm
+      ${
+        dataStatus.type === "QUICK"
+          ? "border-amber-300 bg-amber-50"
+          : "border-emerald-300 bg-emerald-50"
+      }`}
+          >
+            {dataStatus.type === "QUICK" && (
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+              </span>
+            )}
+
+            <div className="flex flex-col leading-none">
+              <span
+                className={`text-[10px] font-black uppercase ${
+                  dataStatus.type === "QUICK"
+                    ? "text-amber-700"
+                    : "text-emerald-700"
+                }`}
+              >
+                {dataStatus.type === "QUICK"
+                  ? "DATA QUICK COUNT"
+                  : "DATA FINAL"}
+              </span>
+
+              <span className="text-[9px] opacity-80">
+                {dataStatus.bulan} {dataStatus.tahun}
+                {dataStatus.minggu ? ` • Minggu ${dataStatus.minggu}` : ""}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* KONTEN FILTER DROPDOWN */}
         <div className="bg-slate-100 rounded-xl p-1 flex items-center gap-0.5 border border-slate-200 shadow-inner font-sans">
-          
           {/* FILTER TAHUN */}
           <select
             value={globalFilter.tahun}
-            onChange={(e) => setGlobalFilter({ ...globalFilter, tahun: Number(e.target.value) })}
+            onChange={(e) =>
+              setGlobalFilter({
+                ...globalFilter,
+                tahun: Number(e.target.value),
+              })
+            }
             className="bg-transparent hover:bg-white text-slate-700 hover:text-slate-900 font-black text-[11px] px-3 py-1.5 rounded-lg cursor-pointer outline-none appearance-none text-center"
           >
             <option value={2024}>2024</option>
@@ -55,13 +128,15 @@ export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
             <option value={2026}>2026</option>
             <option value={2027}>2027</option>
           </select>
-          
+
           <div className="h-3.5 w-[1px] bg-slate-300 self-center mx-0.5"></div>
-          
+
           {/* FILTER BULAN (Full Jan - Des) */}
           <select
             value={globalFilter.bulan}
-            onChange={(e) => setGlobalFilter({ ...globalFilter, bulan: e.target.value })}
+            onChange={(e) =>
+              setGlobalFilter({ ...globalFilter, bulan: e.target.value })
+            }
             className="bg-transparent hover:bg-white text-slate-700 hover:text-slate-900 font-black text-[11px] px-3 py-1.5 rounded-lg cursor-pointer outline-none appearance-none text-center"
           >
             <option value="Jan">Jan</option>
@@ -79,11 +154,16 @@ export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
           </select>
 
           <div className="h-3.5 w-[1px] bg-slate-300 self-center mx-0.5"></div>
-          
+
           {/* FILTER MINGGU */}
           <select
             value={globalFilter.minggu}
-            onChange={(e) => setGlobalFilter({ ...globalFilter, minggu: Number(e.target.value) })}
+            onChange={(e) =>
+              setGlobalFilter({
+                ...globalFilter,
+                minggu: Number(e.target.value),
+              })
+            }
             className="bg-transparent hover:bg-white text-slate-700 hover:text-slate-900 font-black text-[11px] px-3 py-1.5 rounded-lg cursor-pointer outline-none appearance-none text-center"
           >
             <option value={1}>Minggu 1</option>
@@ -99,12 +179,23 @@ export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
           onClick={toggleFullscreen}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-[11px] font-black shadow-sm transition-all duration-200"
         >
-          {isFullscreen ? <><Minimize2 size={14} /> Exit Fullscreen</> : <><Maximize2 size={14} /> Fullscreen</>}
+          {isFullscreen ? (
+            <>
+              <Minimize2 size={14} /> Exit Fullscreen
+            </>
+          ) : (
+            <>
+              <Maximize2 size={14} /> Fullscreen
+            </>
+          )}
         </button>
 
         {/* TOMBOL LOGOUT */}
         <button
-          onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+          onClick={async () => {
+            await supabase.auth.signOut();
+            window.location.reload();
+          }}
           className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 bg-red-50/50 hover:bg-red-50 text-red-600 hover:text-red-700 text-[11px] font-black shadow-sm transition-all duration-200"
         >
           Logout

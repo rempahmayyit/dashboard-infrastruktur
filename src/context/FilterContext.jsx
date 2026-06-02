@@ -2,22 +2,53 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { usePengendalianData } from "../hooks/usePengendalianData";
 
 const FilterContext = createContext();
 
 export function FilterProvider({ children }) {
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+  ];
+
+  const today = new Date();
+
+  // Hitung minggu keberapa dalam bulan
+  const currentWeek = Math.ceil(today.getDate() / 7);
+
   const [globalFilter, setGlobalFilter] = useState({
-    tahun: 2026,
-    bulan: "Apr",
-    minggu: 5,
+    tahun: today.getFullYear(),
+    bulan: monthNames[today.getMonth()],
+    minggu: currentWeek,
   });
+
+  // =========================================================
+  // MODE DATA
+  // FINAL = hanya data final
+  // QUICK = final + quick count
+  // =========================================================
+  const [dataMode, setDataMode] = useState("QUICK");
 
   const [excelData, setExcelData] = useState({
     db_master_data: [],
     db_rkap_awal: [],
     db_pengendalian_rkap: [],
     db_realisasi: [],
+    db_pemasaran_rkap: [],
+    db_beban_bawah: [],
+    db_cashflow: [],
+    db_kendala: [],
+    db_sap: [],
   });
 
   const [isDataLoading, setIsDataLoading] = useState(true);
@@ -72,24 +103,25 @@ export function FilterProvider({ children }) {
         console.log("Loading dashboard data...");
 
         const masterData = await fetchAllDataFromTable("master_project");
-
-        const rkapAwalData =
-          await fetchAllDataFromTable("db_rkap_awal");
-
-        const realisasiData =
-          await fetchAllDataFromTable("db_realisasi");
+        const rkapAwalData = await fetchAllDataFromTable("db_rkap_awal");
+        const realisasiData = await fetchAllDataFromTable("db_realisasi");
+        const pemasaranRkapData =
+          await fetchAllDataFromTable("db_pemasaran_rkap");
+        const bebanBawahData = await fetchAllDataFromTable("db_beban_bawah");
+        const cashflowData = await fetchAllDataFromTable("db_cashflow");
+        const kendalaData = await fetchAllDataFromTable("db_kendala");
+        const sapData = await fetchAllDataFromTable("db_sap");
 
         setExcelData((prevData) => ({
           ...prevData,
-
-          // MASTER
           db_master_data: masterData,
-
-          // RKAP
           db_rkap_awal: rkapAwalData,
-
-          // REALISASI
           db_realisasi: realisasiData,
+          db_pemasaran_rkap: pemasaranRkapData,
+          db_beban_bawah: bebanBawahData,
+          db_cashflow: cashflowData,
+          db_kendala: kendalaData,
+          db_sap: sapData,
         }));
 
         console.log("Dashboard data loaded");
@@ -116,25 +148,15 @@ export function FilterProvider({ children }) {
       // =====================================================
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "db_realisasi",
-        },
+        { event: "*", schema: "public", table: "db_realisasi" },
         async (payload) => {
-          console.log(
-            "Realtime update db_realisasi:",
-            payload.eventType
-          );
-
-          const realisasiData =
-            await fetchAllDataFromTable("db_realisasi");
-
+          console.log("Realtime update db_realisasi:", payload.eventType);
+          const realisasiData = await fetchAllDataFromTable("db_realisasi");
           setExcelData((prevData) => ({
             ...prevData,
             db_realisasi: realisasiData,
           }));
-        }
+        },
       )
 
       // =====================================================
@@ -142,25 +164,15 @@ export function FilterProvider({ children }) {
       // =====================================================
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "db_rkap_awal",
-        },
+        { event: "*", schema: "public", table: "db_rkap_awal" },
         async (payload) => {
-          console.log(
-            "Realtime update db_rkap_awal:",
-            payload.eventType
-          );
-
-          const rkapAwalData =
-            await fetchAllDataFromTable("db_rkap_awal");
-
+          console.log("Realtime update db_rkap_awal:", payload.eventType);
+          const rkapAwalData = await fetchAllDataFromTable("db_rkap_awal");
           setExcelData((prevData) => ({
             ...prevData,
             db_rkap_awal: rkapAwalData,
           }));
-        }
+        },
       )
 
       // =====================================================
@@ -168,25 +180,101 @@ export function FilterProvider({ children }) {
       // =====================================================
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "master_project",
-        },
+        { event: "*", schema: "public", table: "master_project" },
         async (payload) => {
-          console.log(
-            "Realtime update master_project:",
-            payload.eventType
-          );
-
-          const masterData =
-            await fetchAllDataFromTable("master_project");
-
+          console.log("Realtime update master_project:", payload.eventType);
+          const masterData = await fetchAllDataFromTable("master_project");
           setExcelData((prevData) => ({
             ...prevData,
             db_master_data: masterData,
           }));
-        }
+        },
+      )
+
+      // =====================================================
+      // REALTIME RKAP PEMASARAN
+      // =====================================================
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "db_pemasaran_rkap" },
+        async (payload) => {
+          console.log("Realtime update db_pemasaran_rkap:", payload.eventType);
+          const pemasaranRkapData =
+            await fetchAllDataFromTable("db_pemasaran_rkap");
+          setExcelData((prevData) => ({
+            ...prevData,
+            db_pemasaran_rkap: pemasaranRkapData,
+          }));
+        },
+      )
+
+      // =====================================================
+      // REALTIME BEBAN BAWAH
+      // =====================================================
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "db_beban_bawah" },
+        async (payload) => {
+          console.log("Realtime update db_beban_bawah:", payload.eventType);
+          const bebanBawahData = await fetchAllDataFromTable("db_beban_bawah");
+          setExcelData((prevData) => ({
+            ...prevData,
+            db_beban_bawah: bebanBawahData,
+          }));
+        },
+      )
+
+      // =====================================================
+      // TAMBAHAN: REALTIME CASHFLOW
+      // =====================================================
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "db_cashflow" },
+        async (payload) => {
+          console.log("Realtime update db_cashflow:", payload.eventType);
+          const cashflowData = await fetchAllDataFromTable("db_cashflow");
+          setExcelData((prevData) => ({
+            ...prevData,
+            db_cashflow: cashflowData,
+          }));
+        },
+      )
+
+      // =====================================================
+      // DATA SAP
+      // =====================================================
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "db_sap" },
+        async (payload) => {
+          console.log("Realtime update db_sap:", payload.eventType);
+          const sapData = await fetchAllDataFromTable("db_sap");
+          setExcelData((prevData) => ({
+            ...prevData,
+            db_sap: sapData,
+          }));
+        },
+      )
+
+      // =====================================================
+      // REALISASI
+      // =====================================================
+
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "db_kendala",
+        },
+        async () => {
+          const kendalaData = await fetchAllDataFromTable("db_kendala");
+
+          setExcelData((prev) => ({
+            ...prev,
+            db_kendala: kendalaData,
+          }));
+        },
       )
 
       .subscribe((status) => {
@@ -201,16 +289,55 @@ export function FilterProvider({ children }) {
     };
   }, []);
 
+  // =========================================================
+  // CEK STATUS QUICK / FINAL
+  // =========================================================
+  const periodeAktif = excelData.db_realisasi?.filter(
+    (row) =>
+      row.bulan === globalFilter.bulan &&
+      Number(row.tahun) === Number(globalFilter.tahun),
+  );
+
+  let dataStatus = null;
+
+  // PRIORITAS 1 = QUICK
+  const quickRow = periodeAktif?.find(
+    (row) => String(row.status_data || "").toUpperCase() === "QUICK",
+  );
+
+  if (quickRow) {
+    dataStatus = {
+      type: "QUICK",
+      bulan: quickRow.bulan,
+      tahun: quickRow.tahun,
+      minggu: quickRow.minggu,
+    };
+  } else {
+    // PRIORITAS 2 = FINAL
+    const finalRow = periodeAktif?.find(
+      (row) => String(row.status_data || "").toUpperCase() === "FINAL",
+    );
+
+    if (finalRow) {
+      dataStatus = {
+        type: "FINAL",
+        bulan: finalRow.bulan,
+        tahun: finalRow.tahun,
+      };
+    }
+  }
+
   return (
     <FilterContext.Provider
       value={{
         globalFilter,
         setGlobalFilter,
-
+        dataMode,
+        setDataMode,
         excelData,
         setExcelData,
-
         isDataLoading,
+        dataStatus,
       }}
     >
       {children}
