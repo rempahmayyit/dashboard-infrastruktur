@@ -99,9 +99,9 @@ export default function ExecutiveDashboard() {
     mainValue: realGpm,
     targetPeriode: targetGpmPeriode,
     realPeriode: realGpm,
-    persenPeriode: targetGpmPeriode > 0 ? (realGpm / targetGpmPeriode) * 100 : 0,
+    persenPeriode: targetGpmPeriode > 0 ? (realGpm / targetGpmPeriode) : 0,
     targetTahun: targetGpmTahun,
-    persenTahun: targetGpmTahun > 0 ? (realGpm / targetGpmTahun) * 100 : 0,
+    persenTahun: targetGpmTahun > 0 ? (realGpm / targetGpmTahun) : 0,
   };
 
   const dynamicKpiData = {

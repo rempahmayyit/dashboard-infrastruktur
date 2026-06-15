@@ -1,6 +1,7 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
 import { useFilter } from "../context/FilterContext";
+import { getDisplayName } from "../utils/projectName";
 
 const safeParseNumber = (val) => {
   if (val === null || val === undefined || val === "") return 0;
@@ -74,10 +75,9 @@ export default function FinancialWarningList({ current }) {
 
       warningMap[id] = {
         id_project: id,
-        nama: row.project_name || master?.project_name || "Project",
+        nama: getDisplayName(master) || row.project_name || "Project",
         puRkap: 0,
         puReal: 0,
-        note: "-",
       };
     }
 

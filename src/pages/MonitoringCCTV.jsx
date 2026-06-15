@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { getDisplayName } from "../utils/projectName";
 
 import { Camera, Play, X, MapPin, Search } from "lucide-react";
 import { supabase } from "../lib/supabase";
@@ -49,12 +50,7 @@ export default function MonitoringCCTV() {
           item.project_code ||
           `LOT-${index + 1}`,
 
-        name:
-          item.project_name ||
-          item.nama_project ||
-          item.nama_paket ||
-          item.paket_pekerjaan ||
-          "Unknown Project",
+        name: getDisplayName(item) || item.paket_pekerjaan || "Unknown Project",
 
         location:
           item.lokasi_proyek ||

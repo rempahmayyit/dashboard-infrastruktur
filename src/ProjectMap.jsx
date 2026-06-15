@@ -1,6 +1,7 @@
 // src/ProjectMap.jsx
 import React, { useState, useEffect } from "react";
 import { useFilter } from "./context/FilterContext";
+import { getDisplayName } from "./utils/projectName";
 import {
   ComposableMap,
   Geographies,
@@ -54,7 +55,7 @@ const formatDate = (value) => {
 
 export default function ProjectMap() {
   const [projectData, setProjectData] = useState([]);
-  const { excelData } = useFilter();
+  const { excelData, dataMode } = useFilter();
 
   const masterData = excelData?.db_master_data || [];
   const realisasiData = excelData?.db_realisasi || [];
@@ -96,7 +97,12 @@ export default function ProjectMap() {
           const latestRealisasi = (excelData?.db_realisasi || [])
             .filter((r) => {
               const rid = r?.id_project || r?.id_proyect || r?.id_proyek;
-              return String(rid) === String(projectId);
+
+              const statusMatch =
+                String(r?.status_data || "").toUpperCase() ===
+                String(dataMode || "QUICK").toUpperCase();
+
+              return String(rid) === String(projectId) && statusMatch;
             })
             .sort((a, b) => new Date(b.periode) - new Date(a.periode))[0];
 
@@ -163,7 +169,7 @@ export default function ProjectMap() {
           return {
             id: projectId,
             name:
-              item?.project_name ||
+              getDisplayName(item) ||
               item?.nama_proyek_current ||
               item?.nama_paket_current ||
               "Unknown Project",

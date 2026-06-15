@@ -16,17 +16,12 @@ const KpiCardMinimalist = ({
   targetTahun,
   persenTahun,
   isDeficit = false,
+  isPercentage = false,
   onClick,
 }) => {
-  const safePersenPeriode = Math.min(
-    Math.abs(persenPeriode || 0),
-    100
-  );
+  const safePersenPeriode = Math.min(Math.abs(persenPeriode || 0), 100);
 
-  const safePersenTahun = Math.min(
-    Math.abs(persenTahun || 0),
-    100
-  );
+  const safePersenTahun = Math.min(Math.abs(persenTahun || 0), 100);
 
   return (
     <div
@@ -40,9 +35,7 @@ const KpiCardMinimalist = ({
         </h3>
 
         <p className="text-3xl font-extrabold text-slate-900 mt-1">
-          {typeof mainValue === "number"
-            ? formatCompact(mainValue)
-            : mainValue}
+          {typeof mainValue === "number" ? formatCompact(mainValue) : mainValue}
         </p>
       </div>
 
@@ -53,13 +46,7 @@ const KpiCardMinimalist = ({
           <div className="flex justify-between items-end text-[11px] font-semibold text-slate-700 mb-1.5">
             <span>YTD</span>
 
-            <span
-              className={
-                isDeficit
-                  ? "text-red-600"
-                  : "text-blue-700"
-              }
-            >
+            <span className={isDeficit ? "text-red-600" : "text-blue-700"}>
               {(persenPeriode || 0).toFixed(1)}%
             </span>
           </div>
@@ -67,9 +54,7 @@ const KpiCardMinimalist = ({
           <div className="w-full bg-slate-100 rounded-full h-2.5">
             <div
               className={`h-2.5 rounded-full transition-all duration-500 ${
-                isDeficit
-                  ? "bg-red-500"
-                  : "bg-blue-600"
+                isDeficit ? "bg-red-500" : "bg-blue-600"
               }`}
               style={{
                 width: `${safePersenPeriode}%`,
@@ -79,11 +64,17 @@ const KpiCardMinimalist = ({
 
           <div className="flex justify-between text-[10px] text-slate-400 mt-1">
             <span>
-              T: {formatCompact(targetPeriode || 0)}
+              Ra.:{" "}
+              {isPercentage
+                ? `${(targetPeriode || 0).toFixed(1)}%`
+                : formatCompact(targetPeriode || 0)}
             </span>
 
             <span>
-              R: {formatCompact(realPeriode || 0)}
+              Ri.:{" "}
+              {isPercentage
+                ? `${(realPeriode || 0).toFixed(1)}%`
+                : formatCompact(realPeriode || 0)}
             </span>
           </div>
         </div>
@@ -109,7 +100,10 @@ const KpiCardMinimalist = ({
 
           <div className="flex justify-between text-[10px] text-slate-400 mt-1">
             <span>
-              Target: {formatCompact(targetTahun || 0)}
+              Target:{" "}
+              {isPercentage
+                ? `${(targetTahun || 0).toFixed(1)}%`
+                : formatCompact(targetTahun || 0)}
             </span>
           </div>
         </div>
@@ -122,45 +116,31 @@ const KpiCardMinimalist = ({
 // MAIN COMPONENT
 // ======================================================
 
-export default function PengendalianKPICards({
-  kpiData,
-  setActiveChartTab,
-}) {
+export default function PengendalianKPICards({ kpiData, setActiveChartTab }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
       {/* PU */}
       <KpiCardMinimalist
         title="Pendapatan Usaha"
         mainValue={kpiData.pendapatanUsaha.mainValue}
-        targetPeriode={
-          kpiData.pendapatanUsaha.targetPeriode
-        }
-        realPeriode={
-          kpiData.pendapatanUsaha.realPeriode
-        }
-        persenPeriode={
-          kpiData.pendapatanUsaha.persenPeriode
-        }
-        targetTahun={
-          kpiData.pendapatanUsaha.targetTahun
-        }
-        persenTahun={
-          kpiData.pendapatanUsaha.persenTahun
-        }
+        targetPeriode={kpiData.pendapatanUsaha.targetPeriode}
+        realPeriode={kpiData.pendapatanUsaha.realPeriode}
+        persenPeriode={kpiData.pendapatanUsaha.persenPeriode}
+        targetTahun={kpiData.pendapatanUsaha.targetTahun}
+        persenTahun={kpiData.pendapatanUsaha.persenTahun}
         onClick={() => setActiveChartTab("PU")}
       />
 
       {/* BKPU */}
       <KpiCardMinimalist
         title="BK/PU"
-        mainValue={`${(
-          kpiData.bkpu.mainValue || 0
-        ).toFixed(2)}%`}
+        mainValue={`${(kpiData.bkpu.mainValue || 0).toFixed(2)}%`}
         targetPeriode={kpiData.bkpu.targetPeriode}
         realPeriode={kpiData.bkpu.realPeriode}
         persenPeriode={kpiData.bkpu.persenPeriode}
         targetTahun={kpiData.bkpu.targetTahun}
         persenTahun={kpiData.bkpu.persenTahun}
+        isPercentage={true}
         onClick={() => setActiveChartTab("BKPU")}
       />
 
@@ -168,21 +148,11 @@ export default function PengendalianKPICards({
       <KpiCardMinimalist
         title="Laba Kotor"
         mainValue={kpiData.labaKotor.mainValue}
-        targetPeriode={
-          kpiData.labaKotor.targetPeriode
-        }
-        realPeriode={
-          kpiData.labaKotor.realPeriode
-        }
-        persenPeriode={
-          kpiData.labaKotor.persenPeriode
-        }
-        targetTahun={
-          kpiData.labaKotor.targetTahun
-        }
-        persenTahun={
-          kpiData.labaKotor.persenTahun
-        }
+        targetPeriode={kpiData.labaKotor.targetPeriode}
+        realPeriode={kpiData.labaKotor.realPeriode}
+        persenPeriode={kpiData.labaKotor.persenPeriode}
+        targetTahun={kpiData.labaKotor.targetTahun}
+        persenTahun={kpiData.labaKotor.persenTahun}
         isDeficit={true}
       />
 
@@ -190,21 +160,11 @@ export default function PengendalianKPICards({
       <KpiCardMinimalist
         title="Laba Bersih"
         mainValue={kpiData.labaBersih.mainValue}
-        targetPeriode={
-          kpiData.labaBersih.targetPeriode
-        }
-        realPeriode={
-          kpiData.labaBersih.realPeriode
-        }
-        persenPeriode={
-          kpiData.labaBersih.persenPeriode
-        }
-        targetTahun={
-          kpiData.labaBersih.targetTahun
-        }
-        persenTahun={
-          kpiData.labaBersih.persenTahun
-        }
+        targetPeriode={kpiData.labaBersih.targetPeriode}
+        realPeriode={kpiData.labaBersih.realPeriode}
+        persenPeriode={kpiData.labaBersih.persenPeriode}
+        targetTahun={kpiData.labaBersih.targetTahun}
+        persenTahun={kpiData.labaBersih.persenTahun}
         isDeficit={true}
       />
     </div>

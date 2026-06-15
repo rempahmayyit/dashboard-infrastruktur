@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { formatNumber } from "../utils/formatters";
 import { Maximize2, Minimize2, Activity } from "lucide-react";
 import { useFilter } from "../context/FilterContext";
+import { getDisplayName } from "../utils/projectName";
 
 // Helper Penyeragaman ID Proyek
 const getProjectId = (row) =>
@@ -9,6 +10,7 @@ const getProjectId = (row) =>
 
 export default function RkapVsRealisasiTable() {
   const { excelData, globalFilter } = useFilter();
+  const [sortMode, setSortMode] = useState("LK");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // ==========================================================
@@ -47,7 +49,7 @@ export default function RkapVsRealisasiTable() {
 
       projectMap[id] = {
         id,
-        nama: p.nama_proyek_current || p.nama_paket || p.project_name || "-",
+        nama: getDisplayName(p),
         nk: Number(p.nk_current || p.nilai_kontrak || 0),
         rkapPu: 0,
         rkapBk: 0,
@@ -180,10 +182,16 @@ export default function RkapVsRealisasiTable() {
       )
 
       // 4. Urutkan berdasarkan minus (-) LK terbesar ke positif (Aturan 4)
-      .sort((a, b) => a.devLk - b.devLk);
+      .sort((a, b) => {
+        if (sortMode === "PU") {
+          return a.devPu - b.devPu;
+        }
+
+        return a.devLk - b.devLk;
+      });
 
     return processedData;
-  }, [excelData, globalFilter]);
+  }, [excelData, globalFilter, sortMode]);
 
   // ==========================================================
   // HELPER FORMAT TAMPILAN
@@ -349,28 +357,47 @@ export default function RkapVsRealisasiTable() {
     <>
       {/* NORMAL VIEW */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col h-[360px]">
-        <div className="mb-4 flex justify-between items-start">
+        <div className="flex items-start justify-between w-full">
           <div>
             <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <Activity
-                size={14}
-                className="text-[#000075]"
-                strokeWidth={2.5}
-              />
-              RKAP VS REALISASI
+              ...
             </h4>
+
             <p className="text-[10px] text-slate-400 mt-1">
-              Perbandingan budget anggaran dan realisasi proyek diurutkan
-              defisit LK
+              Perbandingan budget anggaran dan realisasi proyek
             </p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="p-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-all shadow-sm flex items-center justify-center w-7 h-7"
-            title="Maximize"
-          >
-            <Maximize2 size={13} strokeWidth={2.5} />
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSortMode("LK")}
+              className={`px-3 py-1 text-xs rounded-lg border ${
+                sortMode === "LK"
+                  ? "bg-red-600 text-white border-red-600"
+                  : "bg-white border-slate-300"
+              }`}
+            >
+              Defisit LK
+            </button>
+
+            <button
+              onClick={() => setSortMode("PU")}
+              className={`px-3 py-1 text-xs rounded-lg border ${
+                sortMode === "PU"
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white border-slate-300"
+              }`}
+            >
+              Defisit PU
+            </button>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="p-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-slate-100"
+            >
+              <Maximize2 size={13} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
         <RenderTableContent />
       </div>
@@ -394,12 +421,37 @@ export default function RkapVsRealisasiTable() {
                   Menampilkan data kumulatif s.d bulan berjalan
                 </p>
               </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
-              >
-                <Minimize2 size={16} />
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSortMode("LK")}
+                  className={`px-3 py-1 text-xs rounded-lg border ${
+                    sortMode === "LK"
+                      ? "bg-red-600 text-white border-red-600"
+                      : "bg-white border-slate-300"
+                  }`}
+                >
+                  Defisit LK
+                </button>
+
+                <button
+                  onClick={() => setSortMode("PU")}
+                  className={`px-3 py-1 text-xs rounded-lg border ${
+                    sortMode === "PU"
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white border-slate-300"
+                  }`}
+                >
+                  Defisit PU
+                </button>
+
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
+                >
+                  <Minimize2 size={16} />
+                </button>
+              </div>
             </div>
             <RenderTableContent isFullView />
           </div>

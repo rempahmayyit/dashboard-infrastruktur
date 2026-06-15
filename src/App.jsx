@@ -1,6 +1,4 @@
-// src/App.jsx
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "./lib/supabase";
 import LoginPage from "./LoginPage";
 
@@ -9,7 +7,7 @@ import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 //import MonitoringCCTV from "./pages/MonitoringCCTV";
 import PemasaranAnggaran from "./PemasaranAnggaran";
 import PengendalianProyek from "./Pengendalian/pages/PengendalianProyek";
-import KeuanganAkuntansi from "./KeuanganAkuntansi";
+import KeuanganAkuntansi from "./Keuangan/pages/KeuanganAkuntansi";
 import TeknikMutuK3L from "./TeknikMutuK3L";
 import LegalManrisk from "./LegalManrisk";
 import SdmUmum from "./SdmUmum";
@@ -18,6 +16,8 @@ import SapVsQcRekon from "./SapVsQcRekon";
 import MonitoringEskalasiComponent from "./MonitoringEskalasiComponent";
 import PdpkMonitoring from "./PdpkMonitoring";
 import PusatData from "./PusatData";
+import ReportDashboard from "./Report/pages/ReportModule";
+import { getUserProfile } from "./lib/userProfile";
 
 // --- Import Komponen Layout ---
 import Sidebar from "./components/Sidebar";
@@ -40,24 +40,63 @@ export default function App() {
   const [activeMenu, setActiveMenu] = useState("Executive Dashboard");
   const [openMenu, setOpenMenu] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showIdleWarning, setShowIdleWarning] = useState(false);
 
+  // Gunakan undefined sebagai penanda awal "Belum difetch"
+  const [profile, setProfile] = useState(undefined);
+
+  // Gunakan ref untuk menyimpan fungsi timer agar bisa dipanggil manual
+  const resetTimerRef = useRef(null);
+
+  const userRole = profile?.role || "viewer";
+
+  // Optimasi Supabase Auth & Fetch Profile
+  // Optimasi Supabase Auth & Fetch Profile
+  // Optimasi Supabase Auth & Anti-Deadlock Fetch
   useEffect(() => {
+    let isMounted = true;
+
+    // 1. Cek session tanpa memblokir thread
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
+      if (isMounted) {
+        setSession(session);
+
+        // KUNCI UTAMA: Langsung matikan loading di sini!
+        // Jangan menunggu profil ter-load agar layar tidak stuck.
+        setLoading(false);
+
+        // 2. Fetch profil di background
+        if (session?.user?.id) {
+          getUserProfile(session.user.id).then((profileData) => {
+            if (isMounted) setProfile(profileData || null);
+          });
+        } else {
+          if (isMounted) setProfile(null);
+        }
+      }
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      setLoading(false);
+
+      if (event === "SIGNED_IN" && session?.user?.id) {
+        getUserProfile(session.user.id).then((profileData) => {
+          if (isMounted) setProfile(profileData || null);
+        });
+      } else if (event === "SIGNED_OUT") {
+        if (isMounted) setProfile(null);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // AUTO LOGOUT 30 MENIT + WARNING 5 MENIT SEBELUMNYA
@@ -86,10 +125,14 @@ export default function App() {
         async () => {
           await supabase.auth.signOut();
           setSession(null);
+          setProfile(null);
         },
         30 * 60 * 1000,
       );
     };
+
+    // Simpan fungsi ke dalam ref
+    resetTimerRef.current = resetTimer;
 
     const events = [
       "mousemove",
@@ -112,30 +155,74 @@ export default function App() {
     };
   }, [session]);
 
-  const menuItems = [
+  const allMenus = [
     { name: "Executive Dashboard", icon: LayoutDashboard },
-    { name: "Pemasaran & Anggaran", icon: FolderKanban },
-    { name: "Pengendalian Proyek", icon: AlertTriangle },
-    { name: "Keuangan & Akuntansi", icon: CircleDollarSign },
-    { name: "Teknik, Mutu & K3L", icon: LayoutDashboard },
-    { name: "Legal & Manrisk", icon: FolderKanban },
-    { name: "SDM & Umum", icon: Search },
+
+    {
+      name: "Pemasaran & Anggaran",
+      icon: FolderKanban,
+      roles: ["admin", "super_admin"],
+    },
+
+    {
+      name: "Pengendalian Proyek",
+      icon: AlertTriangle,
+      roles: ["admin", "super_admin"],
+    },
+
+    {
+      name: "Keuangan & Akuntansi",
+      icon: CircleDollarSign,
+      roles: ["admin", "super_admin"],
+    },
+
+    {
+      name: "Teknik, Mutu & K3L",
+      icon: LayoutDashboard,
+      roles: ["admin", "super_admin"],
+    },
+
+    {
+      name: "Legal & Manrisk",
+      icon: FolderKanban,
+      roles: ["admin", "super_admin"],
+    },
+
+    {
+      name: "SDM & Umum",
+      icon: Search,
+      roles: ["admin", "super_admin"],
+    },
+
     {
       name: "Project Risk Dashboard",
       icon: ShieldAlert,
+      roles: ["admin", "super_admin"],
     },
+
     {
       name: "Monitoring",
       icon: BarChart3,
-      children: [
-        { name: "SAP vs QC/Rekon" },
-        { name: "Eskalasi" },
-        { name: "PDPK" },
-        { name: "Under Development" },
-      ],
+      roles: ["admin", "super_admin"],
+      children: [{ name: "Eskalasi" }, { name: "PDPK" }],
     },
-        { name: "Pusat Data & Integrasi", icon: Database },
+
+    {
+      name: "Pusat Data & Integrasi",
+      icon: Database,
+      roles: ["super_admin"],
+    },
+
+    {
+      name: "Laporan Manajemen",
+      icon: BarChart3,
+      roles: ["admin", "super_admin"],
+    },
   ];
+
+  const menuItems = allMenus.filter(
+    (menu) => !menu.roles || menu.roles.includes(userRole),
+  );
 
   const renderContent = () => {
     switch (activeMenu) {
@@ -164,7 +251,13 @@ export default function App() {
       case "Pusat Data & Integrasi":
         return <PusatData />;
       case "Form Pemasaran & Anggaran":
-        return <PusatData />;
+        return (
+          <div className="flex items-center justify-center h-full text-slate-500">
+            Form Pemasaran & Anggaran belum tersedia
+          </div>
+        );
+      case "Laporan Manajemen":
+        return <ReportDashboard />;
       default:
         return null;
     }
@@ -172,8 +265,18 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center text-slate-500">
         Loading...
+      </div>
+    );
+  }
+
+  // SEMENTARA DISABLE DULU BAGIAN INI dengan menambahkan /* dan */
+
+  if (session && profile === undefined) {
+    return (
+      <div className="h-screen flex items-center justify-center text-slate-500">
+        Loading Profile...
       </div>
     );
   }
@@ -203,13 +306,10 @@ export default function App() {
     .toUpperCase();
 
   const stayLoggedIn = () => {
-    setShowIdleWarning(false);
-
-    window.dispatchEvent(
-      new MouseEvent("mousemove", {
-        bubbles: true,
-      }),
-    );
+    // Memanggil ulang fungsi reset dengan rapi lewat ref
+    if (resetTimerRef.current) {
+      resetTimerRef.current();
+    }
   };
 
   return (
@@ -256,6 +356,7 @@ export default function App() {
                   onClick={async () => {
                     await supabase.auth.signOut();
                     setSession(null);
+                    setProfile(null);
                   }}
                   className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50"
                 >

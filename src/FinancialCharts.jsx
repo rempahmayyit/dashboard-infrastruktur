@@ -1,6 +1,7 @@
 // src/FinancialCharts.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import { Maximize2, AlertTriangle } from "lucide-react";
+import { getDisplayName } from "./utils/projectName";
 import {
   ResponsiveContainer,
   CartesianGrid,
@@ -51,7 +52,9 @@ const Top5WarningPanel = ({ current, top5Data, activeTab }) => {
   };
 
   return (
-<div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col h-full max-h-[400px] overflow-hidden">      <div className="flex-shrink-0 mb-3 border-b border-slate-100 pb-2">
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col h-full max-h-[400px] overflow-hidden">
+      {" "}
+      <div className="flex-shrink-0 mb-3 border-b border-slate-100 pb-2">
         <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider text-[#BD002F] flex items-center gap-1.5">
           <AlertTriangle size={15} strokeWidth={2.5} />
           {current.title}
@@ -60,7 +63,6 @@ const Top5WarningPanel = ({ current, top5Data, activeTab }) => {
           Peringkat 5 deviasi negatif (YTD s.d bulan terpilih)
         </p>
       </div>
-
       <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 scrollbar-thin">
         {top5Data.length === 0 && (
           <div className="flex flex-col items-center justify-center h-24 bg-emerald-50 rounded-xl border border-emerald-100">
@@ -101,27 +103,33 @@ const Top5WarningPanel = ({ current, top5Data, activeTab }) => {
         {isLB &&
           top5Data.map((item, i) => {
             // Logika Warna: Merah jika jebol (minus), Hijau jika hemat/tercapai (plus atau 0)
-            const isOverbudget = item.dev < 0; 
+            const isOverbudget = item.dev < 0;
 
             return (
               <div
                 key={i}
                 className={`p-2.5 rounded-xl border flex flex-col gap-1.5 transition-colors ${
-                  isOverbudget 
-                    ? "bg-red-50/60 border-red-100 hover:bg-red-50" 
+                  isOverbudget
+                    ? "bg-red-50/60 border-red-100 hover:bg-red-50"
                     : "bg-emerald-50/60 border-emerald-100 hover:bg-emerald-50"
                 }`}
               >
-                <div className={`flex justify-between items-center border-b pb-1.5 ${isOverbudget ? "border-red-100/60" : "border-emerald-100/60"}`}>
+                <div
+                  className={`flex justify-between items-center border-b pb-1.5 ${isOverbudget ? "border-red-100/60" : "border-emerald-100/60"}`}
+                >
                   <span
                     className="text-[11px] font-black text-slate-800 uppercase break-words whitespace-normal pr-2"
                     title={item.name}
                   >
                     {item.name}
                   </span>
-                  <span className={`text-[11px] font-black bg-white px-1.5 py-0.5 rounded shadow-sm border font-mono tracking-tighter ${
-                    isOverbudget ? "text-[#BD002F] border-red-100" : "text-emerald-600 border-emerald-100"
-                  }`}>
+                  <span
+                    className={`text-[11px] font-black bg-white px-1.5 py-0.5 rounded shadow-sm border font-mono tracking-tighter ${
+                      isOverbudget
+                        ? "text-[#BD002F] border-red-100"
+                        : "text-emerald-600 border-emerald-100"
+                    }`}
+                  >
                     {formatM(item.dev)}
                   </span>
                 </div>
@@ -196,14 +204,30 @@ export default function FinancialCharts() {
   const getComponentConfig = () => {
     switch (activeChartTab) {
       case "PU":
-        return { name: "PU (Miliar)", color: "#000075", title: "Top 5 PU Tidak Tercapai" };
+        return {
+          name: "PU (Miliar)",
+          color: "#000075",
+          title: "Top 5 PU Tidak Tercapai",
+        };
       case "LK":
-        return { name: "Laba Kotor (Miliar)", color: "#BD002F", title: "Top 5 LK Tidak Tercapai" };
+        return {
+          name: "Laba Kotor (Miliar)",
+          color: "#BD002F",
+          title: "Top 5 LK Tidak Tercapai",
+        };
       case "BKPU":
-        return { name: "BK/PU (%)", color: "#f97316", title: "Top 5 BK/PU (Cost Overrun)" };
+        return {
+          name: "BK/PU (%)",
+          color: "#f97316",
+          title: "Top 5 BK/PU (Cost Overrun)",
+        };
       case "LB":
         // UBAH JUDUL DI SINI
-        return { name: "Laba Bersih (Miliar)", color: "#059669", title: "Rincian Deviasi Beban" };
+        return {
+          name: "Laba Bersih (Miliar)",
+          color: "#059669",
+          title: "Rincian Deviasi Beban",
+        };
       default:
         return { name: "Nilai", color: "#000075", title: "Peringatan" };
     }
@@ -456,29 +480,43 @@ export default function FinancialCharts() {
     // FUNGSI PENCARI BULAN SUPER KETAT (Bisa baca format kalender apapun)
     const getValidMonth = (row) => {
       let m = safeParseNumber(row.bulan_index);
-      
+
       if (!m && row.bulan) {
         const textBulan = String(row.bulan).toLowerCase().substring(0, 3);
-        const bMap = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, mei: 5, jun: 6, jul: 7, agu: 8, sep: 9, okt: 10, nov: 11, des: 12 };
+        const bMap = {
+          jan: 1,
+          feb: 2,
+          mar: 3,
+          apr: 4,
+          may: 5,
+          mei: 5,
+          jun: 6,
+          jul: 7,
+          agu: 8,
+          sep: 9,
+          okt: 10,
+          nov: 11,
+          des: 12,
+        };
         m = bMap[textBulan] || 0;
       }
-      
+
       if (!m && row.periode) {
         const rawDate = String(row.periode);
         const d = new Date(rawDate);
-        
+
         if (!isNaN(d.getTime())) {
-           m = d.getMonth() + 1; // Jika format YYYY-MM-DD standar
+          m = d.getMonth() + 1; // Jika format YYYY-MM-DD standar
         } else {
-           // Jika Supabase menyimpan dalam format DD/MM/YYYY atau DD-MM-YYYY
-           const parts = rawDate.split(/[-/]/);
-           if (parts.length === 3) {
-              if (parts[0].length <= 2 && parts[2].length === 4) { 
-                 m = safeParseNumber(parts[1]); 
-              } else if (parts[0].length === 4) { 
-                 m = safeParseNumber(parts[1]); 
-              }
-           }
+          // Jika Supabase menyimpan dalam format DD/MM/YYYY atau DD-MM-YYYY
+          const parts = rawDate.split(/[-/]/);
+          if (parts.length === 3) {
+            if (parts[0].length <= 2 && parts[2].length === 4) {
+              m = safeParseNumber(parts[1]);
+            } else if (parts[0].length === 4) {
+              m = safeParseNumber(parts[1]);
+            }
+          }
         }
       }
       return m;
@@ -486,15 +524,19 @@ export default function FinancialCharts() {
 
     // SAPU JAGAT KHUSUS BEBAN BAWAH
     const getBebanValue = (row, keyPart) => {
-      let exact = row[`beban_bawah_${keyPart}_parsial`] ?? row[`beban_${keyPart}`];
+      let exact =
+        row[`beban_bawah_${keyPart}_parsial`] ?? row[`beban_${keyPart}`];
       if (exact !== undefined && exact !== null) return safeParseNumber(exact);
 
       const keys = Object.keys(row);
-      for(let i=0; i<keys.length; i++) {
-          const k = keys[i].toLowerCase();
-          if (k.includes(keyPart) && (k.includes("beban") || k.includes("parsial"))) {
-              return safeParseNumber(row[keys[i]]);
-          }
+      for (let i = 0; i < keys.length; i++) {
+        const k = keys[i].toLowerCase();
+        if (
+          k.includes(keyPart) &&
+          (k.includes("beban") || k.includes("parsial"))
+        ) {
+          return safeParseNumber(row[keys[i]]);
+        }
       }
       return 0;
     };
@@ -502,30 +544,40 @@ export default function FinancialCharts() {
     // ALUR 1: Jika Tab Laba Bersih (Tampilkan KESELURUHAN Rincian db_beban_bawah)
     if (activeChartTab === "LB") {
       const bebanMap = {};
-      
+
       rawBebanData.forEach((row) => {
         const m = getValidMonth(row);
         let y = safeParseNumber(row.tahun);
-        
+
         if (!y && row.periode) {
-           const d = new Date(row.periode);
-           if (!isNaN(d.getTime())) y = d.getFullYear();
-           else if (row.periode.includes("/")) y = safeParseNumber(row.periode.split("/").pop());
-           else if (row.periode.includes("-")) y = safeParseNumber(row.periode.split("-").pop());
+          const d = new Date(row.periode);
+          if (!isNaN(d.getTime())) y = d.getFullYear();
+          else if (row.periode.includes("/"))
+            y = safeParseNumber(row.periode.split("/").pop());
+          else if (row.periode.includes("-"))
+            y = safeParseNumber(row.periode.split("-").pop());
         }
-        if (!y) y = selectedYear; 
-        
+        if (!y) y = selectedYear;
+
         // Filter YTD: Tahun cocok & Bulan <= Bulan Terpilih
         if (y === selectedYear && m > 0 && m <= currentMonthNum) {
-          const rawName = row.uraian || row.keterangan || row.nama_beban || row.item || "Beban Lainnya";
-          
+          const rawName =
+            row.uraian ||
+            row.keterangan ||
+            row.nama_beban ||
+            row.item ||
+            "Beban Lainnya";
+
           // STANDARISASI: Huruf Besar Semua & Hapus Spasi Berlebih agar akumulasi tidak bocor
-          const groupKey = String(rawName).trim().toUpperCase().replace(/\s+/g, " "); 
-          
+          const groupKey = String(rawName)
+            .trim()
+            .toUpperCase()
+            .replace(/\s+/g, " ");
+
           if (!bebanMap[groupKey]) {
-              bebanMap[groupKey] = { name: rawName, rkap: 0, real: 0 };
+            bebanMap[groupKey] = { name: rawName, rkap: 0, real: 0 };
           }
-          
+
           bebanMap[groupKey].rkap += getBebanValue(row, "rkap");
           bebanMap[groupKey].real += getBebanValue(row, "real");
         }
@@ -549,25 +601,46 @@ export default function FinancialCharts() {
         const y = safeParseNumber(row.tahun);
 
         if (y === selectedYear && m > 0 && m <= currentMonthNum) {
-          let category = String(row.jenis_jo_current || row.nonjo_joi || "").toUpperCase();
+          let category = String(
+            row.jenis_jo_current || row.nonjo_joi || "",
+          ).toUpperCase();
           let isTypeMatch = false;
           if (filterNonJo && !filterJoi) isTypeMatch = category.includes("NON");
-          else if (!filterNonJo && filterJoi) isTypeMatch = category.includes("JOI");
+          else if (!filterNonJo && filterJoi)
+            isTypeMatch = category.includes("JOI");
           else if (filterNonJo && filterJoi) isTypeMatch = true;
 
           if (!isTypeMatch) return;
-          if (isRkap && !String(row.rkap_status || "").toLowerCase().includes("awal")) return;
+          if (
+            isRkap &&
+            !String(row.rkap_status || "")
+              .toLowerCase()
+              .includes("awal")
+          )
+            return;
 
-          const id = row.id_project || row.id_proyek || row.project_id || row.id;
+          const id =
+            row.id_project || row.id_proyek || row.project_id || row.id;
           if (!id) return;
 
           if (!projectMap[id]) {
-            projectMap[id] = { id, name: row.nama_proyek || row.project_name || `Proyek ${id}`, rkapPu: 0, rkapBk: 0, realPu: 0, realBk: 0 };
+            projectMap[id] = {
+              id,
+              name: getDisplayName(row) || `Proyek ${id}`,
+              rkapPu: 0,
+              rkapBk: 0,
+              realPu: 0,
+              realBk: 0,
+            };
           }
 
           if (isRkap) {
-            projectMap[id].rkapPu += safeParseNumber(row.pu_rkap_parsial || row.PU_RKAP_Parsial);
-            projectMap[id].rkapBk += safeParseNumber(row.bk_rkap_parsial || row.BK_RKAP_Parsial);
+            projectMap[id].rkapPu += safeParseNumber(
+              row.pu_rkap_parsial || row.PU_RKAP_Parsial,
+            );
+            projectMap[id].rkapBk += safeParseNumber(
+              row.bk_rkap_parsial || row.BK_RKAP_Parsial,
+            );
           } else {
             projectMap[id].realPu += getDynamicValue(row, "pu");
             projectMap[id].realBk += getDynamicValue(row, "bk");
@@ -581,19 +654,31 @@ export default function FinancialCharts() {
 
     let list = Object.values(projectMap).map((p) => {
       p.devPu = p.realPu - p.rkapPu;
-      p.devLk = (p.realPu - p.realBk) - (p.rkapPu - p.rkapBk);
+      p.devLk = p.realPu - p.realBk - (p.rkapPu - p.rkapBk);
       const rkapBkPu = p.rkapPu > 0 ? (p.rkapBk / p.rkapPu) * 100 : 0;
       const realBkPu = p.realPu > 0 ? (p.realBk / p.realPu) * 100 : 0;
-      p.devBkPu = rkapBkPu - realBkPu; 
+      p.devBkPu = rkapBkPu - realBkPu;
       return p;
     });
 
-    if (activeChartTab === "PU") list = list.filter((p) => p.devPu < 0).sort((a, b) => a.devPu - b.devPu);
-    else if (activeChartTab === "LK") list = list.filter((p) => p.devLk < 0).sort((a, b) => a.devLk - b.devLk);
-    else if (activeChartTab === "BKPU") list = list.filter((p) => p.devBkPu < 0).sort((a, b) => a.devBkPu - b.devBkPu);
+    if (activeChartTab === "PU")
+      list = list.filter((p) => p.devPu < 0).sort((a, b) => a.devPu - b.devPu);
+    else if (activeChartTab === "LK")
+      list = list.filter((p) => p.devLk < 0).sort((a, b) => a.devLk - b.devLk);
+    else if (activeChartTab === "BKPU")
+      list = list
+        .filter((p) => p.devBkPu < 0)
+        .sort((a, b) => a.devBkPu - b.devBkPu);
 
     return list.slice(0, 5);
-  }, [excelData, globalFilter, currentMonthNum, activeChartTab, filterNonJo, filterJoi]);
+  }, [
+    excelData,
+    globalFilter,
+    currentMonthNum,
+    activeChartTab,
+    filterNonJo,
+    filterJoi,
+  ]);
 
   return (
     <>

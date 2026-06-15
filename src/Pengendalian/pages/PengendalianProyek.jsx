@@ -78,30 +78,12 @@ export default function PengendalianProyek() {
       />
 
       {/* 6. TABEL ANALISIS RKAP & BK/PU */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
-        <div>
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">
-            Evaluasi RKAP vs Realisasi
-          </h3>
-
-          <RkapVsRealisasiTable />
-        </div>
-
-        <div>
-          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">
-            Matriks Evaluasi BK/PU
-          </h3>
-
-          <EbVsForecastTable />
-        </div>
-      </div>
-
-      {/* 5. MONITORING BUDGET */}
       <div className="mt-6">
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">
-          Monitoring EB-P01
+          Evaluasi RKAP vs Realisasi
         </h3>
-        <EbVsForecastTable/>
+
+        <RkapVsRealisasiTable />
       </div>
 
       {/* 6. SAP VS QC/REKON */}
@@ -112,36 +94,12 @@ export default function PengendalianProyek() {
         <SapVsQcRekon />
       </div>
 
-{/* MONITORING PEMAKAIAN BUDGET SAP */}
-      <div className="mt-6">
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">
-          Monitoring Pemakaian Budget SAP
-        </h3>
-        <MonitoringBudgetTable />
-      </div>
-
-      {/* MONITORING UMUR PERSEDIAAN */}
-      <div className="mt-6">
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">
-          Monitoring Umur Persediaan (FIORI)
-        </h3>
-        <MonitoringAgingStockTable />
-      </div>
-
-{/* MONITORING TAGIHAN BRUTO */}
-      <div className="mt-6">
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-3">
-          Monitoring Tagihan Bruto
-        </h3>
-        <MonitoringTagbrutTable />
-      </div>
-
       {/* 7. FOOTER */}
       <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-xl flex items-center gap-3">
         <ShieldAlert size={18} className="text-[#000075] shrink-0" />
         <p className="text-slate-700 text-xs font-medium">
           <span className="font-bold text-[#000075]">
-            Nota Pengendalian SCM:
+            Catatan dari bapak Sayuti Mulyono SDU Dirop 1 :
           </span>{" "}
           Evaluasi cost overrun, progress delay, dan percepatan termin proyek
           berjalan.

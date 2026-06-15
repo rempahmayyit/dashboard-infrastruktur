@@ -1,6 +1,7 @@
 // src/components/ProjectRiskDashboard.jsx
 import React, { useState, useMemo, useRef } from "react";
 import { useFilter } from "../../context/FilterContext";
+import { getDisplayName } from "../../utils/projectName";
 import {
   AlertOctagon,
   AlertTriangle,
@@ -166,7 +167,7 @@ export default function ProjectRiskDashboard() {
         project_name:
           proj.nama_proyek_current ||
           proj.nama_proyek ||
-          proj.project_name ||
+          getDisplayName(proj) ||
           "Proyek Tanpa Nama",
         divisi: proj.divisi_current || proj.divisi || "-",
         status_proyek:
@@ -250,7 +251,7 @@ export default function ProjectRiskDashboard() {
     const keyword = searchTerm.toLowerCase();
 
     return (
-      String(proj.project_name || "")
+      String(getDisplayName(proj) || "")
         .toLowerCase()
         .includes(keyword) ||
       String(proj.id_project || "")
@@ -375,7 +376,7 @@ export default function ProjectRiskDashboard() {
 
                     <div className="flex-1 min-w-0">
                       <h4 className={`text-sm font-bold truncate ${textClass}`}>
-                        {proj.project_name}
+                        {getDisplayName(proj)}
                       </h4>
                       <div className="flex flex-wrap items-center gap-2 mt-1">
                         <span className="text-[10px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
@@ -452,7 +453,7 @@ export default function ProjectRiskDashboard() {
                 </div>
                 <div className="bg-red-50/50 border border-red-100 p-2.5 rounded-xl">
                   <span className="font-bold text-red-800 flex items-center gap-1.5 mb-1">
-                    <ShieldAlert size={12} /> Cost Overrun (Boncos)
+                    <ShieldAlert size={12} /> Cost Overrun
                   </span>
                   <span className="text-[10px] text-slate-600 leading-snug block">
                     Dihitung dari selisih pemakaian BKPU aktual thd batasan
@@ -698,7 +699,7 @@ export default function ProjectRiskDashboard() {
 
                       <td className="p-3 px-4 max-w-[320px]">
                         <div className="font-bold text-slate-800 break-words whitespace-normal">
-                          {proj.project_name}
+                          {getDisplayName(proj)}
                         </div>
                         <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-2">
                           <span>{proj.divisi}</span>

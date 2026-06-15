@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from "react";
 import { useFilter } from "../../context/FilterContext";
 import { ArrowUpDown, TrendingDown, Clock, ShieldAlert } from "lucide-react";
+import { getDisplayName } from "../utils/projectName";
 
 // ======================================================================
 // HELPER FUNCTIONS (Sama dengan standar hook pengendalian)
@@ -110,7 +111,7 @@ export default function ProjectRanking() {
 
       return {
         ...proj,
-        nama_projek: proj.nama_proyek_current || proj.nama_proyek || proj.project_name || "Proyek Tanpa Nama",
+        nama_projek: getDisplayName(proj),
         divisi: proj.divisi || proj.owner || "-",
         status_asli: proj.status_proyek || proj.status || "On Going",
         progRencana,

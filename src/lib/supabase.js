@@ -1,13 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl =
-  "https://cfjbxoytanoqltzkvncd.supabase.co";
+// Mengambil nilai dari file .env
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const supabaseAnonKey =
-  "sb_publishable_zQTdPtzlKzBJziZShF9f-A_hDlG3cAK";
-
-export const supabase =
-  createClient(
-    supabaseUrl,
-    supabaseAnonKey
-  );
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

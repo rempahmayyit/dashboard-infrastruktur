@@ -2,6 +2,7 @@
 import React, { useMemo } from "react";
 import { useFilter } from "../../context/FilterContext";
 import ProjectRanking from "./ProjectRanking";
+import { getDisplayName } from "../utils/projectName";
 import {
   AlertOctagon,
   AlertTriangle,
@@ -34,7 +35,7 @@ export default function ProjectRiskSummary() {
     console.log(
       "STATUS SAMPLE",
       rawProjects.slice(0, 20).map((p) => ({
-        nama: p.nama_projek || p.project_name || p.nama_proyek,
+        nama: getDisplayName(p),
 
         status: p.status_project_current || p.status_proyek || p.status,
       })),
@@ -76,7 +77,7 @@ export default function ProjectRiskSummary() {
       return {
         ...proj,
         nama_projek:
-          proj.project_name ||
+          getDisplayName(proj) ||
           proj.nama_projek ||
           proj.nama_proyek ||
           "Proyek Tanpa Nama",

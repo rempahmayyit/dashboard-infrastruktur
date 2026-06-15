@@ -102,7 +102,16 @@ export function FilterProvider({ children }) {
       try {
         console.log("Loading dashboard data...");
 
-        const masterData = await fetchAllDataFromTable("master_project");
+        const masterDataRaw = await fetchAllDataFromTable("master_project");
+
+        const masterData = masterDataRaw.map((row) => ({
+          ...row,
+          display_name:
+            row.short_project_name ||
+            row.project_name ||
+            row.nama_proyek_current ||
+            row.nama_paket_current,
+        }));
         const rkapAwalData = await fetchAllDataFromTable("db_rkap_awal");
         const realisasiData = await fetchAllDataFromTable("db_realisasi");
         const pemasaranRkapData =
@@ -183,7 +192,16 @@ export function FilterProvider({ children }) {
         { event: "*", schema: "public", table: "master_project" },
         async (payload) => {
           console.log("Realtime update master_project:", payload.eventType);
-          const masterData = await fetchAllDataFromTable("master_project");
+          const masterDataRaw = await fetchAllDataFromTable("master_project");
+
+          const masterData = masterDataRaw.map((row) => ({
+            ...row,
+            display_name:
+              row.short_project_name ||
+              row.project_name ||
+              row.nama_proyek_current ||
+              row.nama_paket_current,
+          }));
           setExcelData((prevData) => ({
             ...prevData,
             db_master_data: masterData,

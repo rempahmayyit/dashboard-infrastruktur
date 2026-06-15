@@ -8,6 +8,7 @@ import {
   getSelectedDate,
   getCumulativeValue,
 } from "../utils/projectCalculations";
+import { getDisplayName } from "../utils/projectName";
 
 // =====================================================
 // SAFE HELPERS
@@ -74,6 +75,7 @@ export function usePengendalianData() {
   const realisasiData = excelData?.db_realisasi || [];
   const db_rkap_awal = excelData?.db_rkap_awal || [];
   const db_realisasi = excelData?.db_realisasi || [];
+
   // TAMBAHAN: Tarik data beban bawah dari Supabase
   const db_beban_bawah = excelData?.db_beban_bawah || [];
 
@@ -156,10 +158,14 @@ export function usePengendalianData() {
       if (!isAnnual && Number(row.bulan_index) > Number(selectedMonth))
         return sum;
 
-      const master = projectMap[getProjectId(row)];
-      if (!master) return sum;
+      const categoryItem =
+        row?.nonjo_joi || row?.jenis_jo_current
+          ? row
+          : projectMap[getProjectId(row)];
 
-      if (category && getProjectCategory(master) !== category) return sum;
+      if (!categoryItem) return sum;
+
+      if (category && getProjectCategory(categoryItem) !== category) return sum;
 
       return sum + Number(row[sumField] || 0);
     }, 0);
@@ -174,6 +180,8 @@ export function usePengendalianData() {
     const rowMonth = safeNumber(row?.bulan_index);
     return rowYear === selectedYear && rowMonth <= selectedMonth;
   });
+
+  db_realisasi.slice(0, 20).forEach((row) => {});
 
   filteredRealisasiData.forEach((row) => {
     const id = row?.id_project || row?.id_proyect || row?.id_proyek;
@@ -237,6 +245,7 @@ export function usePengendalianData() {
   const bkpuJoiPercent = puRkapJoi > 0 ? (bkJoi / puRkapJoi) * 100 : 0;
 
   // --- REALISASI KUMULATIF ---
+
   const puRealNonJo = calculateSum({
     data: db_realisasi,
     sumField: "pu_real_parsial",
@@ -247,6 +256,7 @@ export function usePengendalianData() {
     sumField: "pu_real_parsial",
     category: "JOI",
   });
+
   const puRealTotal = puRealNonJo + puRealJoi;
 
   const bkRealNonJo = calculateSum({
@@ -441,11 +451,7 @@ export function usePengendalianData() {
 
       const progress = latestProgressMap[id]?.progress || 0;
       return {
-        name:
-          project?.nama_proyek_current ||
-          project?.nama_paket_current ||
-          project?.project_name ||
-          "-",
+        name: getDisplayName(project),
         prog: safeNumber(progress).toFixed(2),
         ra: safeNumber(ra).toFixed(2),
         ri: safeNumber(ri).toFixed(2),
@@ -489,11 +495,7 @@ export function usePengendalianData() {
 
       return {
         id,
-        name:
-          project?.nama_proyek_current ||
-          project?.nama_paket_current ||
-          project?.project_name ||
-          "-",
+        name: getDisplayName(project),
         prog: safeNumber(progress).toFixed(2),
         mapp: safeNumber(mapp).toFixed(2),
         real: safeNumber(real).toFixed(2),
@@ -562,11 +564,7 @@ export function usePengendalianData() {
   const rekonsiliasiTableData = masterData
     .map((project) => {
       const id = getProjectId(project);
-      const projectName =
-        project?.nama_proyek_current ||
-        project?.nama_paket_current ||
-        project?.project_name ||
-        "Nama Tidak Diketahui";
+      const projectName = getDisplayName(project);
       const nk = safeNumber(project?.nk_current);
 
       // 1. QUICK COUNT (YTD): Akumulasi bulan Jan s.d bulan terpilih

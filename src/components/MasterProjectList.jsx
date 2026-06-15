@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { Database, Loader2, AlertTriangle, MapPinOff } from "lucide-react";
+import { getDisplayName } from "../utils/projectName";
 
 export default function MasterProjectList() {
   const [projects, setProjects] = useState([]);
@@ -104,7 +105,7 @@ export default function MasterProjectList() {
 
     const searchMatch =
       !searchTerm ||
-      String(p.project_name || "")
+      String(getDisplayName(p) || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       String(p.id_project || "")
@@ -181,7 +182,7 @@ export default function MasterProjectList() {
                 >
                   <div className="flex flex-col">
                     <span className="text-sm font-bold text-slate-800">
-                      {w.project_name || "Nama Proyek Kosong"}
+                      {getDisplayName(w) || "Nama Proyek Kosong"}
                     </span>
                     <span className="text-[11px] text-slate-500 font-mono mt-0.5">
                       ID: {w.id_project || "-"}
@@ -300,7 +301,7 @@ export default function MasterProjectList() {
                     {item.id_project || "-"}
                   </td>
                   <td className="p-3 font-bold text-slate-800 whitespace-normal break-words border-r border-slate-100">
-                    {item.project_name || "-"}
+                    {getDisplayName(item) || "-"}
                   </td>
                   <td className="p-3 text-center font-medium text-slate-600 border-r border-slate-100">
                     <span className="bg-slate-100 px-2 py-1 rounded text-[11px] border border-slate-200">
