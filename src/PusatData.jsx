@@ -12,7 +12,7 @@ import {
   ServerCog,
 } from "lucide-react";
 import { useFilter } from "./context/FilterContext";
-import * as XLSX from "xlsx";
+
 import RestrictedAccess from "./components/RestrictedAccess";
 import { usePengendalianData } from "./hooks/usePengendalianData";
 import MasterProjectList from "./components/MasterProjectList"; // Import komponen baru
@@ -50,17 +50,25 @@ function PusatDataComponent() {
 
   const { unmappedProjects } = usePengendalianData();
 
-  const exportUnmappedToExcel = () => {
+  const exportUnmappedToExcel = async () => {
     if (!unmappedProjects || unmappedProjects.length === 0) return;
+
     const dataToExport = unmappedProjects.map((p) => ({
       "ID Project": p.id,
       "Nama Project": p.name,
       "Ditemukan Pada File": p.sources,
     }));
-    const workbook = XLSX.utils.book_new();
+
+    const XLSX = await import("xlsx");
+
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
     worksheet["!cols"] = [{ wch: 25 }, { wch: 60 }, { wch: 20 }];
+
+    const workbook = XLSX.utils.book_new();
+
     XLSX.utils.book_append_sheet(workbook, worksheet, "Unmapped_Projects");
+
     XLSX.writeFile(workbook, "Daftar_Project_Belum_Terdaftar.xlsx");
   };
 

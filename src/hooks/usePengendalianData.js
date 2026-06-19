@@ -69,7 +69,7 @@ const getProjectCategory = (item) => {
 // CUSTOM HOOK
 // =====================================================
 export function usePengendalianData() {
-  const { excelData, globalFilter } = useFilter();
+  const { excelData, globalFilter, dataMode } = useFilter();
 
   const masterData = excelData?.db_master_data || [];
   const realisasiData = excelData?.db_realisasi || [];
@@ -143,6 +143,33 @@ export function usePengendalianData() {
   const selectedYear = safeNumber(globalFilter?.tahun || 2026);
   const selectedMonth =
     monthMap[globalFilter?.bulan] || new Date().getMonth() + 1;
+
+  const filteredDbRealisasi = db_realisasi.filter((row) => {
+    const status = String(row.status_data || "")
+      .trim()
+      .toUpperCase();
+
+    const rowYear = Number(row.tahun);
+    const rowMonth = Number(row.bulan_index);
+
+    // MODE FINAL
+    if (dataMode === "FINAL") {
+      return status === "FINAL";
+    }
+
+    // MODE QUICK
+    if (dataMode === "QUICK") {
+      // bulan aktif = QUICK
+      if (rowYear === selectedYear && rowMonth === selectedMonth) {
+        return status === "QUICK";
+      }
+
+      // bulan sebelumnya = FINAL
+      return status === "FINAL";
+    }
+
+    return true;
+  });
 
   // 4. HELPER MENGHITUNG TOTAL KEUANGAN (Ditaruh setelah selectedYear & selectedMonth)
   const calculateSum = ({
@@ -247,12 +274,12 @@ export function usePengendalianData() {
   // --- REALISASI KUMULATIF ---
 
   const puRealNonJo = calculateSum({
-    data: db_realisasi,
+    data: filteredDbRealisasi,
     sumField: "pu_real_parsial",
     category: "NONJO",
   });
   const puRealJoi = calculateSum({
-    data: db_realisasi,
+    data: filteredDbRealisasi,
     sumField: "pu_real_parsial",
     category: "JOI",
   });
@@ -260,12 +287,12 @@ export function usePengendalianData() {
   const puRealTotal = puRealNonJo + puRealJoi;
 
   const bkRealNonJo = calculateSum({
-    data: db_realisasi,
+    data: filteredDbRealisasi,
     sumField: "bk_real_parsial",
     category: "NONJO",
   });
   const bkRealJoi = calculateSum({
-    data: db_realisasi,
+    data: filteredDbRealisasi,
     sumField: "bk_real_parsial",
     category: "JOI",
   });
@@ -484,15 +511,16 @@ export function usePengendalianData() {
       )[0];
       const progress = safeNumber(latest?.prog_real);
       const real = safeNumber(latest?.bkpu_real_kumulatif);
-      const nilaiKontrak = safeNumber(project?.nk_current);
       const bkMappKumulatif = safeNumber(project?.bk_mapp_kumulatif_current);
-      const mapp =
-        nilaiKontrak > 0 ? (bkMappKumulatif / nilaiKontrak) * 100 : 0;
 
-      const dev = mapp - real;
+      const puMappKumulatif = safeNumber(project?.pu_mapp_kumulatif_current);
+
+      const mapp =
+        puMappKumulatif > 0 ? (bkMappKumulatif / puMappKumulatif) * 100 : 0;
 
       if (real <= mapp) return null;
 
+      const dev = mapp - real;
       return {
         id,
         name: getDisplayName(project),

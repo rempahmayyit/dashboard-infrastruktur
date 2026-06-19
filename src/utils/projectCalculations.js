@@ -11,7 +11,7 @@ export const getProjectRealisasi = (realisasiData, projectId, selectedDate) => {
     return String(rowId) === String(projectId) && rowDate <= selectedDate;
   });
 
-    return hasil;
+  return hasil;
 };
 
 export const calculateRiProgress = (realisasiProject) => {
@@ -55,8 +55,6 @@ export const calculateTimeOverrunData = ({
   const timeProjects = ongoingProjects
     .map((project) => {
       const id = project.id_project;
-
-      const nilaiKontrak = Number(project.nk_current || 0);
 
       const realisasiProject = getProjectRealisasi(
         realisasiData,

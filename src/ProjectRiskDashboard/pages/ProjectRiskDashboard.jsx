@@ -131,12 +131,13 @@ export default function ProjectRiskDashboard() {
       const behindSchedule = progRealisasi - progRencana;
 
       // --- PARAMETER 2: Cost Overrun ---
-      const nilaiKontrak = safeParseNumber(
-        proj.nk_current || proj.nilai_kontrak,
-      );
-      const bkMappKumulatif = safeParseNumber(proj.bk_mapp_kumulatif_current);
-      const mappPercent =
-        nilaiKontrak > 0 ? (bkMappKumulatif / nilaiKontrak) * 100 : 0;
+
+      const bkMappKumulatif = safeParseNumber(proj?.bk_mapp_kumulatif_current);
+
+      const puMappKumulatif = safeParseNumber(proj?.pu_mapp_kumulatif_current);
+
+      const mapp =
+        puMappKumulatif > 0 ? (bkMappKumulatif / puMappKumulatif) * 100 : 0;
 
       let realBkpuPercent = 0;
       if (realisasiProject && realisasiProject.length > 0) {
@@ -148,7 +149,7 @@ export default function ProjectRiskDashboard() {
         );
       }
 
-      const costOverrun = mappPercent - realBkpuPercent;
+      const costOverrun = mapp - realBkpuPercent;
 
       // --- PARAMETER 3: Time Overrun ---
       const sisaProgres = Math.max(0, 100 - progRealisasi);
@@ -176,7 +177,7 @@ export default function ProjectRiskDashboard() {
         progRealisasi,
         behindSchedule,
         costOverrun,
-        mappPercent,
+        mappPercent: mapp,
         realBkpuPercent,
         urgencyRatio,
         sisaHari,

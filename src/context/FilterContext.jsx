@@ -318,6 +318,75 @@ export function FilterProvider({ children }) {
 
   let dataStatus = null;
 
+  // =========================================================
+  // EFFECTIVE REALISASI DATA
+  // FINAL = hanya FINAL
+  // QUICK = FINAL historis + QUICK bulan aktif
+  // =========================================================
+
+  const effectiveRealisasiData = React.useMemo(() => {
+    const sourceData = excelData.db_realisasi || [];
+
+    // MODE FINAL
+    if (dataMode === "FINAL") {
+      return sourceData.filter(
+        (row) =>
+          String(row.status_data || "")
+            .trim()
+            .toUpperCase() === "FINAL",
+      );
+    }
+
+    // MODE QUICK
+    const grouped = {};
+
+    sourceData.forEach((row) => {
+      const key = [row.id_project, row.periode, row.minggu].join("_");
+
+      const status = String(row.status_data || "")
+        .trim()
+        .toUpperCase();
+
+      if (!grouped[key]) {
+        grouped[key] = {
+          final: null,
+          quick: null,
+        };
+      }
+
+      if (status === "FINAL") {
+        grouped[key].final = row;
+      }
+
+      if (status === "QUICK") {
+        grouped[key].quick = row;
+      }
+    });
+
+    console.log("DATA MODE :", dataMode);
+    console.log("SOURCE DATA :", sourceData.length);
+
+    const finalCount = sourceData.filter(
+      (r) => String(r.status_data).toUpperCase() === "FINAL",
+    ).length;
+
+    const quickCount = sourceData.filter(
+      (r) => String(r.status_data).toUpperCase() === "QUICK",
+    ).length;
+
+    console.log("FINAL :", finalCount);
+    console.log("QUICK :", quickCount);
+
+    return Object.values(grouped)
+      .map((item) => item.quick || item.final)
+      .filter(Boolean);
+  }, [excelData.db_realisasi, dataMode]);
+
+  React.useEffect(() => {
+    console.log("REALISASI RAW :", excelData.db_realisasi?.length || 0);
+    console.log("REALISASI EFFECTIVE :", effectiveRealisasiData?.length || 0);
+  }, [excelData.db_realisasi, effectiveRealisasiData]);
+
   // PRIORITAS 1 = QUICK
   const quickRow = periodeAktif?.find(
     (row) => String(row.status_data || "").toUpperCase() === "QUICK",
@@ -352,7 +421,13 @@ export function FilterProvider({ children }) {
         setGlobalFilter,
         dataMode,
         setDataMode,
-        excelData,
+
+        excelData: {
+          ...excelData,
+          db_realisasi: effectiveRealisasiData,
+          db_realisasi_raw: excelData.db_realisasi,
+        },
+
         setExcelData,
         isDataLoading,
         dataStatus,

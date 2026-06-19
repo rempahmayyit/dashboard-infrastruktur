@@ -55,19 +55,19 @@ const Top5WarningPanel = ({ current, top5Data, activeTab }) => {
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col h-full max-h-[400px] overflow-hidden">
       {" "}
       <div className="flex-shrink-0 mb-3 border-b border-slate-100 pb-2">
-        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider text-[#BD002F] flex items-center gap-1.5">
+        <h4 className="text-[16px] font-black text-slate-900 uppercase tracking-wider text-[#BD002F] flex items-center gap-1.5">
           <AlertTriangle size={15} strokeWidth={2.5} />
           {current.title}
         </h4>
-        <p className="text-[10px] text-slate-400 mt-0.5">
-          Peringkat 5 deviasi negatif (YTD s.d bulan terpilih)
+        <p className="text-[14px] text-slate-400 mt-0.5">
+          Peringkat 5 deviasi negatif
         </p>
       </div>
       <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 scrollbar-thin">
         {top5Data.length === 0 && (
           <div className="flex flex-col items-center justify-center h-24 bg-emerald-50 rounded-xl border border-emerald-100">
             <span className="text-[20px] mb-1">🎉</span>
-            <span className="text-xs font-black text-emerald-600 tracking-wide uppercase">
+            <span className="text-[12px] font-black text-emerald-600 tracking-wide uppercase">
               Semua Tercapai!
             </span>
           </div>
@@ -87,12 +87,12 @@ const Top5WarningPanel = ({ current, top5Data, activeTab }) => {
                 className="flex justify-between items-center p-2.5 rounded-xl bg-red-50/60 border border-red-100 hover:bg-red-50 transition-colors"
               >
                 <span
-                  className="text-[11px] font-bold text-slate-700 break-words whitespace-normal pr-2"
+                  className="text-[12px] font-bold text-slate-700 break-words whitespace-normal pr-2"
                   title={item.name}
                 >
                   {item.name}
                 </span>
-                <span className="text-[11px] font-black text-[#BD002F] font-mono tracking-tighter">
+                <span className="text-[12px] font-black text-[#BD002F] font-mono tracking-tighter">
                   {valStr}
                 </span>
               </div>
@@ -118,13 +118,13 @@ const Top5WarningPanel = ({ current, top5Data, activeTab }) => {
                   className={`flex justify-between items-center border-b pb-1.5 ${isOverbudget ? "border-red-100/60" : "border-emerald-100/60"}`}
                 >
                   <span
-                    className="text-[11px] font-black text-slate-800 uppercase break-words whitespace-normal pr-2"
+                    className="text-[12px] font-black text-slate-800 uppercase break-words whitespace-normal pr-2"
                     title={item.name}
                   >
                     {item.name}
                   </span>
                   <span
-                    className={`text-[11px] font-black bg-white px-1.5 py-0.5 rounded shadow-sm border font-mono tracking-tighter ${
+                    className={`text-[12px] font-black bg-white px-1.5 py-0.5 rounded shadow-sm border font-mono tracking-tighter ${
                       isOverbudget
                         ? "text-[#BD002F] border-red-100"
                         : "text-emerald-600 border-emerald-100"
@@ -133,7 +133,7 @@ const Top5WarningPanel = ({ current, top5Data, activeTab }) => {
                     {formatM(item.dev)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-[10px]">
+                <div className="flex justify-between items-center text-[11px]">
                   <span className="text-slate-500 flex items-center gap-1">
                     RKAP:{" "}
                     <span className="font-bold text-slate-700 font-mono">
@@ -205,26 +205,26 @@ export default function FinancialCharts() {
     switch (activeChartTab) {
       case "PU":
         return {
-          name: "PU (Miliar)",
+          name: "PU",
           color: "#000075",
           title: "Top 5 PU Tidak Tercapai",
         };
       case "LK":
         return {
-          name: "Laba Kotor (Miliar)",
+          name: "Laba Kotor",
           color: "#BD002F",
           title: "Top 5 LK Tidak Tercapai",
         };
       case "BKPU":
         return {
-          name: "BK/PU (%)",
+          name: "BK/PU",
           color: "#f97316",
           title: "Top 5 BK/PU (Cost Overrun)",
         };
       case "LB":
         // UBAH JUDUL DI SINI
         return {
-          name: "Laba Bersih (Miliar)",
+          name: "Laba Bersih",
           color: "#059669",
           title: "Rincian Deviasi Beban",
         };
@@ -685,11 +685,11 @@ export default function FinancialCharts() {
       <div className="space-y-4 font-sans mt-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
           <div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-[24px] font-bold text-slate-900">
               Operational Performance
             </h3>
-            <p className="text-slate-400 text-xs">
-              Klik tab untuk mengubah rincian visualisasi data
+            <p className="text-slate-400 text-[11]]">
+              Klik tab untuk mengubah rincian data
             </p>
           </div>
 
@@ -697,25 +697,25 @@ export default function FinancialCharts() {
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1">
               <button
                 onClick={() => setActiveChartTab("PU")}
-                className={`px-3 py-1.5 text-[11px] font-black rounded-lg transition-all ${activeChartTab === "PU" ? "bg-[#000075] text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
+                className={`px-3 py-1.5 text-[12px] font-black rounded-lg transition-all ${activeChartTab === "PU" ? "bg-[#000075] text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
               >
                 PU
               </button>
               <button
                 onClick={() => setActiveChartTab("LK")}
-                className={`px-3 py-1.5 text-[11px] font-black rounded-lg transition-all ${activeChartTab === "LK" ? "bg-[#BD002F] text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
+                className={`px-3 py-1.5 text-[12px] font-black rounded-lg transition-all ${activeChartTab === "LK" ? "bg-[#BD002F] text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
               >
                 Laba Kotor
               </button>
               <button
                 onClick={() => setActiveChartTab("BKPU")}
-                className={`px-3 py-1.5 text-[11px] font-black rounded-lg transition-all ${activeChartTab === "BKPU" ? "bg-orange-500 text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
+                className={`px-3 py-1.5 text-[12px] font-black rounded-lg transition-all ${activeChartTab === "BKPU" ? "bg-orange-500 text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
               >
                 BK/PU
               </button>
               <button
                 onClick={() => setActiveChartTab("LB")}
-                className={`px-3 py-1.5 text-[11px] font-black rounded-lg transition-all ${activeChartTab === "LB" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
+                className={`px-3 py-1.5 text-[12px] font-black rounded-lg transition-all ${activeChartTab === "LB" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-200"}`}
               >
                 Laba Bersih
               </button>
@@ -724,7 +724,7 @@ export default function FinancialCharts() {
             <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1">
               <button
                 onClick={() => setFilterNonJo(!filterNonJo)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black rounded-lg transition-all ${filterNonJo ? "bg-slate-700 text-white shadow-sm" : "text-slate-400 hover:bg-slate-200"}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-black rounded-lg transition-all ${filterNonJo ? "bg-slate-700 text-white shadow-sm" : "text-slate-400 hover:bg-slate-200"}`}
               >
                 <div
                   className={`w-1.5 h-1.5 rounded-full ${filterNonJo ? "bg-green-400" : "bg-slate-400"}`}
@@ -733,7 +733,7 @@ export default function FinancialCharts() {
               </button>
               <button
                 onClick={() => setFilterJoi(!filterJoi)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black rounded-lg transition-all ${filterJoi ? "bg-slate-700 text-white shadow-sm" : "text-slate-400 hover:bg-slate-200"}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-black rounded-lg transition-all ${filterJoi ? "bg-slate-700 text-white shadow-sm" : "text-slate-400 hover:bg-slate-200"}`}
               >
                 <div
                   className={`w-1.5 h-1.5 rounded-full ${filterJoi ? "bg-green-400" : "bg-slate-400"}`}
@@ -748,10 +748,10 @@ export default function FinancialCharts() {
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col overflow-hidden max-h-[400px]">
             <div className="flex justify-between items-start mb-3 flex-shrink-0">
               <div>
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                <h4 className="text-[16px] font-black text-slate-900 uppercase tracking-wider">
                   Kinerja sd. Bulan Ini
                 </h4>
-                <p className="text-[10px] text-slate-400">{`Periode Januari - ${selectedMonthName}`}</p>
+                <p className="text-[14px] text-slate-400">{`Periode Januari - ${selectedMonthName}`}</p>
               </div>
               <button
                 onClick={() => setIsTableOpen(true)}
@@ -767,11 +767,11 @@ export default function FinancialCharts() {
 
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
             <div className="flex-shrink-0">
-              <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                Visualisasi Tren Bulanan
+              <h4 className="text-[16px] font-black text-slate-900 uppercase tracking-wider">
+                Tren Kinerja Bulanan
               </h4>
-              <p className="text-[10px] text-slate-400">
-                Komparasi target vs realisasi
+              <p className="text-[14px] text-slate-400">
+                Komparasi RKAP vs Realisasi
               </p>
             </div>
             <div className="w-full flex-1 pt-4 min-w-0 min-h-[320px]">
@@ -784,11 +784,11 @@ export default function FinancialCharts() {
                   <XAxis
                     dataKey="month"
                     stroke="#94a3b8"
-                    style={{ fontSize: 9 }}
+                    style={{ fontSize: 12 }}
                   />
                   <YAxis
                     stroke="#94a3b8"
-                    style={{ fontSize: 9 }}
+                    style={{ fontSize: 12 }}
                     domain={["auto", "auto"]}
                   />
                   <Tooltip
@@ -810,17 +810,17 @@ export default function FinancialCharts() {
                       fontWeight: "bold",
                       color: "#475569",
                       marginBottom: "4px",
-                      fontSize: "11px",
+                      fontSize: "14px",
                     }}
-                    itemStyle={{ fontSize: "11px", fontWeight: "bold" }}
+                    itemStyle={{ fontSize: "14px", fontWeight: "bold" }}
                   />
-                  <Legend wrapperStyle={{ fontSize: 10, paddingTop: 12 }} />
+                  <Legend wrapperStyle={{ fontSize: 14, paddingTop: 12 }} />
                   <Line
                     type="monotone"
                     dataKey="rencana"
                     stroke="#94a3b8"
                     strokeWidth={1.5}
-                    name="RKAP Tahunan"
+                    name="RKAP"
                     strokeDasharray="5 5"
                   />
                   <Line
@@ -837,7 +837,7 @@ export default function FinancialCharts() {
                       position="top"
                       style={{
                         fill: current.color,
-                        fontSize: 8,
+                        fontSize: 11,
                         fontWeight: "bold",
                       }}
                     />

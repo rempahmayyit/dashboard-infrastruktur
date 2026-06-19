@@ -10,9 +10,9 @@ import {
 } from "../utils/formatters";
 
 export default function FinancialTable({ popupMode = false }) {
-  const textSize = popupMode ? "text-sm" : "text-[10px]";
-  const headerSize = popupMode ? "text-xs" : "text-[9px]";
-  const subHeaderSize = popupMode ? "text-[10px]" : "text-[8px]";
+  const textSize = popupMode ? "text-[48px]" : "text-[12px]";
+  const headerSize = popupMode ? "text-[48px]" : "text-[12px]";
+  const subHeaderSize = popupMode ? "text-[48px]" : "text-[12px]";
 
   const paddingMain = popupMode ? "p-3" : "p-2";
   const paddingSub = popupMode ? "p-2.5" : "p-1.5";

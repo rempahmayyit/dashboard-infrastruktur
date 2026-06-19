@@ -61,13 +61,11 @@ export default function ProjectRiskSummary() {
       );
       const behindSchedule = progRealisasi - progRencana;
 
-      const nilaiKontrak = safeParseNumber(
-        proj.nilai_kontrak || proj.rab || proj.nominal,
-      );
+      
       const realisasiBiaya = safeParseNumber(
         proj.realisasi_biaya || proj.biaya_aktual,
       );
-      const costOverrun = nilaiKontrak - realisasiBiaya;
+      
 
       const sisaProgres = Math.max(0, 100 - progRealisasi);
       const sisaHari = safeParseNumber(proj.sisa_hari || proj.sisa_waktu || 30);

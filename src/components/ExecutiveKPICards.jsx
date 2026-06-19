@@ -41,7 +41,7 @@ const KpiCardMinimalist = ({
       {/* HEADER */}
       <div className="mb-5">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">
+          <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">
             {title}
           </h3>
           {Icon && (
@@ -60,7 +60,7 @@ const KpiCardMinimalist = ({
       <div className="space-y-4">
         {/* YTD */}
         <div>
-          <div className="flex justify-between items-end text-[11px] font-semibold text-slate-700 mb-1.5">
+          <div className="flex justify-between items-end text-sm font-semibold text-slate-700 mb-1.5">
             <span>YTD</span>
             {/* Persentase dibuat 2 digit di belakang koma */}
             <span className={isDeficit ? "text-red-600" : "text-blue-700"}>
@@ -73,7 +73,7 @@ const KpiCardMinimalist = ({
               style={{ width: `${safePersenPeriode}%` }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-medium">
+          <div className="flex justify-between text-sm text-slate-400 mt-1 font-medium">
             {/* Diubah menjadi Ra dan Ri */}
             <span>
               Ra:{" "}
@@ -93,8 +93,8 @@ const KpiCardMinimalist = ({
 
         {/* RKAP */}
         <div>
-          <div className="flex justify-between items-end text-[11px] font-semibold text-slate-700 mb-1.5">
-            <span>RKAP Tahunan</span>
+          <div className="flex justify-between items-end text-sm font-semibold text-slate-700 mb-1.5">
+            <span> RKAP Des. </span>
             <span className="text-slate-800">
               {(persenTahun || 0).toFixed(2)}%
             </span>
@@ -105,9 +105,9 @@ const KpiCardMinimalist = ({
               style={{ width: `${safePersenTahun}%` }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-medium">
+          <div className="flex justify-between text-sm text-slate-400 mt-1 font-medium">
             <span>
-              Ra Tahunan:{" "}
+              RKAP Des. :{" "}
               {isPercentage
                 ? `${(targetTahun || 0).toFixed(2)}%`
                 : formatCompact(targetTahun || 0)}
@@ -133,7 +133,7 @@ const KpiCardCashflow = ({ title, data = {}, icon: Icon, onClick }) => {
       {/* HEADER */}
       <div className="mb-5">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">
+          <h3 className="text-slate-500 text-sm font-bold uppercase tracking-wider">
             {title}
           </h3>
           {Icon && (
@@ -146,7 +146,7 @@ const KpiCardCashflow = ({ title, data = {}, icon: Icon, onClick }) => {
         <p className="text-3xl font-extrabold text-emerald-600 mt-1 tracking-tight">
           {formatCompact(saldoAkhir)}
         </p>
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">
           Saldo Akhir
         </span>
       </div>
@@ -155,10 +155,10 @@ const KpiCardCashflow = ({ title, data = {}, icon: Icon, onClick }) => {
       <div className="space-y-3 pt-1">
         {/* Saldo Awal */}
         <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
-          <span className="text-[10px] font-bold text-slate-500 uppercase">
+          <span className="text-xs font-bold text-slate-500 uppercase">
             Saldo Awal
           </span>
-          <span className="text-xs font-bold text-slate-700">
+          <span className="text-sm font-bold text-slate-700">
             {formatCompact(saldoAwal)}
           </span>
         </div>
@@ -170,7 +170,7 @@ const KpiCardCashflow = ({ title, data = {}, icon: Icon, onClick }) => {
             <div className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 uppercase mb-1">
               <ArrowDownToLine size={10} strokeWidth={3} /> Cash In
             </div>
-            <span className="text-xs font-bold text-emerald-700">
+            <span className="text-sm font-bold text-emerald-700">
               {formatCompact(cashIn)}
             </span>
           </div>
@@ -180,7 +180,7 @@ const KpiCardCashflow = ({ title, data = {}, icon: Icon, onClick }) => {
             <div className="flex items-center gap-1 text-[9px] font-bold text-red-600 uppercase mb-1">
               <ArrowUpFromLine size={10} strokeWidth={3} /> Cash Out
             </div>
-            <span className="text-xs font-bold text-red-700">
+            <span className="text-sm font-bold text-red-700">
               {formatCompact(cashOut)}
             </span>
           </div>

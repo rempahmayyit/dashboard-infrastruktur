@@ -2,8 +2,7 @@ import { supabase } from "./supabase";
 
 export async function getUserProfile(userId) {
   try {
-    console.log("MENCARI USER =", userId);
-
+    
     const { data, error } = await supabase
       .from("user_profiles")
       .select("*")

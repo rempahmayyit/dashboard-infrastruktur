@@ -2,7 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "./lib/supabase";
 import LoginPage from "./LoginPage";
 
+
 // --- Import Halaman Konten ---
+import LandingPage from "./pages/LandingPage";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 //import MonitoringCCTV from "./pages/MonitoringCCTV";
 import PemasaranAnggaran from "./PemasaranAnggaran";
@@ -19,6 +21,8 @@ import PusatData from "./PusatData";
 import ReportDashboard from "./Report/pages/ReportModule";
 import { getUserProfile } from "./lib/userProfile";
 
+import MasterProject from "./PusatData/MasterProject";
+
 // --- Import Komponen Layout ---
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
@@ -34,10 +38,11 @@ import {
   Database,
   Video,
   ShieldAlert,
+  
 } from "lucide-react";
 
 export default function App() {
-  const [activeMenu, setActiveMenu] = useState("Executive Dashboard");
+  const [activeMenu, setActiveMenu] = useState("Portal Infrastruktur");
   const [openMenu, setOpenMenu] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -60,9 +65,18 @@ export default function App() {
     let isMounted = true;
 
     // 1. Cek session tanpa memblokir thread
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (isMounted) {
         setSession(session);
+        if (session?.user?.id) {
+          await supabase
+            .from("user_profiles")
+            .update({
+              last_login: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", session.user.id);
+        }
 
         // KUNCI UTAMA: Langsung matikan loading di sini!
         // Jangan menunggu profil ter-load agar layar tidak stuck.
@@ -85,11 +99,18 @@ export default function App() {
       setSession(session);
 
       if (event === "SIGNED_IN" && session?.user?.id) {
+        // Update last login
+        supabase
+          .from("user_profiles")
+          .update({
+            last_login: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", session.user.id);
+
         getUserProfile(session.user.id).then((profileData) => {
           if (isMounted) setProfile(profileData || null);
         });
-      } else if (event === "SIGNED_OUT") {
-        if (isMounted) setProfile(null);
       }
     });
 
@@ -156,6 +177,10 @@ export default function App() {
   }, [session]);
 
   const allMenus = [
+    {
+      name: "Portal Infrastruktur",
+      icon: LayoutDashboard,
+    },
     { name: "Executive Dashboard", icon: LayoutDashboard },
 
     {
@@ -214,6 +239,12 @@ export default function App() {
     },
 
     {
+      name: "Master Project",
+      icon: Database,
+      roles: ["admin", "super_admin"],
+    },
+
+    {
       name: "Laporan Manajemen",
       icon: BarChart3,
       roles: ["admin", "super_admin"],
@@ -226,6 +257,10 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeMenu) {
+      case "Portal Infrastruktur":
+        return (
+          <LandingPage setActiveMenu={setActiveMenu} userName={userName} />
+        );
       case "Executive Dashboard":
         return <ExecutiveDashboard />;
       case "Pemasaran & Anggaran":
@@ -256,6 +291,8 @@ export default function App() {
             Form Pemasaran & Anggaran belum tersedia
           </div>
         );
+      case "Master Project":
+        return <MasterProject />;
       case "Laporan Manajemen":
         return <ReportDashboard />;
       default:
@@ -327,13 +364,21 @@ export default function App() {
       />
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden print:block">
-        <Topbar
-          isCollapsed={isCollapsed}
-          setIsCollapsed={setIsCollapsed}
-          activeMenu={activeMenu}
-        />
+        {activeMenu !== "Portal Infrastruktur" && (
+          <Topbar
+            isCollapsed={isCollapsed}
+            setIsCollapsed={setIsCollapsed}
+            activeMenu={activeMenu}
+          />
+        )}
 
-        <div className="flex-1 overflow-y-auto p-8">{renderContent()}</div>
+        <div
+          className={`flex-1 overflow-y-auto ${
+            activeMenu === "Portal Infrastruktur" ? "p-0" : "p-8"
+          }`}
+        >
+          {renderContent()}
+        </div>
       </div>
 
       {showIdleWarning && (

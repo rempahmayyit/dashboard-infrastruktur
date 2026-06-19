@@ -174,45 +174,45 @@ export default function ExecutiveDashboard() {
         <div className="w-full lg:w-[45%] bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+              <h2 className="text-[24px] font-bold text-slate-900 tracking-tight">
                 Commercial Performance
               </h2>
-              <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-lg text-[10px] font-bold">
+              <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-lg text-[12px] font-bold">
                 RKAP: {formatPercent(progresRkapKumulatif)}
               </span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
               <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-200/60 text-center flex flex-col justify-center">
-                <p className="text-slate-500 text-[9px] font-bold uppercase tracking-wider">
+                <p className="text-slate-500 text-[12px] font-bold uppercase tracking-wider">
                   RKAP Des '{String(globalFilter?.tahun || "").slice(-2)}
                 </p>
-                <h3 className="text-sm font-black text-slate-900 mt-1 truncate">
+                <h3 className="text-[20px] font-black text-slate-900 mt-1 truncate">
                   {formatMiliar(totalRkapTahunan)}
                 </h3>
               </div>
               <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-200/60 text-center flex flex-col justify-center">
-                <p className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">
-                  Target s.d {selectedMonthLabelCaps}
+                <p className="text-slate-400 text-[12px] font-bold uppercase tracking-wider">
+                  RKAP s.d {selectedMonthLabelCaps}
                 </p>
-                <h3 className="text-sm font-black text-[#000075] mt-1 truncate">
+                <h3 className="text-[20px]] font-black text-[#000075] mt-1 truncate">
                   {formatMiliar(targetSdBulanIni)}
                 </h3>
               </div>
               <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-200/60 text-center flex flex-col justify-center">
-                <p className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">
+                <p className="text-slate-400 text-[12px] font-bold uppercase tracking-wider">
                   Real s.d {selectedMonthLabelCaps}
                 </p>
-                <h3 className="text-sm font-black text-emerald-600 mt-1 truncate">
+                <h3 className="text-[20px]] font-black text-emerald-600 mt-1 truncate">
                   {pemasaranLoading ? "..." : formatMiliar(totalRealisasiA0, 1)}
                 </h3>
               </div>
 
               <div className="bg-blue-50/50 rounded-xl p-2.5 border border-blue-100 text-center flex flex-col justify-center">
-                <p className="text-blue-500 text-[9px] font-bold uppercase tracking-wider">
+                <p className="text-blue-500 text-[12px] font-bold uppercase tracking-wider">
                   Prognosa '{String(globalFilter?.tahun || "").slice(-2)}
                 </p>
-                <h3 className="text-sm font-black text-blue-700 mt-1 truncate">
+                <h3 className="text-[20px]] font-black text-blue-700 mt-1 truncate">
                   {pemasaranLoading ? "..." : formatMiliar(totalPrognosa, 1)}
                 </h3>
               </div>
@@ -222,7 +222,7 @@ export default function ExecutiveDashboard() {
           <div className="flex flex-col gap-3">
             {/* BAR 1: RKAP */}
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/40">
-              <div className="flex justify-between mb-1 text-[11px] font-semibold text-slate-600">
+              <div className="flex justify-between mb-1 text-[14px] font-semibold text-slate-600">
                 <span>Progres Kumulatif Realisasi terhadap RKAP</span>
                 <span className="font-black text-slate-800">
                   {formatPercent(progresRkapKumulatif)}
@@ -235,7 +235,7 @@ export default function ExecutiveDashboard() {
                 ></div>
               </div>
               <p
-                className={`text-[10px] font-bold mt-1.5 flex items-center gap-1 ${deviasiRkap < 0 ? "text-[#BD002F]" : "text-emerald-600"}`}
+                className={`text-[12px] font-bold mt-1.5 flex items-center gap-1 ${deviasiRkap < 0 ? "text-[#BD002F]" : "text-emerald-600"}`}
               >
                 {deviasiRkap < 0 ? <AlertCircle size={12} /> : <CheckCircle2 size={12} />}
                 {deviasiRkap < 0 ? "Deviasi Negatif" : "Surplus"} terhadap
@@ -245,7 +245,7 @@ export default function ExecutiveDashboard() {
 
             {/* BAR 2: PROGNOSA */}
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/40">
-              <div className="flex justify-between mb-1 text-[11px] font-semibold text-slate-600">
+              <div className="flex justify-between mb-1 text-[14px] font-semibold text-slate-600">
                 <span>
                   Progres Pencapaian terhadap Prognosa '{String(globalFilter?.tahun || "").slice(-2)}
                 </span>
@@ -259,7 +259,7 @@ export default function ExecutiveDashboard() {
                   style={{ width: `${Math.min(progresPrognosa, 100)}%` }}
                 ></div>
               </div>
-              <p className="text-[10px] text-slate-500 font-medium mt-1.5 flex items-center gap-1">
+              <p className="text-[12px] text-slate-500 font-medium mt-1.5 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                 Sisa Target Prognosa:{" "}
                 <span className="font-bold">{formatMiliar(sisaPrognosa)}</span>
@@ -274,7 +274,7 @@ export default function ExecutiveDashboard() {
             <div className="bg-slate-50 p-2.5 border-b border-slate-200 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <ListOrdered size={14} className="text-[#000075]" />
-                <span className="text-xs font-bold text-slate-800 uppercase tracking-wide truncate">
+                <span className="text-sm font-bold text-slate-800 uppercase tracking-wide truncate">
                   Breakdown Log Realisasi Perolehan & Prognosa NKB {globalFilter?.tahun || 2026}
                 </span>
               </div>
@@ -282,7 +282,7 @@ export default function ExecutiveDashboard() {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="text-[10px] font-bold border border-slate-200 rounded-md py-1 px-2 text-slate-700 bg-white shadow-sm focus:outline-none focus:border-[#000075] focus:ring-1 focus:ring-[#000075] cursor-pointer"
+                className="text-[12px] font-bold border border-slate-200 rounded-md py-1 px-2 text-slate-700 bg-white shadow-sm focus:outline-none focus:border-[#000075] focus:ring-1 focus:ring-[#000075] cursor-pointer"
               >
                 <option value="A0">A0</option>
                 <option value="A1">A1</option>
@@ -293,11 +293,11 @@ export default function ExecutiveDashboard() {
             </div>
 
             <div className="overflow-y-auto max-h-[220px] flex-1 scrollbar-thin">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full text-left text-[12px] border-collapse">
                 <thead className="bg-slate-100 text-slate-500 font-semibold sticky top-0 border-b border-slate-200 shadow-sm backdrop-blur-sm z-10">
                   <tr>
                     <th className="p-2.5 text-center w-[50%]">Nama Paket</th>
-                    <th className="p-2.5 text-center w-[15%] max-w-[70px]">Owner</th>
+                    <th className="p-2.5 text-center w-[15%]">Owner</th>
                     <th className="p-2.5 text-center w-[20%]">Nilai</th>
                     <th className="p-2.5 text-center w-[15%]">Bulan</th>
                   </tr>
@@ -305,13 +305,13 @@ export default function ExecutiveDashboard() {
                 <tbody className="divide-y divide-slate-100">
                   {pemasaranLoading ? (
                     <tr>
-                      <td colSpan="4" className="p-4 text-center text-xs text-slate-500 animate-pulse">
+                      <td colSpan="4" className="p-4 text-center text-[12px] text-slate-500 animate-pulse">
                         Memuat data...
                       </td>
                     </tr>
                   ) : filteredPipeline.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="p-4 text-center text-xs text-slate-500">
+                      <td colSpan="4" className="p-4 text-center text-[12px] text-slate-500">
                         Belum ada data (Status {selectedStatus}).
                       </td>
                     </tr>
@@ -321,7 +321,7 @@ export default function ExecutiveDashboard() {
                         <td className="p-2.5 pl-4 font-bold text-slate-800 whitespace-normal break-words">
                           {proj.paket}
                         </td>
-                        <td className="p-2.5 text-slate-600 text-center font-medium text-[11px] whitespace-normal break-words min-w-[50px] max-w-[70px]">
+                        <td className="p-2.5 text-slate-600 text-center font-medium text-[12px] whitespace-normal break-words min-w-[50px] max-w-[70px]">
                           {proj.owner}
                         </td>
                         <td className="p-2.5 text-center font-black text-emerald-600 whitespace-nowrap align-top pt-3">

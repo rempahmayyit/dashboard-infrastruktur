@@ -20,10 +20,10 @@ export default function MonitoringTables({
           <div className="flex items-center gap-2">
             <Clock className="text-[#BD002F]" size={18} />
             <div>
-              <h3 className="text-sm font-black text-slate-900">
+              <h3 className="text-[16px] font-black text-slate-900">
                 TIME OVERRUN
               </h3>
-              <p className="text-[10px] font-bold text-slate-400">
+              <p className="text-[12px] font-bold text-slate-400">
                 Rasio Kasus: {pureTimeOverrunProjects.length}/{totalProject}{" "}
                 Proyek
               </p>
@@ -75,7 +75,7 @@ export default function MonitoringTables({
                 <th className="p-2 text-center w-[16%] align-middle leading-tight">
                   Prog.
                   <br />
-                  <span className="text-[10px] font-normal text-teal-100">
+                  <span className="text-[11px] font-normal text-teal-100">
                     (%)
                   </span>
                 </th>
@@ -87,7 +87,7 @@ export default function MonitoringTables({
                 <th className="p-2 text-center w-[18%] align-middle pr-2 leading-tight">
                   Remain.
                   <br />
-                  <span className="text-[10px] font-normal text-teal-100">
+                  <span className="text-[11px] font-normal text-teal-100">
                     (day)
                   </span>
                 </th>
@@ -95,7 +95,7 @@ export default function MonitoringTables({
             </thead>
 
             <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
-              <tr className="bg-slate-50 text-slate-500 text-[10px] font-black">
+              <tr className="bg-slate-50 text-slate-500 text-[11px] font-black">
                 <td colSpan="4" className="p-2 pl-3 uppercase">
                   Time Overrun
                 </td>
@@ -126,7 +126,7 @@ export default function MonitoringTables({
                 </tr>
               ))}
 
-              <tr className="bg-slate-50 text-slate-500 text-[10px] font-black">
+              <tr className="bg-slate-50 text-slate-500 text-[11px] font-black">
                 <td colSpan="4" className="p-2 pl-3 uppercase">
                   Almost Overrun
                 </td>
@@ -160,10 +160,10 @@ export default function MonitoringTables({
           <div className="flex items-center gap-2">
             <Activity className="text-orange-600" size={18} />
             <div>
-              <h3 className="text-sm font-black text-slate-900">
+              <h3 className="text-[16px] font-black text-slate-900">
                 BEHIND SCHEDULE
               </h3>
-              <p className="text-[10px] font-bold text-slate-400">
+              <p className="text-[12px] font-bold text-slate-400">
                 Rasio Kasus: {behindScheduleProjects.length}/{totalProject}{" "}
                 Proyek
               </p>
@@ -274,10 +274,10 @@ export default function MonitoringTables({
           <div className="flex items-center gap-2">
             <TrendingDown className="text-[#000075]" size={18} />
             <div>
-              <h3 className="text-sm font-black text-slate-900">
+              <h3 className="text-[16px] font-black text-slate-900">
                 BK/PU &gt; MAPP
               </h3>
-              <p className="text-[10px] font-bold text-slate-400">
+              <p className="text-[12px] font-bold text-slate-400">
                 Rasio Kasus: {bkpuMappProjects.length}/{totalProject} Proyek
               </p>
             </div>
@@ -346,7 +346,7 @@ export default function MonitoringTables({
                   </span>
                 </th>
 
-                <th className="p-2 text-center w-[15%] align-middle leading-tight">
+                <th className="p-2 text-center w-[20%] align-middle leading-tight">
                   MAPP
                   <br />
                   <span className="text-[10px] font-normal text-blue-200">

@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   PlayCircle,
   Info,
+  Maximize2,
 } from "lucide-react";
 
 const geoUrl = "/indonesia.json";
@@ -67,6 +68,8 @@ export default function ProjectMap() {
   // State untuk menyimpan data proyek yang sedang diklik (Panel Kanan)
   const [activeProject, setActiveProject] = useState(null);
   const [activeVideo, setActiveVideo] = useState(null);
+  const [activeCCTV, setActiveCCTV] = useState(null);
+  const [detailModal, setDetailModal] = useState(null);
 
   const [position, setPosition] = useState({ coordinates: [118, -2], zoom: 1 });
 
@@ -94,17 +97,35 @@ export default function ProjectMap() {
           const projectId =
             item?.id_project || item?.id_proyect || item?.id_proyek;
 
+          console.log("MASTER", projectId, item.nama_proyek_current);
+
+          console.log("REALISASI SAMPLE", excelData?.db_realisasi?.slice(0, 5));
+
+          // --- KODE DENGAN LOGIKA PRIORITAS: TERBARU & FINAL ---
           const latestRealisasi = (excelData?.db_realisasi || [])
             .filter((r) => {
+              // 1. Pastikan ID Proyeknya cocok
               const rid = r?.id_project || r?.id_proyect || r?.id_proyek;
-
-              const statusMatch =
-                String(r?.status_data || "").toUpperCase() ===
-                String(dataMode || "QUICK").toUpperCase();
-
-              return String(rid) === String(projectId) && statusMatch;
+              return String(rid) === String(projectId);
             })
-            .sort((a, b) => new Date(b.periode) - new Date(a.periode))[0];
+            .sort((a, b) => {
+              // 2. Urutkan berdasarkan Tanggal / Periode (Terbaru di atas)
+              const dateA = new Date(a.periode || 0).getTime();
+              const dateB = new Date(b.periode || 0).getTime();
+
+              if (dateB !== dateA) {
+                return dateB - dateA; // Descending
+              }
+
+              // 3. Jika tanggalnya SAMA, cek statusnya. Prioritaskan "FINAL"
+              const statusA = String(a.status_data || "").toUpperCase();
+              const statusB = String(b.status_data || "").toUpperCase();
+
+              if (statusA === "FINAL" && statusB !== "FINAL") return -1; // A naik ke atas
+              if (statusB === "FINAL" && statusA !== "FINAL") return 1; // B naik ke atas
+
+              return 0; // Jika sama-sama Quick atau sama-sama Final, biarkan
+            })[0]; // Ambil data urutan ke-1 (paling atas/paling prioritas)
 
           const latestKendala = kendalaData
             .filter((k) => String(k.id_project) === String(projectId))
@@ -112,6 +133,8 @@ export default function ProjectMap() {
 
           const ri = safeParseNumber(latestRealisasi?.prog_real || 0);
           const ra = safeParseNumber(latestRealisasi?.progres_scurve || 0);
+          console.log("PROJECT", projectId);
+          console.log("REALISASI", latestRealisasi);
 
           const isOnGoing =
             rawStatus.includes("ON GOING") ||
@@ -181,6 +204,9 @@ export default function ProjectMap() {
             status: isBehind ? "Critical" : "On Going",
             gap: isBehind ? "Behind Schedule" : "Normal",
             link_drone: item?.link_drone || null,
+            cctv_channel1: item?.cctv_channel1 || null,
+            cctv_channel2: item?.cctv_channel2 || null,
+            cctv_ptz: item?.cctv_ptz || false,
             // Data Keuangan & Progres (Real Data)
             nk: nk,
             ra: ra,
@@ -534,15 +560,32 @@ export default function ProjectMap() {
               {/* C. Area Kendala (Dirender jika ada masalah deviasi) */}
               {activeProject.deviasi < 0 && (
                 <div className="bg-red-50 p-4 rounded-xl border border-red-200/60 h-32 flex flex-col">
-                  <div className="flex items-center gap-1.5 mb-2.5">
-                    <AlertTriangle size={14} className="text-red-600" />
-                    <h5 className="text-[11px] font-black text-red-800 uppercase tracking-wide">
-                      Penyebab Keterlambatan
-                    </h5>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-1.5">
+                      <AlertTriangle size={14} className="text-red-600" />
+
+                      <h5 className="text-[12px] font-black text-red-800 uppercase tracking-wide">
+                        Penyebab Keterlambatan
+                      </h5>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        setDetailModal({
+                          title: "PENYEBAB KETERLAMBATAN",
+                          content: activeProject.kendalaProgres || "-",
+                          color: "red",
+                        })
+                      }
+                      className="text-red-600 hover:text-red-800"
+                      title="Perbesar"
+                    >
+                      <Maximize2 size={14} />
+                    </button>
                   </div>
 
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <p className="text-[10.5px] text-red-700 font-medium leading-relaxed">
+                    <p className="text-[12px] text-red-700 font-medium leading-relaxed">
                       {activeProject.kendalaProgres || "-"}
                     </p>
                   </div>
@@ -551,15 +594,32 @@ export default function ProjectMap() {
 
               {activeProject.kendalaBkpu && (
                 <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 h-32 flex flex-col">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle size={14} className="text-amber-600" />
-                    <h5 className="text-[11px] font-black text-amber-800 uppercase">
-                      Penyebab BK/PU di Atas MAPP
-                    </h5>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle size={14} className="text-amber-600" />
+
+                      <h5 className="text-[12px] font-black text-amber-800 uppercase">
+                        Penyebab BK/PU di Atas MAPP
+                      </h5>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        setDetailModal({
+                          title: "PENYEBAB BK/PU DI ATAS MAPP",
+                          content: activeProject.kendalaBkpu || "-",
+                          color: "amber",
+                        })
+                      }
+                      className="text-amber-600 hover:text-amber-800"
+                      title="Perbesar"
+                    >
+                      <Maximize2 size={14} />
+                    </button>
                   </div>
 
                   <div className="flex-1 overflow-y-auto pr-2">
-                    <p className="text-[10.5px] text-amber-700 leading-relaxed">
+                    <p className="text-[12px] text-amber-700 leading-relaxed">
                       {activeProject.kendalaBkpu || "-"}
                     </p>
                   </div>
@@ -573,9 +633,8 @@ export default function ProjectMap() {
                     size={14}
                     className="text-emerald-600 shrink-0 mt-0.5"
                   />
-                  <p className="text-[10.5px] text-emerald-700 font-medium leading-relaxed">
-                    Proyek berjalan sesuai dengan kurva S (On Track). Tidak
-                    terdeteksi deviasi negatif yang signifikan.
+                  <p className="text-[12px] text-emerald-700 font-medium leading-relaxed">
+                    -
                   </p>
                 </div>
               )}
@@ -585,35 +644,74 @@ export default function ProjectMap() {
 
         {/* Footer: Action Button untuk Drone */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
-          <button
-            disabled={
-              !activeProject ||
-              !activeProject.link_drone ||
-              activeProject.link_drone === "-"
-            }
-            onClick={() => setActiveVideo(activeProject)}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[11px] font-bold transition-all shadow-sm
-              ${
+          <div className="grid grid-cols-2 gap-2">
+            {/* DRONE */}
+            <button
+              disabled={
                 !activeProject ||
                 !activeProject.link_drone ||
                 activeProject.link_drone === "-"
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                  : "bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/20 active:scale-[0.98]"
               }
-            `}
-          >
-            {!activeProject ||
-            !activeProject.link_drone ||
-            activeProject.link_drone === "-" ? (
-              <>Video Drone Tidak Tersedia</>
-            ) : (
-              <>
-                <PlayCircle size={16} /> Putar Video Drone Proyek
-              </>
-            )}
-          </button>
+              onClick={() => setActiveVideo(activeProject)}
+              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all
+        ${
+          !activeProject ||
+          !activeProject.link_drone ||
+          activeProject.link_drone === "-"
+            ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+            : "bg-slate-900 text-white hover:bg-slate-800"
+        }
+      `}
+            >
+              <PlayCircle size={15} />
+              Drone
+            </button>
+
+            {/* CCTV */}
+            <button
+              disabled={
+                !activeProject ||
+                (!activeProject.cctv_channel1 && !activeProject.cctv_channel2)
+              }
+              onClick={() => setActiveCCTV(activeProject)}
+              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all
+        ${
+          !activeProject ||
+          (!activeProject.cctv_channel1 && !activeProject.cctv_channel2)
+            ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+            : "bg-blue-700 text-white hover:bg-blue-800"
+        }
+      `}
+            >
+              <Video size={15} />
+              CCTV
+            </button>
+          </div>
         </div>
       </div>
+
+      {detailModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl w-full max-w-5xl h-[80vh] shadow-2xl flex flex-col">
+            <div className="flex justify-between items-center p-5 border-b">
+              <h3 className="font-black text-lg">{detailModal.title}</h3>
+
+              <button
+                onClick={() => setDetailModal(null)}
+                className="w-8 h-8 rounded-lg bg-red-50 text-red-600 hover:bg-red-500 hover:text-white flex items-center justify-center"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="whitespace-pre-wrap text-base leading-relaxed text-slate-700">
+                {detailModal.content}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ====================================================================== */}
       {/* MODAL POPUP VIDEO DRONE */}
@@ -647,6 +745,48 @@ export default function ProjectMap() {
                 allow="autoplay; fullscreen"
                 allowFullScreen
               />
+            </div>
+          </div>
+        </div>
+      )}
+      {activeCCTV && (
+        <div className="fixed inset-0 z-[9999] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl">
+            <div className="flex justify-between items-center px-5 py-4 border-b">
+              <div>
+                <h3 className="font-black text-slate-800">CCTV Monitoring</h3>
+
+                <p className="text-xs text-slate-500">{activeCCTV.name}</p>
+              </div>
+
+              <button
+                onClick={() => setActiveCCTV(null)}
+                className="w-8 h-8 rounded-lg bg-red-50 text-red-600"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {activeCCTV.cctv_channel1 && (
+                <div className="border rounded-xl p-4">
+                  <div className="font-bold text-sm mb-2">Kamera Belakang</div>
+
+                  <div className="text-xs text-slate-500 break-all">
+                    {activeCCTV.cctv_channel1}
+                  </div>
+                </div>
+              )}
+
+              {activeCCTV.cctv_channel2 && (
+                <div className="border rounded-xl p-4">
+                  <div className="font-bold text-sm mb-2">Kamera PTZ</div>
+
+                  <div className="text-xs text-slate-500 break-all">
+                    {activeCCTV.cctv_channel2}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

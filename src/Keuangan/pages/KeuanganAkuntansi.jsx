@@ -1,18 +1,24 @@
 import React, { useState } from "react";
-import { Wallet, TrendingUp, Activity, Building2, Layers } from "lucide-react";
+import { Wallet, TrendingUp, Activity, Building2, Layers, Loader2 } from "lucide-react";
+
+// 1. IMPORT CUSTOM HOOK (Sesuaikan path-nya jika beda folder)
+// Asumsi: useKeuanganData.js ada di dalam folder yang sama, atau sesuaikan menjadi "../hooks/useKeuanganData"
+import useKeuanganData from "../../hooks/useKeuanganData"; 
 
 // Import Components
 import CashFlowResume from "../components/CashFlowResume";
 import KomitmenTermin from "../components/KomitmenTermin";
 import AgingChart from "../components/AgingChart";
-import DetailCashFlow from "../components/DetailCashFlow";
 import ModalKerjaNwc from "../components/ModalKerjaNwc";
-import PiutangKategori from "../components/PiutangKategori"; // IMPORT BARU
-
-
+import PiutangKategori from "../components/PiutangKategori"; 
+// 2. IMPORT TABEL BARU (Ganti DetailCashFlow)
+import DetailPiutangTable from "../components/DetailPiutangTable"; 
 
 export default function KeuanganAkuntansi() {
   const [activeTab, setActiveTab] = useState("cashflow");
+  
+  // 3. WAJIB PANGGIL HOOK-NYA DI SINI
+  const { chartData, detailData, loading } = useKeuanganData();
 
   return (
     <div className="space-y-6 animate-fadeIn font-sans relative">
@@ -46,7 +52,7 @@ export default function KeuanganAkuntansi() {
         </div>
       </div>
 
-      {/* 2. TAB NAVIGATION (DITAMBAHKAN TAB KETIGA) */}
+      {/* 2. TAB NAVIGATION */}
       <div className="flex gap-4 border-b-2 border-slate-200 pb-px">
         <button
           onClick={() => setActiveTab("cashflow")}
@@ -66,7 +72,6 @@ export default function KeuanganAkuntansi() {
           <Activity size={18} />
           Modal Kerja (NWC)
         </button>
-        {/* TOMBOL TAB BARU DI SEBELAH POSISI AKHIR (NWC) */}
         <button
           onClick={() => setActiveTab("piutang_kat")}
           className={`pb-3 px-2 text-sm font-bold uppercase tracking-wide flex items-center gap-2 transition-all duration-300 border-b-2 ${
@@ -86,8 +91,19 @@ export default function KeuanganAkuntansi() {
               <div className="w-full xl:w-[40%]"><CashFlowResume /></div>
               <div className="w-full xl:w-[60%]"><KomitmenTermin /></div>
             </div>
-            <AgingChart />
-            <DetailCashFlow />
+            
+            {/* 4. TAMPILKAN GRAFIK & TABEL BERDASARKAN STATUS LOADING */}
+            {loading ? (
+              <div className="h-64 flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200 shadow-sm mt-6">
+                <Loader2 className="animate-spin text-[#000075] mb-3" size={32} />
+                <span className="text-slate-500 font-medium">Memuat data piutang dari Supabase...</span>
+              </div>
+            ) : (
+              <>
+                <AgingChart chartData={chartData} detailData={detailData} />
+                <DetailPiutangTable detailData={detailData} />
+              </>
+            )}
           </div>
         )}
         
@@ -97,14 +113,12 @@ export default function KeuanganAkuntansi() {
           </div>
         )}
 
-        {/* LOGIKA MERENDER TAB ANALISIS PIUTANG KATEGORI */}
         {activeTab === "piutang_kat" && (
           <div className="animate-fadeIn">
             <PiutangKategori />
           </div>
         )}
       </div>
-
       
     </div>
   );

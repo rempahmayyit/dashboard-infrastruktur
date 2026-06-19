@@ -182,3 +182,17 @@
     border-right-color: var(--border);
   }
 }
+
+@keyframes slowZoom {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.animate-slowZoom {
+  animation: slowZoom 30s ease-in-out infinite alternate;
+}
