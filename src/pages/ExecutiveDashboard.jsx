@@ -3,19 +3,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 import { formatPercent, formatMiliar } from "../utils/formatters";
-import ProjectMap from "../ProjectMap";
 import FinancialCharts from "../FinancialCharts";
 import CashFlowSummary from "../components/CashFlowSummary";
 import ProjectRiskDashboard from "../ProjectRiskDashboard/pages/ProjectRiskDashboard";
 import ExecutiveKPICards from "../components/ExecutiveKPICards";
-import {
-  AlertCircle,
-  ListOrdered,
-  CheckCircle2,
-} from "lucide-react";
+import { AlertCircle, ListOrdered, CheckCircle2 } from "lucide-react";
 
 import { usePemasaranData } from "../hooks/usePemasaranData";
-import { usePengendalianData } from "../hooks/usePengendalianData"; 
+import { usePengendalianData } from "../hooks/usePengendalianData";
 import { useFilter } from "../context/FilterContext";
 
 const safeParseNumber = (val) => {
@@ -32,16 +27,32 @@ export default function ExecutiveDashboard() {
 
   const {
     marketingPipeline,
-    totalRealisasiA0, 
-    totalPrognosa,    
+    totalRealisasiA0,
+    totalPrognosa,
     loading: pemasaranLoading,
   } = usePemasaranData();
 
-  const pengendalian = usePengendalianData(); 
-  const { kpiData } = pengendalian; 
+  const pengendalian = usePengendalianData();
+  const { kpiData } = pengendalian;
 
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-  const selectedMonthNum = monthNames.findIndex((m) => m.toLowerCase() === globalFilter?.bulan?.toLowerCase()) + 1;
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+  ];
+  const selectedMonthNum =
+    monthNames.findIndex(
+      (m) => m.toLowerCase() === globalFilter?.bulan?.toLowerCase(),
+    ) + 1;
   const selectedYear = safeParseNumber(globalFilter?.tahun || 2026);
   const selectedMonthLabelFull = globalFilter?.bulan || "Jan";
   const selectedMonthLabelCaps = selectedMonthLabelFull.toUpperCase();
@@ -52,17 +63,33 @@ export default function ExecutiveDashboard() {
     let targetKumulatif = 0;
 
     rawRkapData.forEach((item) => {
-      const nilaiEstimasi = safeParseNumber(item.estimasi_nilai) / 1_000_000_000;
+      const nilaiEstimasi =
+        safeParseNumber(item.estimasi_nilai) / 1_000_000_000;
       rkapTotal += nilaiEstimasi;
 
       let itemMonth = 0;
-      const monthStr = String(item.bulan_perolehan || item.periode || "").toLowerCase().trim();
+      const monthStr = String(item.bulan_perolehan || item.periode || "")
+        .toLowerCase()
+        .trim();
       const parsedMonth = parseInt(monthStr, 10);
-      
+
       if (!isNaN(parsedMonth) && parsedMonth >= 1 && parsedMonth <= 12) {
         itemMonth = parsedMonth;
       } else {
-        const arrayBulan = ["jan", "feb", "mar", "apr", "mei", "jun", "jul", "agu", "sep", "okt", "nov", "des"];
+        const arrayBulan = [
+          "jan",
+          "feb",
+          "mar",
+          "apr",
+          "mei",
+          "jun",
+          "jul",
+          "agu",
+          "sep",
+          "okt",
+          "nov",
+          "des",
+        ];
         const indexM = arrayBulan.findIndex((b) => monthStr.startsWith(b));
         if (indexM !== -1) itemMonth = indexM + 1;
       }
@@ -75,20 +102,26 @@ export default function ExecutiveDashboard() {
     return { totalRkapTahunan: rkapTotal, targetSdBulanIni: targetKumulatif };
   }, [excelData, selectedMonthNum]);
 
-  const progresRkapKumulatif = totalRkapTahunan > 0 ? (totalRealisasiA0 / totalRkapTahunan) * 100 : 0;
+  const progresRkapKumulatif =
+    totalRkapTahunan > 0 ? (totalRealisasiA0 / totalRkapTahunan) * 100 : 0;
   const deviasiRkap = totalRealisasiA0 - targetSdBulanIni;
-  const progresPrognosa = totalPrognosa > 0 ? (totalRealisasiA0 / totalPrognosa) * 100 : 0;
+  const progresPrognosa =
+    totalPrognosa > 0 ? (totalRealisasiA0 / totalPrognosa) * 100 : 0;
   const sisaPrognosa = Math.max(0, totalPrognosa - totalRealisasiA0);
 
-  const filteredPipeline = marketingPipeline.filter((proj) => proj.status === selectedStatus);
+  const filteredPipeline = marketingPipeline.filter(
+    (proj) => proj.status === selectedStatus,
+  );
 
   const dynamicNkbData = {
     mainValue: totalRealisasiA0 * 1_000_000_000,
     targetPeriode: targetSdBulanIni * 1_000_000_000,
     realPeriode: totalRealisasiA0 * 1_000_000_000,
-    persenPeriode: targetSdBulanIni > 0 ? (totalRealisasiA0 / targetSdBulanIni) * 100 : 0,
+    persenPeriode:
+      targetSdBulanIni > 0 ? (totalRealisasiA0 / targetSdBulanIni) * 100 : 0,
     targetTahun: totalRkapTahunan * 1_000_000_000,
-    persenTahun: totalRkapTahunan > 0 ? (totalRealisasiA0 / totalRkapTahunan) * 100 : 0,
+    persenTahun:
+      totalRkapTahunan > 0 ? (totalRealisasiA0 / totalRkapTahunan) * 100 : 0,
   };
 
   const realGpm = 100 - (kpiData?.bkpu?.realPeriode || 0);
@@ -99,9 +132,9 @@ export default function ExecutiveDashboard() {
     mainValue: realGpm,
     targetPeriode: targetGpmPeriode,
     realPeriode: realGpm,
-    persenPeriode: targetGpmPeriode > 0 ? (realGpm / targetGpmPeriode) : 0,
+    persenPeriode: targetGpmPeriode > 0 ? realGpm / targetGpmPeriode : 0,
     targetTahun: targetGpmTahun,
-    persenTahun: targetGpmTahun > 0 ? (realGpm / targetGpmTahun) : 0,
+    persenTahun: targetGpmTahun > 0 ? realGpm / targetGpmTahun : 0,
   };
 
   const dynamicKpiData = {
@@ -118,22 +151,42 @@ export default function ExecutiveDashboard() {
     let cashOut = 0;
 
     // Array referensi untuk mengubah teks bulan menjadi angka (1-12)
-    const arrayBulan = ["jan", "feb", "mar", "apr", "mei", "jun", "jul", "agu", "sep", "okt", "nov", "des"];
+    const arrayBulan = [
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "mei",
+      "jun",
+      "jul",
+      "agu",
+      "sep",
+      "okt",
+      "nov",
+      "des",
+    ];
 
     // 1. Ekstrak dan filter data yang tahun dan bulannya valid (<= bulan yang dipilih)
-    const validRows = rawCashflow.map(row => {
-      let rowYear = safeParseNumber(row.tahun);
-      let rowMonth = 0;
-      
-      // Deteksi angka bulan dari teks (misal: "Jan" -> 1, "Apr" -> 4)
-      if (row.bulan) {
-        const monthStr = String(row.bulan).toLowerCase().trim();
-        const indexM = arrayBulan.findIndex((b) => monthStr.startsWith(b));
-        if (indexM !== -1) rowMonth = indexM + 1;
-      }
-      
-      return { ...row, rowYear, rowMonth };
-    }).filter(r => r.rowYear === selectedYear && r.rowMonth > 0 && r.rowMonth <= selectedMonthNum);
+    const validRows = rawCashflow
+      .map((row) => {
+        let rowYear = safeParseNumber(row.tahun);
+        let rowMonth = 0;
+
+        // Deteksi angka bulan dari teks (misal: "Jan" -> 1, "Apr" -> 4)
+        if (row.bulan) {
+          const monthStr = String(row.bulan).toLowerCase().trim();
+          const indexM = arrayBulan.findIndex((b) => monthStr.startsWith(b));
+          if (indexM !== -1) rowMonth = indexM + 1;
+        }
+
+        return { ...row, rowYear, rowMonth };
+      })
+      .filter(
+        (r) =>
+          r.rowYear === selectedYear &&
+          r.rowMonth > 0 &&
+          r.rowMonth <= selectedMonthNum,
+      );
 
     // 2. Urutkan berdasarkan bulan (dari terkecil ke terbesar)
     validRows.sort((a, b) => a.rowMonth - b.rowMonth);
@@ -144,7 +197,7 @@ export default function ExecutiveDashboard() {
       saldoAwal = safeParseNumber(validRows[0].saldo_awal);
 
       // b. Akumulasi seluruh Cash In dan Cash Out dari bulan awal hingga bulan yang difilter
-      validRows.forEach(row => {
+      validRows.forEach((row) => {
         cashIn += safeParseNumber(row.cash_in);
         cashOut += safeParseNumber(row.cash_out);
       });
@@ -155,7 +208,7 @@ export default function ExecutiveDashboard() {
       cashIn,
       cashOut,
       // Saldo Akhir didapat dari: Saldo Awal + Total Cash In - Total Cash Out
-      saldoAkhir: saldoAwal + cashIn - cashOut, 
+      saldoAkhir: saldoAwal + cashIn - cashOut,
     };
   }, [excelData, selectedMonthNum, selectedYear]);
 
@@ -237,7 +290,11 @@ export default function ExecutiveDashboard() {
               <p
                 className={`text-[12px] font-bold mt-1.5 flex items-center gap-1 ${deviasiRkap < 0 ? "text-[#BD002F]" : "text-emerald-600"}`}
               >
-                {deviasiRkap < 0 ? <AlertCircle size={12} /> : <CheckCircle2 size={12} />}
+                {deviasiRkap < 0 ? (
+                  <AlertCircle size={12} />
+                ) : (
+                  <CheckCircle2 size={12} />
+                )}
                 {deviasiRkap < 0 ? "Deviasi Negatif" : "Surplus"} terhadap
                 Target {selectedMonthLabelFull}: {formatMiliar(deviasiRkap)}
               </p>
@@ -247,7 +304,8 @@ export default function ExecutiveDashboard() {
             <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/40">
               <div className="flex justify-between mb-1 text-[14px] font-semibold text-slate-600">
                 <span>
-                  Progres Pencapaian terhadap Prognosa '{String(globalFilter?.tahun || "").slice(-2)}
+                  Progres Pencapaian terhadap Prognosa '
+                  {String(globalFilter?.tahun || "").slice(-2)}
                 </span>
                 <span className="font-black text-slate-800">
                   {pemasaranLoading ? "..." : formatPercent(progresPrognosa)}
@@ -275,7 +333,8 @@ export default function ExecutiveDashboard() {
               <div className="flex items-center gap-2">
                 <ListOrdered size={14} className="text-[#000075]" />
                 <span className="text-sm font-bold text-slate-800 uppercase tracking-wide truncate">
-                  Breakdown Log Realisasi Perolehan & Prognosa NKB {globalFilter?.tahun || 2026}
+                  Breakdown Log Realisasi Perolehan & Prognosa NKB{" "}
+                  {globalFilter?.tahun || 2026}
                 </span>
               </div>
 
@@ -305,19 +364,28 @@ export default function ExecutiveDashboard() {
                 <tbody className="divide-y divide-slate-100">
                   {pemasaranLoading ? (
                     <tr>
-                      <td colSpan="4" className="p-4 text-center text-[12px] text-slate-500 animate-pulse">
+                      <td
+                        colSpan="4"
+                        className="p-4 text-center text-[12px] text-slate-500 animate-pulse"
+                      >
                         Memuat data...
                       </td>
                     </tr>
                   ) : filteredPipeline.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="p-4 text-center text-[12px] text-slate-500">
+                      <td
+                        colSpan="4"
+                        className="p-4 text-center text-[12px] text-slate-500"
+                      >
                         Belum ada data (Status {selectedStatus}).
                       </td>
                     </tr>
                   ) : (
                     filteredPipeline.map((proj) => (
-                      <tr key={proj.id} className="hover:bg-slate-50/80 transition-colors">
+                      <tr
+                        key={proj.id}
+                        className="hover:bg-slate-50/80 transition-colors"
+                      >
                         <td className="p-2.5 pl-4 font-bold text-slate-800 whitespace-normal break-words">
                           {proj.paket}
                         </td>
@@ -341,15 +409,14 @@ export default function ExecutiveDashboard() {
       </div>
 
       <div className="page-break">
-        <FinancialCharts activeChartTab={activeChartTab} setActiveChartTab={setActiveChartTab} />
+        <FinancialCharts
+          activeChartTab={activeChartTab}
+          setActiveChartTab={setActiveChartTab}
+        />
       </div>
 
       <div className="page-break mb-8">
         <CashFlowSummary />
-      </div>
-
-      <div className="page-break mb-8">
-        <ProjectMap />
       </div>
 
       <div className="mt-6">

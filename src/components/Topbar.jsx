@@ -23,7 +23,7 @@ export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
   };
 
   return (
-    <div className="flex justify-between items-center px-8 py-6 border-b border-slate-200 bg-white print:static">
+    <div className="flex justify-between items-center px-4 py-2 border-b border-slate-200 bg-white print:static">
       <div className="flex items-center gap-4">
         {/* TOMBOL TOGGLE SIDEBAR */}
         <button
@@ -39,7 +39,7 @@ export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
               ? "Proyek Dalam Penanganan Khusus"
               : activeMenu}
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-[14px] text-slate-400 mt-1">
             Dashboard Portofolio Divisi Infrastruktur
           </p>
         </div>

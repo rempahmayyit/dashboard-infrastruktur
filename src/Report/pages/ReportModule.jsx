@@ -1,140 +1,331 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
+import { usePengendalianData } from "../../hooks/usePengendalianData";
+
+// Import Komponen
 import ManagementReport from "./ManagementReport";
+import CoverLayout from "./CoverLayout";
+import SlideAgenda from "../components/SlideAgenda";
+import SlideProyekOnGoing from "../components/SlideProyekOnGoing";
+import SlideKinerjaOperasional from "../components/KinerjaOperasional"; // Pastikan path benar
+import SlideWarningList from "../components/SlideWarningList";
+import SlideEvaluasiRkap from "../components/EvaluasiRkap"; // Pastikan path benar
+import SlideEvaluasiBkpu from "../components/EvaluasiBkpu"; // Pastikan path benar
+import SlideMonitoringBudget from "../components/MonitoringBudget"; // Pastikan path benar
+import ClosingLayout from "./ClosingLayout";
 
 const ReportDashboard = () => {
   const componentRef = useRef(null);
+  const pengendalian = usePengendalianData();
 
+  // State untuk Slideshow
+  const [presentationMode, setPresentationMode] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [scale, setScale] = useState(1);
+
+  // Data
+  const reportData = {
+    cover: {},
+    agenda: [],
+  };
+
+  // Kumpulan Slide untuk Mode Presentasi
+  const slides = [
+    <CoverLayout key="cover" data={reportData.cover} />,
+    <SlideAgenda key="agenda" />,
+    <SlideProyekOnGoing key="proyek" />,
+    <SlideKinerjaOperasional key="operasional" />,
+    <SlideWarningList
+      key="warning"
+      pageNumber={4}
+      pureTimeOverrunProjects={pengendalian.pureTimeOverrun}
+      almostOverrun={pengendalian.almostOverrun}
+      behindScheduleProjects={pengendalian.behindScheduleProjects}
+      bkpuMappProjects={pengendalian.bkpuMappProjects}
+      totalProject={pengendalian.totalProject}
+      timeOverrunPercent={pengendalian.timeOverrunPercent}
+      behindSchedulePercent={pengendalian.behindSchedulePercent}
+      bkpuMappPercent={pengendalian.bkpuMappPercent}
+    />,
+    <SlideEvaluasiRkap key="rkap" />,
+    <SlideEvaluasiBkpu key="bkpu" />,
+    <SlideMonitoringBudget key="budget" />,
+    <ClosingLayout key="closing" pageNumber={15} />, // Dinamis
+  ];
+
+  // --- LOGIKA SLIDESHOW ---
+
+  // 1. Mengatur Ukuran Skala (Fit to Screen) saat Fullscreen
+  useEffect(() => {
+    const calculateScale = () => {
+      // 338.67mm x 190.5mm setara dengan resolusi ~1280x720px
+      const widthRatio = window.innerWidth / 1280;
+      const heightRatio = window.innerHeight / 720;
+      // Ambil rasio terkecil agar slide selalu masuk ke dalam layar sepenuhnya
+      setScale(Math.min(widthRatio, heightRatio) * 0.98); // 98% agar ada sedikit margin
+    };
+
+    if (presentationMode) {
+      calculateScale();
+      window.addEventListener("resize", calculateScale);
+    }
+
+    return () => window.removeEventListener("resize", calculateScale);
+  }, [presentationMode]);
+
+  // 2. Navigasi Keyboard & Keluar dari Fullscreen (Esc)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!presentationMode) return;
+
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1));
+      }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        setCurrentSlide((prev) => Math.max(prev - 1, 0));
+      }
+    };
+
+    // Deteksi jika pengguna menekan "Esc" bawaan browser untuk keluar fullscreen
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setPresentationMode(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, [presentationMode, slides.length]);
+
+  // --- HANDLER TOMBOL ---
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
-    documentTitle: "Report",
+    documentTitle: "Report_Manajemen_Infrastruktur",
   });
 
-  // Di dalam file src/Report/Pages/ReportModule.jsx
+  const handleStartPresentation = async () => {
+    setCurrentSlide(0);
+    setPresentationMode(true);
+    try {
+      await document.documentElement.requestFullscreen();
+    } catch (err) {
+      console.error("Gagal masuk mode fullscreen:", err);
+    }
+  };
 
-  const reportData = {
-    cover: {
-      judul: "EVALUASI KINERJA BULANAN",
-      periode: "(PRODUKSI) - MEI 2026",
-      divisi: "DIVISI INFRASTRUKTUR",
-      tanggal: "Jakarta, 4-5 Mei 2026",
-    },
-    agenda: [
-      "Proyek - Proyek On Going 2026",
-      "Kinerja Operasional MEI 2026",
-      "Evaluasi Time Overrun",
-      "Evaluasi Kinerja Div. Infrastruktur",
-    ],
-    proyekOnGoing: [
-      {
-        wilayah: "ACEH",
-        proyek: [
-          { nama: "Bang. Pengarah Rukoh", progress: 55.09 },
-          { nama: "Fasilitas Pengarah Rukoh JO", progress: 67.62 },
-        ],
-      },
-    ],
-    kinerjaOperasional: {
-      tabel: [
-        {
-          uraian: "PRODUKSI USAHA (PU)",
-          rkap: 1045.8,
-          realisasi: 1309.48,
-          capaian: 125.21,
-        },
-        {
-          uraian: "BIAYA KONTRAK (BK)",
-          rkap: 1492.23,
-          realisasi: 1066.27,
-          capaian: 71.45,
-        },
-        {
-          uraian: "LABA KOTOR (LK)",
-          rkap: -446.43,
-          realisasi: 243.21,
-          capaian: null,
-        },
-      ],
-      trenPU: [
-        { bulan: "JAN", rkap: 149, realisasi: 205 },
-        { bulan: "FEB", rkap: 141, realisasi: 223 },
-      ],
-    },
-    evaluasiBulanIni: {
-      overrun: [
-        {
-          no: 1,
-          nama: "Oplah III Sumut",
-          renc: 91.4,
-          real: 91.4,
-          dev: -0.0,
-          jadwal: "31-May-26",
-          sisa: 0,
-        },
-        {
-          no: 2,
-          nama: "Japeksel 3 Induk",
-          renc: 98.57,
-          real: 98.57,
-          dev: -0.0,
-          jadwal: "23-Jun-26",
-          sisa: 23,
-        },
-      ],
-      behindSchedule: [
-        { no: 1, nama: "Patimban Port", renc: 97.76, real: 69.94, dev: -27.82 },
-        {
-          no: 2,
-          nama: "Bendungan Rukoh",
-          renc: 67.62,
-          real: 55.09,
-          dev: -12.53,
-        },
-      ],
-    },
-    evaluasiDetailV2: [
-      {
-        no: 1,
-        nama: "Perbaikan KAPB",
-        nilaiKontrak: 856594,
-        rkapPU: 112933,
-        rkapBK: 95877,
-        realPU: 225956,
-        realBK: 175519,
-        deviasiBK: -62586,
-        progPU: 150000,
-        progBK: 130000,
-        sisaPU: 37067,
-        sisaBK: 34123,
-        lk: -67493,
-      },
-    ],
-    financialTableData: {
-    puRkapTotal: 1045800000000, puRealTotal: 1309480000000, puPercent: 125.21, puRkapTahunan: 5589640000000, sisaPuTotal: 4280160000000,
-    puRkapNonJo: 600000000000, puRealNonJo: 700000000000, puNonJoPercent: 116.66, puRkapTahunanNonJo: 3000000000000, sisaPuNonJo: 2300000000000,
-    puRkapJoi: 445800000000, puRealJoi: 609480000000, puJoiPercent: 136.71, puRkapTahunanJoi: 2589640000000, sisaPuJoi: 1980160000000,
+  const handleExitPresentation = () => {
+    setPresentationMode(false);
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
 
-    bkTotal: 1492230000000, bkRealTotal: 1066270000000, bkRkapTahunan: 5172310000000, sisaBkTotal: 4106040000000,
-    bkNonJo: 800000000000, bkRealNonJo: 600000000000, bkRkapTahunanNonJo: 2800000000000, sisaBkNonJo: 2200000000000,
-    bkJoi: 692230000000, bkRealJoi: 466270000000, bkRkapTahunanJoi: 2372310000000, sisaBkJoi: 1906040000000,
+  // --- RENDER MODE PRESENTASI ---
+  if (presentationMode) {
+    return (
+      <div
+        style={{
+          width: "100vw",
+          height: "100vh",
+          backgroundColor: "#000000",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          overflow: "hidden",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: 9999,
+        }}
+      >
+        {/* Wrapper Slide dengan CSS Transform untuk Scaling */}
+        <div
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: "center center",
+            transition: "transform 0.2s ease-out",
+          }}
+        >
+          {slides[currentSlide]}
+        </div>
 
-    bkpuPercent: 142.68, bkpuRealPercent: 81.42, bkpuRkapTahunan: 92.53, sisaBkpuTotal: 95.93,
-    bkpuNonJoPercent: 133.33, bkpuRealNonJoPercent: 85.71, bkpuRkapTahunanNonJo: 93.33, sisaBkpuNonJo: 95.65,
-    bkpuJoiPercent: 155.27, bkpuRealJoiPercent: 76.50, bkpuRkapTahunanJoi: 91.60, sisaBkpuJoi: 96.25,
+        {/* Kontrol Navigasi Mengambang (Hover) */}
+        <div
+          style={{
+            position: "fixed",
+            bottom: "30px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "rgba(30, 41, 59, 0.85)",
+            backdropFilter: "blur(10px)",
+            padding: "10px 20px",
+            borderRadius: "50px",
+            display: "flex",
+            alignItems: "center",
+            gap: "20px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+            zIndex: 10000,
+            transition: "opacity 0.3s",
+            opacity: 0.2, // Transparan saat tidak disentuh
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = 1)}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = 0.2)}
+        >
+          <button
+            onClick={() => setCurrentSlide((prev) => Math.max(prev - 1, 0))}
+            style={navBtnStyle}
+            disabled={currentSlide === 0}
+          >
+            ◀ Prev
+          </button>
 
-    lkTotal: -446430000000, lkRealTotal: 243210000000, lkPercent: -54.47, lkRkapTahunan: 417330000000, sisaLkTotal: 174120000000,
-    lkNonJo: -200000000000, lkRealNonJo: 100000000000, lkRkapTahunanNonJo: 200000000000, sisaLkNonJo: 100000000000,
-    lkJoi: -246430000000, lkRealJoi: 143210000000, lkRkapTahunanJoi: 217330000000, sisaLkJoi: 74120000000
-  }  
-};
+          <span
+            style={{
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: "14px",
+              minWidth: "50px",
+              textAlign: "center",
+            }}
+          >
+            {currentSlide + 1} / {slides.length}
+          </span>
 
+          <button
+            onClick={() =>
+              setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1))
+            }
+            style={navBtnStyle}
+            disabled={currentSlide === slides.length - 1}
+          >
+            Next ▶
+          </button>
+
+          <div
+            style={{
+              width: "1px",
+              height: "20px",
+              backgroundColor: "rgba(255,255,255,0.3)",
+            }}
+          ></div>
+
+          <button
+            onClick={handleExitPresentation}
+            style={{ ...navBtnStyle, color: "#FCA5A5" }}
+          >
+            ✖ Exit
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- RENDER MODE NORMAL (DASHBOARD) ---
   return (
-    <div>
-      <button onClick={handlePrint}>Export PDF</button>
+    <div
+      style={{
+        padding: "20px",
+        backgroundColor: "#F1F5F9",
+        minHeight: "100vh",
+      }}
+    >
+      {/* Toolbar Atas */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          backgroundColor: "#FFFFFF",
+          padding: "15px 25px",
+          borderRadius: "12px",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+          marginBottom: "25px",
+        }}
+      >
+        <div>
+          <h2
+            style={{
+              margin: 0,
+              color: "#002060",
+              fontSize: "20px",
+              fontWeight: "bold",
+            }}
+          >
+            Report Dashboard
+          </h2>
+          <p
+            style={{ margin: "5px 0 0 0", color: "#64748B", fontSize: "14px" }}
+          >
+            Pratinjau, Presentasikan, atau Ekspor dokumen laporan
+          </p>
+        </div>
 
-      <ManagementReport ref={componentRef} data={reportData} />
+        <div style={{ display: "flex", gap: "15px" }}>
+          <button onClick={handleStartPresentation} style={primaryBtnStyle}>
+            <span style={{ fontSize: "16px" }}>▶</span> Slideshow
+          </button>
+          <button onClick={handlePrint} style={secondaryBtnStyle}>
+            ⬇ Export PDF
+          </button>
+        </div>
+      </div>
+
+      {/* Area Pratinjau (Preview) untuk diekspor */}
+      <div style={{ opacity: 1 }}>
+        <ManagementReport ref={componentRef} data={reportData} />
+      </div>
     </div>
   );
+};
+
+// --- GAYA CSS TOMBOL (INLINE) ---
+
+const primaryBtnStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  backgroundColor: "#002060", // Waskita Blue
+  color: "white",
+  border: "none",
+  padding: "10px 20px",
+  fontSize: "14px",
+  fontWeight: "bold",
+  borderRadius: "8px",
+  cursor: "pointer",
+  boxShadow: "0 4px 6px rgba(0, 32, 96, 0.2)",
+  transition: "all 0.2s",
+};
+
+const secondaryBtnStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  backgroundColor: "#C00000", // Waskita Red
+  color: "white",
+  border: "none",
+  padding: "10px 20px",
+  fontSize: "14px",
+  fontWeight: "bold",
+  borderRadius: "8px",
+  cursor: "pointer",
+  boxShadow: "0 4px 6px rgba(192, 0, 0, 0.2)",
+  transition: "all 0.2s",
+};
+
+const navBtnStyle = {
+  backgroundColor: "transparent",
+  color: "white",
+  border: "none",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+  padding: "5px 10px",
+  borderRadius: "5px",
 };
 
 export default ReportDashboard;

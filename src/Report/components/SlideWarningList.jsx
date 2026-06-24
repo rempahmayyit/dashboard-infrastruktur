@@ -83,8 +83,8 @@ const SlideWarningList = ({
   };
 
   const cellStyle = {
-    fontSize: 11,
-    padding: "5px 6px",
+    fontSize: 10,
+    padding: "3px 4px",
     borderBottom: "1px solid #E5E7EB",
   };
 
@@ -94,14 +94,15 @@ const SlideWarningList = ({
     WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
     overflow: "hidden",
-    lineHeight: "14px",
+    lineHeight: "12px",
   };
 
   return (
     <ContentLayout
       pageNumber={pageNumber}
       sectionNumber={4}
-      slideTitle="EVALUASI BULAN INI (TIME OVERRUN, BEHIND SCHEDULE & COST OVERRUN)"
+      slideTitle={`EVALUASI BULAN INI
+(TIME OVERRUN, BEHIND SCHEDULE & COST OVERRUN)`}
     >
       <div
         style={{

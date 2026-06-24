@@ -1,58 +1,21 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { useMemo } from "react";
+import { useFilter } from "../context/FilterContext";
 
 export default function useKeuanganData() {
-  const [chartData, setChartData] = useState([]);
-  const [detailData, setDetailData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { excelData, isDataLoading } = useFilter();
 
-  useEffect(() => {
-    loadPiutangData();
-  }, []);
+  const chartData = useMemo(() => {
+    return excelData?.vw_piutang_chart || [];
+  }, [excelData?.vw_piutang_chart]);
 
-  async function loadPiutangData() {
-    try {
-      setLoading(true);
-      console.log("⏳ Mulai fetch data piutang dari Supabase...");
-
-      // Grafik
-      const { data: chart, error: chartError } = await supabase
-        .from("vw_piutang_chart")
-        .select("*")
-        .order("sort_order");
-        
-      console.log("📊 HASIL CHART:", chart);
-      if (chartError) {
-        console.error("❌ ERROR CHART:", chartError);
-        throw chartError;
-      }
-
-      // Detail
-      const { data: detail, error: detailError } = await supabase
-        .from("vw_piutang_detail")
-        .select("*");
-
-      console.log("📝 HASIL DETAIL:", detail);
-      if (detailError) {
-        console.error("❌ ERROR DETAIL:", detailError);
-        throw detailError;
-      }
-
-      setChartData(chart || []);
-      setDetailData(detail || []);
-      console.log("✅ Fetch selesai dan data berhasil di-set!");
-
-    } catch (err) {
-      console.error("🚨 CATCH ERROR Keseluruhan:", err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const detailData = useMemo(() => {
+    return excelData?.vw_piutang_detail || [];
+  }, [excelData?.vw_piutang_detail]);
 
   return {
     chartData,
     detailData,
-    loading,
-    reload: loadPiutangData,
+    loading: isDataLoading,
+    reload: () => {}, // dummy agar tidak merusak komponen lama
   };
 }

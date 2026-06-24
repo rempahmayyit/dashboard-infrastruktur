@@ -2,11 +2,12 @@ import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "./lib/supabase";
 import LoginPage from "./LoginPage";
 
-
 // --- Import Halaman Konten ---
 import LandingPage from "./pages/LandingPage";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
-//import MonitoringCCTV from "./pages/MonitoringCCTV";
+
+import ProjectMapDashboard from "./ProjectMap/pages/ProjectMapDashboard";
+
 import PemasaranAnggaran from "./PemasaranAnggaran";
 import PengendalianProyek from "./Pengendalian/pages/PengendalianProyek";
 import KeuanganAkuntansi from "./Keuangan/pages/KeuanganAkuntansi";
@@ -38,13 +39,14 @@ import {
   Database,
   Video,
   ShieldAlert,
-  
 } from "lucide-react";
 
 export default function App() {
   const [activeMenu, setActiveMenu] = useState("Portal Infrastruktur");
   const [openMenu, setOpenMenu] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [presentationMode, setPresentationMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -113,6 +115,8 @@ export default function App() {
         });
       }
     });
+
+    
 
     return () => {
       isMounted = false;
@@ -183,6 +187,12 @@ export default function App() {
     },
     { name: "Executive Dashboard", icon: LayoutDashboard },
 
+    { name: "Exsum Proyek", icon: LayoutDashboard },
+
+    { name: "Report Mode", 
+      roles: ["admin", "super_admin"],
+      icon: BarChart3 },
+
     {
       name: "Pemasaran & Anggaran",
       icon: FolderKanban,
@@ -243,12 +253,6 @@ export default function App() {
       icon: Database,
       roles: ["admin", "super_admin"],
     },
-
-    {
-      name: "Laporan Manajemen",
-      icon: BarChart3,
-      roles: ["admin", "super_admin"],
-    },
   ];
 
   const menuItems = allMenus.filter(
@@ -263,6 +267,10 @@ export default function App() {
         );
       case "Executive Dashboard":
         return <ExecutiveDashboard />;
+      case "Exsum Proyek":
+        return <ProjectMapDashboard />;
+      case "Report Mode":
+        return <ReportDashboard />;
       case "Pemasaran & Anggaran":
         return <PemasaranAnggaran />;
       case "Pengendalian Proyek":
@@ -293,8 +301,7 @@ export default function App() {
         );
       case "Master Project":
         return <MasterProject />;
-      case "Laporan Manajemen":
-        return <ReportDashboard />;
+
       default:
         return null;
     }
@@ -351,20 +358,22 @@ export default function App() {
 
   return (
     <div className="h-screen bg-slate-50 text-slate-900 flex font-sans antialiased relative overflow-hidden print:block">
-      <Sidebar
-        isCollapsed={isCollapsed}
-        activeMenu={activeMenu}
-        setActiveMenu={setActiveMenu}
-        openMenu={openMenu}
-        setOpenMenu={setOpenMenu}
-        menuItems={menuItems}
-        userInitials={userInitials}
-        userName={userName}
-        userEmail={userEmail}
-      />
+      {!isFullscreen && (
+        <Sidebar
+          isCollapsed={isCollapsed}
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          openMenu={openMenu}
+          setOpenMenu={setOpenMenu}
+          menuItems={menuItems}
+          userInitials={userInitials}
+          userName={userName}
+          userEmail={userEmail}
+        />
+      )}
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden print:block">
-        {activeMenu !== "Portal Infrastruktur" && (
+        {!isFullscreen && activeMenu !== "Portal Infrastruktur" && (
           <Topbar
             isCollapsed={isCollapsed}
             setIsCollapsed={setIsCollapsed}
@@ -374,7 +383,11 @@ export default function App() {
 
         <div
           className={`flex-1 overflow-y-auto ${
-            activeMenu === "Portal Infrastruktur" ? "p-0" : "p-8"
+            isFullscreen
+              ? "p-0"
+              : activeMenu === "Portal Infrastruktur"
+                ? "p-0"
+                : "p-8"
           }`}
         >
           {renderContent()}

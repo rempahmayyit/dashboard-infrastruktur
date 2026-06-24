@@ -49,6 +49,14 @@ export function FilterProvider({ children }) {
     db_cashflow: [],
     db_kendala: [],
     db_sap: [],
+
+    vw_piutang_detail: [],
+    vw_piutang_detail_raw: [],
+
+    vw_piutang_chart: [],
+
+    vw_piutang_aging: [],
+    vw_piutang_aging_raw: [],
   });
 
   const [isDataLoading, setIsDataLoading] = useState(true);
@@ -121,6 +129,15 @@ export function FilterProvider({ children }) {
         const kendalaData = await fetchAllDataFromTable("db_kendala");
         const sapData = await fetchAllDataFromTable("db_sap");
 
+        const piutangDetailData =
+          await fetchAllDataFromTable("vw_piutang_detail");
+
+        const piutangChartData =
+          await fetchAllDataFromTable("vw_piutang_chart");
+
+        const piutangAgingData =
+          await fetchAllDataFromTable("vw_piutang_aging");
+
         setExcelData((prevData) => ({
           ...prevData,
           db_master_data: masterData,
@@ -131,6 +148,10 @@ export function FilterProvider({ children }) {
           db_cashflow: cashflowData,
           db_kendala: kendalaData,
           db_sap: sapData,
+
+          vw_piutang_detail: piutangDetailData,
+          vw_piutang_chart: piutangChartData,
+          vw_piutang_aging: piutangAgingData,
         }));
 
         console.log("Dashboard data loaded");
@@ -206,6 +227,8 @@ export function FilterProvider({ children }) {
             ...prevData,
             db_master_data: masterData,
           }));
+
+          ß;
         },
       )
 
@@ -270,6 +293,24 @@ export function FilterProvider({ children }) {
           setExcelData((prevData) => ({
             ...prevData,
             db_sap: sapData,
+          }));
+        },
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "vw_piutang_detail",
+        },
+        async () => {
+          const piutangDetailData =
+            await fetchAllDataFromTable("vw_piutang_detail");
+
+          setExcelData((prev) => ({
+            ...prev,
+            vw_piutang_detail: piutangDetailData,
           }));
         },
       )
@@ -374,13 +415,70 @@ export function FilterProvider({ children }) {
       (r) => String(r.status_data).toUpperCase() === "QUICK",
     ).length;
 
-    console.log("FINAL :", finalCount);
-    console.log("QUICK :", quickCount);
-
     return Object.values(grouped)
       .map((item) => item.quick || item.final)
       .filter(Boolean);
   }, [excelData.db_realisasi, dataMode]);
+
+  const monthMap = {
+    Jan: 1,
+    Feb: 2,
+    Mar: 3,
+    Apr: 4,
+    Mei: 5,
+    Jun: 6,
+    Jul: 7,
+    Agu: 8,
+    Sep: 9,
+    Okt: 10,
+    Nov: 11,
+    Des: 12,
+  };
+
+  const selectedMonth = monthMap[globalFilter.bulan];
+
+  const monthNameMap = {
+    Jan: "JANUARI",
+    Feb: "FEBRUARI",
+    Mar: "MARET",
+    Apr: "APRIL",
+    Mei: "MEI",
+    Jun: "JUNI",
+    Jul: "JULI",
+    Agu: "AGUSTUS",
+    Sep: "SEPTEMBER",
+    Okt: "OKTOBER",
+    Nov: "NOVEMBER",
+    Des: "DESEMBER",
+  };
+
+  const bulanText = monthNameMap[globalFilter.bulan] || globalFilter.bulan;
+
+  const effectivePiutangAging = React.useMemo(() => {
+    return (excelData.vw_piutang_aging || []).filter(
+      (row) =>
+        Number(row.tahun) === Number(globalFilter.tahun) &&
+        Number(row.bulan_index) === selectedMonth,
+    );
+  }, [excelData.vw_piutang_aging, globalFilter]);
+
+  const effectivePiutangDetail = React.useMemo(() => {
+    return (excelData.vw_piutang_detail || []).filter(
+      (row) =>
+        Number(row.tahun) === Number(globalFilter.tahun) &&
+        Number(row.bulan_index) === selectedMonth,
+    );
+  }, [excelData.vw_piutang_detail, globalFilter]);
+
+  console.log("PIUTANG AGING RAW", excelData.vw_piutang_aging?.length);
+
+  console.log("PIUTANG DETAIL RAW", excelData.vw_piutang_detail?.length);
+
+  console.log("PIUTANG AGING FILTERED", effectivePiutangAging?.length);
+
+  console.log("PIUTANG DETAIL FILTERED", effectivePiutangDetail?.length);
+
+  console.log("PIUTANG SAMPLE RAW", excelData.vw_piutang_aging?.[0]);
 
   React.useEffect(() => {
     console.log("REALISASI RAW :", excelData.db_realisasi?.length || 0);
@@ -424,13 +522,21 @@ export function FilterProvider({ children }) {
 
         excelData: {
           ...excelData,
+
           db_realisasi: effectiveRealisasiData,
           db_realisasi_raw: excelData.db_realisasi,
+
+          vw_piutang_aging: effectivePiutangAging,
+          vw_piutang_aging_raw: excelData.vw_piutang_aging,
+
+          vw_piutang_detail: effectivePiutangDetail,
+          vw_piutang_detail_raw: excelData.vw_piutang_detail,
         },
 
         setExcelData,
         isDataLoading,
         dataStatus,
+        bulanText,
       }}
     >
       {children}

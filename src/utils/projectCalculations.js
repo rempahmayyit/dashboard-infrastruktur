@@ -110,3 +110,78 @@ export const getCumulativeValue = (
       return sum + Number(row[field] || 0);
     }, 0);
 };
+
+// =====================================================
+// SISA HARI
+// Ambil tanggal paling akhir antara end_date
+// dan end_date_current
+// =====================================================
+
+export const getSisaHari = (project) => {
+  const end1 = project?.end_date ? new Date(project.end_date) : null;
+
+  const end2 = project?.end_date_current
+    ? new Date(project.end_date_current)
+    : null;
+
+  let targetEndDate = null;
+
+  if (end1 && end2) {
+    targetEndDate = end1 > end2 ? end1 : end2;
+  } else {
+    targetEndDate = end1 || end2;
+  }
+
+  if (!targetEndDate) return 0;
+
+  return Math.ceil((targetEndDate - new Date()) / (1000 * 60 * 60 * 24));
+};
+
+// =====================================================
+// SISA PROGRESS
+// =====================================================
+
+export const getSisaProgress = (ri) => {
+  return Math.max(0, Math.min(100, 100 - Number(ri || 0)));
+};
+
+// =====================================================
+// TARGET HARIAN
+// =====================================================
+
+export const getTargetHarian = (sisaProgress, sisaHari) => {
+  // proyek selesai
+  if (sisaProgress <= 0) {
+    return {
+      value: 0,
+      status: "SELESAI",
+    };
+  }
+
+  // proyek lewat kontrak
+  if (sisaHari <= 0) {
+    return {
+      value: null,
+      status: "OVERDUE",
+    };
+  }
+
+  return {
+    value: sisaProgress / sisaHari,
+    status: "NORMAL",
+  };
+};
+
+export const getUrgencyRatio = (project, progress) => {
+  const sisaHari = getSisaHari(project);
+  const sisaProgress = getSisaProgress(progress);
+
+  const result = getTargetHarian(
+    sisaProgress,
+    sisaHari
+  );
+
+  if (result.status === "OVERDUE") return 999;
+
+  return result.value || 0;
+};

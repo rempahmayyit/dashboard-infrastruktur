@@ -2,25 +2,12 @@ import React from "react";
 import logoDanantara from "../../assets/Logo_danantara.png";
 import logoWaskita from "../../assets/waskita_logo.png";
 
-const ContentLayout = ({
-  children,
-  pageNumber,
-  sectionNumber,
-  sectionTitle,
-  slideTitle,
-}) => {
-  const titleFontSize =
-    slideTitle?.length > 70
-      ? "14px"
-      : slideTitle?.length > 50
-        ? "16px"
-        : "20px";
-
+const ContentLayout = ({ children, pageNumber, sectionNumber, slideTitle }) => {
   return (
     <div
       style={{
-        width: "297mm",
-        height: "206mm",
+        width: "338.67mm", // PPT Widescreen
+        height: "190.5mm",
         border: "1px solid #d1d5db",
         boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
         margin: "0 auto 24px auto",
@@ -33,28 +20,21 @@ const ContentLayout = ({
         fontFamily: "Arial, sans-serif",
         display: "flex",
         flexDirection: "column",
-        padding: "18px 24px",
+        padding: "20px 30px",
+        lineHeight: "1.0",
       }}
     >
       {/* HEADER */}
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          marginBottom: "20px",
-        }}
+        style={{ display: "flex", alignItems: "center", marginBottom: "25px" }}
       >
-        {/* Logo Danantara */}
         <img
           src={logoDanantara}
           alt=""
-          style={{
-            height: "30px",
-            marginRight: "15px",
-          }}
+          style={{ height: "35px", marginRight: "20px" }}
         />
 
-        {/* Circle Number */}
+        {/* Section Circle */}
         <div
           style={{
             width: "55px",
@@ -67,109 +47,75 @@ const ContentLayout = ({
             color: "#002b7f",
             fontWeight: "bold",
             fontSize: "28px",
-            background: "#fff",
             flexShrink: 0,
           }}
         >
           {sectionNumber}
         </div>
 
-        {/* Connector kiri */}
-        <div
-          style={{
-            width: "18px",
-            height: "6px",
-            background: "#002b7f",
-          }}
-        />
+        <div style={{ width: "20px", height: "6px", background: "#002b7f" }} />
 
-        {/* INFRASTRUKTUR */}
         <div
           style={{
-            width: "230px", // FIXED
+            width: "250px",
             background: "#002b7f",
             color: "white",
-            borderRadius: "20px",
-            height: "48px",
-
+            borderRadius: "25px",
+            height: "50px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-
             fontWeight: "bold",
-            fontSize: "18px",
-
+            fontSize: "24px",
             flexShrink: 0,
           }}
         >
           INFRASTRUKTUR
         </div>
 
-        {/* Connector tengah */}
-        <div
-          style={{
-            width: "18px",
-            height: "6px",
-            background: "#002b7f",
-          }}
-        />
+        <div style={{ width: "20px", height: "5px", background: "#002b7f" }} />
 
-        {/* Judul Slide */}
+        {/* Slide Title */}
         <div
           style={{
             flex: 1,
             background: "#002b7f",
             color: "white",
-            borderRadius: "20px",
-            height: "56px",
-
-            padding: "6px 24px",
-
+            borderRadius: "25px",
+            height: "50px",
+            padding: "0 30px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-
             fontWeight: "bold",
-
             textAlign: "center",
-
-            marginRight: "10px",
-
-            overflow: "hidden",
-
-            lineHeight: "1.1",
-
             fontSize:
-              slideTitle?.length > 60
+              slideTitle?.length > 70
                 ? "16px"
                 : slideTitle?.length > 40
                   ? "18px"
                   : "22px",
           }}
         >
-          {slideTitle}
+          {String(slideTitle)
+            .split("\n")
+            .map((line, index) => (
+              <React.Fragment key={index}>
+                {line}
+                {index < String(slideTitle).split("\n").length - 1 && <br />}
+              </React.Fragment>
+            ))}
         </div>
 
-        {/* Logo Waskita */}
         <img
           src={logoWaskita}
           alt=""
-          style={{
-            height: "50px",
-            marginLeft: "20px",
-          }}
+          style={{ height: "50px", marginLeft: "25px" }}
         />
       </div>
 
-      {/* CONTENT */}
-      <div
-        style={{
-          flex: 1,
-          overflow: "hidden",
-        }}
-      >
-        {children}
-      </div>
+      {/* CONTENT AREA */}
+      <div style={{ flex: 1, overflow: "hidden" }}>{children}</div>
 
       {/* FOOTER */}
       <div
@@ -177,27 +123,14 @@ const ContentLayout = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginTop: "10px",
-          fontSize: "12px",
-          color: "#666",
+          marginTop: "15px",
+          fontSize: "14px",
         }}
       >
-        <div
-          style={{
-            color: "#002b7f",
-            fontWeight: "600",
-          }}
-        >
+        <div style={{ color: "#002b7f", fontWeight: "bold" }}>
           #ForBetterWaskita
         </div>
-
-        <div
-          style={{
-            fontWeight: "bold",
-          }}
-        >
-          {pageNumber}
-        </div>
+        <div style={{ fontWeight: "bold", color: "#666" }}>{pageNumber}</div>
       </div>
     </div>
   );

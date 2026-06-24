@@ -6,8 +6,8 @@ const AgendaLayout = ({ children, pageNumber }) => {
   return (
     <div
       style={{
-        width: "297mm",
-        height: "206mm",
+        width: "338.67mm", // Ukuran PPT Widescreen
+        height: "190.5mm",
         border: "1px solid #d1d5db",
         boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
         margin: "0 auto 24px auto",
@@ -17,22 +17,21 @@ const AgendaLayout = ({ children, pageNumber }) => {
         pageBreakInside: "avoid",
         boxSizing: "border-box",
         position: "relative",
-        margin: "0 auto",
         fontFamily: "Arial, sans-serif",
         display: "flex",
         flexDirection: "column",
-        padding: "20px 30px",
+        padding: "30px 50px", // Padding disesuaikan
       }}
     >
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          marginBottom: "20px",
+          marginBottom: "30px",
         }}
       >
-        <img src={logoDanantara} alt="" style={{ height: 40 }} />
-        <img src={logoWaskita} alt="" style={{ height: 40 }} />
+        <img src={logoDanantara} alt="" style={{ height: 45 }} />
+        <img src={logoWaskita} alt="" style={{ height: 45 }} />
       </div>
 
       <div style={{ flex: 1 }}>{children}</div>
@@ -42,6 +41,7 @@ const AgendaLayout = ({ children, pageNumber }) => {
           textAlign: "right",
           color: "#666",
           fontWeight: "bold",
+          fontSize: "14px"
         }}
       >
         {pageNumber}
