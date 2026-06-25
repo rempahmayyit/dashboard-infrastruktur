@@ -185,9 +185,9 @@ export default function App() {
       name: "Portal Infrastruktur",
       icon: LayoutDashboard,
     },
-    { name: "Executive Dashboard", icon: LayoutDashboard },
+    { name: "Dashboard Divisi", icon: LayoutDashboard },
 
-    { name: "Exsum Proyek", icon: LayoutDashboard },
+    { name: "Dashboard Proyek", icon: LayoutDashboard },
 
     { name: "Report Mode", 
       roles: ["admin", "super_admin"],
@@ -265,9 +265,9 @@ export default function App() {
         return (
           <LandingPage setActiveMenu={setActiveMenu} userName={userName} />
         );
-      case "Executive Dashboard":
+      case "Dashboard Divisi":
         return <ExecutiveDashboard />;
-      case "Exsum Proyek":
+      case "Dashboard Proyek":
         return <ProjectMapDashboard />;
       case "Report Mode":
         return <ReportDashboard />;

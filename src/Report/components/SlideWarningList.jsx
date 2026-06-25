@@ -101,8 +101,7 @@ const SlideWarningList = ({
     <ContentLayout
       pageNumber={pageNumber}
       sectionNumber={4}
-      slideTitle={`EVALUASI BULAN INI
-(TIME OVERRUN, BEHIND SCHEDULE & COST OVERRUN)`}
+      slideTitle={`EVALUASI BULAN INI\n(TIME OVERRUN, BEHIND SCHEDULE & COST OVERRUN)`}
     >
       <div
         style={{
@@ -204,7 +203,10 @@ const SlideWarningList = ({
                 </tr>
 
                 {pureTimeOverrunProjects.map((p, i) => (
-                  <tr key={i}>
+                  <tr 
+                    key={i} 
+                    style={{ backgroundColor: i % 2 !== 0 ? "#FEF2F2" : "transparent" }}
+                  >
                     <td style={projectCellStyle} title={p.name}>
                       {p.name}
                     </td>
@@ -241,7 +243,10 @@ const SlideWarningList = ({
                 </tr>
 
                 {almostOverrun.map((p, i) => (
-                  <tr key={i}>
+                  <tr 
+                    key={i} 
+                    style={{ backgroundColor: i % 2 !== 0 ? "#FEF2F2" : "transparent" }}
+                  >
                     <td style={projectCellStyle} title={p.name}>
                       {p.name}
                     </td>
@@ -343,7 +348,10 @@ const SlideWarningList = ({
 
               <tbody>
                 {behindScheduleProjects.map((p, i) => (
-                  <tr key={i}>
+                  <tr 
+                    key={i}
+                    style={{ backgroundColor: i % 2 !== 0 ? "#FFF7ED" : "transparent" }}
+                  >
                     <td style={projectCellStyle} title={p.name}>
                       {p.name}
                     </td>
@@ -449,7 +457,10 @@ const SlideWarningList = ({
 
               <tbody>
                 {bkpuMappProjects.map((p, i) => (
-                  <tr key={i}>
+                  <tr 
+                    key={i}
+                    style={{ backgroundColor: i % 2 !== 0 ? "#EFF6FF" : "transparent" }}
+                  >
                     <td style={projectCellStyle} title={p.name}>
                       {p.name}
                     </td>

@@ -130,7 +130,7 @@ const ContentLayout = ({ children, pageNumber, sectionNumber, slideTitle }) => {
         <div style={{ color: "#002b7f", fontWeight: "bold" }}>
           #ForBetterWaskita
         </div>
-        <div style={{ fontWeight: "bold", color: "#666" }}>{pageNumber}</div>
+        
       </div>
     </div>
   );

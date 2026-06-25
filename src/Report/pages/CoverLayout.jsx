@@ -7,9 +7,6 @@ import { useFilter } from "../../context/FilterContext";
 const CoverLayout = ({ children }) => {
   const { globalFilter, bulanText } = useFilter();
 
-  console.log("FILTER:", globalFilter);
-  console.log("BULAN TEXT:", bulanText);
-
   return (
     <div
       style={{
@@ -87,7 +84,7 @@ const CoverLayout = ({ children }) => {
             margin: "0",
           }}
         >
-          Jakarta,  2026
+          Jakarta, 2026
         </p>
       </div>
 

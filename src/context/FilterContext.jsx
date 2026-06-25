@@ -49,6 +49,7 @@ export function FilterProvider({ children }) {
     db_cashflow: [],
     db_kendala: [],
     db_sap: [],
+    db_renc_eb: [],
 
     vw_piutang_detail: [],
     vw_piutang_detail_raw: [],
@@ -128,6 +129,7 @@ export function FilterProvider({ children }) {
         const cashflowData = await fetchAllDataFromTable("db_cashflow");
         const kendalaData = await fetchAllDataFromTable("db_kendala");
         const sapData = await fetchAllDataFromTable("db_sap");
+        const rencEbData = await fetchAllDataFromTable("db_renc_eb");
 
         const piutangDetailData =
           await fetchAllDataFromTable("vw_piutang_detail");
@@ -148,6 +150,7 @@ export function FilterProvider({ children }) {
           db_cashflow: cashflowData,
           db_kendala: kendalaData,
           db_sap: sapData,
+          db_renc_eb: rencEbData,
 
           vw_piutang_detail: piutangDetailData,
           vw_piutang_chart: piutangChartData,
@@ -277,6 +280,28 @@ export function FilterProvider({ children }) {
           setExcelData((prevData) => ({
             ...prevData,
             db_cashflow: cashflowData,
+          }));
+        },
+      )
+
+      // =====================================================
+      // REALTIME RENCANA EB
+      // =====================================================
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "db_renc_eb",
+        },
+        async () => {
+          console.log("Realtime update db_renc_eb");
+
+          const rencEbData = await fetchAllDataFromTable("db_renc_eb");
+
+          setExcelData((prevData) => ({
+            ...prevData,
+            db_renc_eb: rencEbData,
           }));
         },
       )
@@ -470,20 +495,7 @@ export function FilterProvider({ children }) {
     );
   }, [excelData.vw_piutang_detail, globalFilter]);
 
-  console.log("PIUTANG AGING RAW", excelData.vw_piutang_aging?.length);
-
-  console.log("PIUTANG DETAIL RAW", excelData.vw_piutang_detail?.length);
-
-  console.log("PIUTANG AGING FILTERED", effectivePiutangAging?.length);
-
-  console.log("PIUTANG DETAIL FILTERED", effectivePiutangDetail?.length);
-
-  console.log("PIUTANG SAMPLE RAW", excelData.vw_piutang_aging?.[0]);
-
-  React.useEffect(() => {
-    console.log("REALISASI RAW :", excelData.db_realisasi?.length || 0);
-    console.log("REALISASI EFFECTIVE :", effectiveRealisasiData?.length || 0);
-  }, [excelData.db_realisasi, effectiveRealisasiData]);
+  React.useEffect(() => {}, [excelData.db_realisasi, effectiveRealisasiData]);
 
   // PRIORITAS 1 = QUICK
   const quickRow = periodeAktif?.find(

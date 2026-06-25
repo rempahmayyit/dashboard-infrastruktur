@@ -1,143 +1,389 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import ContentLayout from "../pages/ContentLayout";
+import { useFilter } from "../../context/FilterContext";
+import { formatNumber } from "../../utils/formatters";
+import { getDisplayName } from "../../utils/projectName";
+
+// Helper Penyeragaman ID Proyek
+const getProjectId = (row) =>
+  row?.id_project || row?.id_proyek || row?.project_id || row?.id || null;
 
 const SlideEvaluasiRkap = () => {
-  // ==========================================
-  // DATA & TABLE COMPONENTS
-  // ==========================================
+  const { excelData, globalFilter } = useFilter();
+  const [sortMode, setSortMode] = useState("LK");
 
-  const tableData = [
-    { id: 1, no: "1", nama: "Perbaikan KAPB", nk: "856,594", rkapPu: "112,933", rkapBk: "95,877", rkapPct: "84.90%", realPu: "175,519", realBk: "225,956", realPct: "128.74%", devPu: "62,586", devBk: "130,080", devLk: "(67,493)" },
-    { id: 2, no: "2", nama: "BA Serdang-Berdagai", nk: "100,000", rkapPu: "-", rkapBk: "-", rkapPct: "0.00%", realPu: "-", realBk: "21,037", realPct: "0.00%", devPu: "-", devBk: "21,037", devLk: "(21,037)" },
-    { id: 3, no: "3", nama: "BA Langsa", nk: "253,000", rkapPu: "-", rkapBk: "-", rkapPct: "0.00%", realPu: "-", realBk: "20,231", realPct: "0.00%", devPu: "-", devBk: "20,231", devLk: "(20,231)" },
-    { id: 4, no: "4", nama: "Lempuing II JOP", nk: "234,732", rkapPu: "21,384", rkapBk: "8,793", rkapPct: "41.12%", realPu: "17,203", realBk: "22,723", realPct: "132.09%", devPu: "(4,181)", devBk: "13,930", devLk: "(18,111)" },
-    { id: 5, no: "5", nama: "Bend. Jlantah", nk: "566,919", rkapPu: "-", rkapBk: "-", rkapPct: "0.00%", realPu: "-", realBk: "17,334", realPct: "0.00%", devPu: "-", devBk: "17,334", devLk: "(17,334)" },
-    { id: 6, no: "6", nama: "Oplah Banten Thp 3", nk: "200,000", rkapPu: "200,000", rkapBk: "186,000", rkapPct: "93.00%", realPu: "-", realBk: "-", realPct: "0.00%", devPu: "(200,000)", devBk: "(186,000)", devLk: "(14,000)" },
-    { id: 7, no: "7", nama: "Proban Pkt. 3", nk: "996,822", rkapPu: "41,498", rkapBk: "49,366", rkapPct: "118.96%", realPu: "32,958", realBk: "53,964", realPct: "163.74%", devPu: "(8,540)", devBk: "4,598", devLk: "(13,138)" },
-    { id: 8, no: "8", nama: "Pengarah Rukoh", nk: "411,452", rkapPu: "11,027", rkapBk: "10,766", rkapPct: "97.63%", realPu: "9,760", realBk: "20,917", realPct: "214.32%", devPu: "(1,267)", devBk: "10,151", devLk: "(11,418)" },
-    { id: 9, no: "9", nama: "BA Bireun-Takengon", nk: "400,000", rkapPu: "-", rkapBk: "-", rkapPct: "0.00%", realPu: "-", realBk: "10,956", realPct: "0.00%", devPu: "-", devBk: "10,956", devLk: "(10,956)" },
-    { id: 10, no: "10", nama: "Struktur Musi", nk: "345,105", rkapPu: "34,510", rkapBk: "39,692", rkapPct: "115.02%", realPu: "18,376", realBk: "33,773", realPct: "183.78%", devPu: "(16,134)", devBk: "(5,919)", devLk: "(10,215)" },
-    { id: 11, no: "11", nama: "Bend. Jragung I", nk: "799,473", rkapPu: "54,349", rkapBk: "44,370", rkapPct: "81.64%", realPu: "26,460", realBk: "25,555", realPct: "96.58%", devPu: "(27,889)", devBk: "(18,815)", devLk: "(9,074)" },
-    { id: 12, no: "12", nama: "Bend. Bener", nk: "589,747", rkapPu: "1,828", rkapBk: "1,762", rkapPct: "96.39%", realPu: "24,678", realBk: "32,612", realPct: "132.15%", devPu: "22,850", devBk: "30,850", devLk: "(8,001)" },
-    { id: 13, no: "13", nama: "Bocimi 3A", nk: "897,832", rkapPu: "132,068", rkapBk: "131,991", rkapPct: "99.94%", realPu: "76,334", realBk: "83,853", realPct: "109.85%", devPu: "(55,734)", devBk: "(48,139)", devLk: "(7,596)" },
-    { id: 14, no: "14", nama: "BA Sumatera", nk: "15,000", rkapPu: "-", rkapBk: "-", rkapPct: "0.00%", realPu: "-", realBk: "4,632", realPct: "0.00%", devPu: "-", devBk: "4,632", devLk: "(4,632)" },
-    { id: 15, no: "15", nama: "Bend. Mbay", nk: "485,958", rkapPu: "38,391", rkapBk: "35,032", rkapPct: "91.25%", realPu: "4,784", realBk: "5,757", realPct: "120.35%", devPu: "(33,607)", devBk: "(29,274)", devLk: "(4,333)" },
-    { id: 16, no: "16", nama: "Irg. Lempuing 3", nk: "218,628", rkapPu: "19,917", rkapBk: "13,920", rkapPct: "69.89%", realPu: "16,799", realBk: "14,796", realPct: "88.08%", devPu: "(3,118)", devBk: "877", devLk: "(3,994)" },
-  ];
+  // ==========================================================
+  // PENGOLAHAN DATA DINAMIS & PENGELOMPOKAN SUB-HEADER
+  // ==========================================================
+  const tableData = useMemo(() => {
+    const masterData = excelData?.db_master_data || [];
+    const rkapData = excelData?.db_rkap_awal || [];
+    const realisasiData = excelData?.db_realisasi || [];
+
+    const monthMap = {
+      Jan: 1, Feb: 2, Mar: 3, Apr: 4, Mei: 5, Jun: 6,
+      Jul: 7, Agu: 8, Sep: 9, Okt: 10, Nov: 11, Des: 12,
+    };
+    const selectedYear = Number(globalFilter?.tahun || 2026);
+    const selectedMonth = monthMap[globalFilter?.bulan] || new Date().getMonth() + 1;
+
+    const projectMap = {};
+
+    // 1. Inisialisasi dari Master Data + Lookup kolom nonjo_joi
+    masterData.forEach((p) => {
+      const id = getProjectId(p);
+      if (!id) return;
+
+      const namaProyek = getDisplayName(p);
+      
+      // Lookup nilai spesifik dari kolom nonjo_joi
+      const nonJoJoiValue = String(p.nonjo_joi || "").toUpperCase().trim();
+      let isJO = false;
+      
+      if (nonJoJoiValue) {
+        // Jika datanya ada, baca dari kolom (JOI / JO, tapi bukan NON JO)
+        isJO = (nonJoJoiValue.includes("JOI") || nonJoJoiValue.includes("JO")) && !nonJoJoiValue.includes("NON");
+      } else {
+        // Fallback jika di master data kolom tersebut masih kosong
+        isJO = namaProyek.toUpperCase().includes(" JO") || namaProyek.toUpperCase().includes(" JOP") || namaProyek.toUpperCase().includes(" JOI");
+      }
+
+      projectMap[id] = {
+        id,
+        nama: namaProyek,
+        nk: Number(p.nk_current || p.nilai_kontrak || 0),
+        isJO: isJO,
+        rkapPu: 0, rkapBk: 0,
+        realPu: 0, realBk: 0,
+      };
+    });
+
+    const aggregateData = (sourceData, prefix) => {
+      sourceData.forEach((row) => {
+        const id = getProjectId(row);
+
+        if (id && !projectMap[id]) {
+          const rawName = row.nama_proyek || row.project_name || `Proyek Tidak Dikenal (${id})`;
+          
+          // Lookup susulan ke masterData jika proyek muncul on-the-fly di transaksi
+          const masterRow = masterData.find((m) => getProjectId(m) === id);
+          const nonJoJoiValue = masterRow ? String(masterRow.nonjo_joi || "").toUpperCase().trim() : "";
+          
+          let isJO = false;
+          if (nonJoJoiValue) {
+            isJO = (nonJoJoiValue.includes("JOI") || nonJoJoiValue.includes("JO")) && !nonJoJoiValue.includes("NON");
+          } else {
+            isJO = rawName.toUpperCase().includes(" JO") || rawName.toUpperCase().includes(" JOP") || rawName.toUpperCase().includes(" JOI");
+          }
+          
+          projectMap[id] = {
+            id,
+            nama: rawName,
+            nk: 0, isJO: isJO,
+            rkapPu: 0, rkapBk: 0, realPu: 0, realBk: 0,
+          };
+        }
+
+        if (!id || !projectMap[id]) return;
+
+        let rowMonth = Number(row.bulan_index);
+        if (!rowMonth && row.bulan) {
+          const textBulan = String(row.bulan).toLowerCase().substring(0, 3);
+          const bMap = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, mei: 5, jun: 6, jul: 7, agu: 8, aug: 8, sep: 9, okt: 10, nov: 11, des: 12, dec: 12 };
+          rowMonth = bMap[textBulan] || 0;
+        }
+
+        const rowYear = Number(row.tahun);
+        let isStatusValid = true;
+        if (prefix === "rkap" && row.rkap_status) {
+          isStatusValid = String(row.rkap_status).toLowerCase().includes("awal");
+        }
+
+        if (rowYear === selectedYear && rowMonth > 0 && rowMonth <= selectedMonth && isStatusValid) {
+          if (prefix === "rkap") {
+            projectMap[id].rkapPu += Number(row.pu_rkap_parsial || 0);
+            projectMap[id].rkapBk += Number(row.bk_rkap_parsial || 0);
+          } else {
+            projectMap[id].realPu += Number(row.pu_real_parsial || 0);
+            projectMap[id].realBk += Number(row.bk_real_parsial || 0);
+          }
+        }
+      });
+    };
+
+    aggregateData(rkapData, "rkap");
+    aggregateData(realisasiData, "real");
+
+    const processedData = Object.values(projectMap)
+      .map((p) => {
+        p.rkapBkpu = p.rkapPu > 0 ? (p.rkapBk / p.rkapPu) * 100 : 0;
+        p.realBkpu = p.realPu > 0 ? (p.realBk / p.realPu) * 100 : 0;
+
+        p.devPu = p.realPu - p.rkapPu;
+        p.devBk = p.realBk - p.rkapBk;
+        p.devLk = p.devPu - p.devBk;
+
+        p.nk /= 1000000; p.rkapPu /= 1000000; p.rkapBk /= 1000000;
+        p.realPu /= 1000000; p.realBk /= 1000000;
+        p.devPu /= 1000000; p.devBk /= 1000000; p.devLk /= 1000000;
+
+        return p;
+      })
+      .filter((p) => p.rkapPu !== 0 || p.rkapBk !== 0 || p.realPu !== 0 || p.realBk !== 0);
+
+    const nonJoList = processedData.filter(p => !p.isJO).sort((a, b) => sortMode === "PU" ? a.devPu - b.devPu : a.devLk - b.devLk);
+    const joList = processedData.filter(p => p.isJO).sort((a, b) => sortMode === "PU" ? a.devPu - b.devPu : a.devLk - b.devLk);
+
+    let urut = 1;
+    nonJoList.forEach(item => item.displayNo = urut++);
+    joList.forEach(item => item.displayNo = urut++);
+
+    const calcSummary = (list) => {
+      const acc = list.reduce(
+        (sum, curr) => {
+          sum.nk += curr.nk; sum.rkapPu += curr.rkapPu; sum.rkapBk += curr.rkapBk;
+          sum.realPu += curr.realPu; sum.realBk += curr.realBk;
+          sum.devPu += curr.devPu; sum.devBk += curr.devBk; sum.devLk += curr.devLk;
+          return sum;
+        },
+        { nk: 0, rkapPu: 0, rkapBk: 0, realPu: 0, realBk: 0, devPu: 0, devBk: 0, devLk: 0 }
+      );
+      acc.rkapBkpu = acc.rkapPu > 0 ? (acc.rkapBk / acc.rkapPu) * 100 : 0;
+      acc.realBkpu = acc.realPu > 0 ? (acc.realBk / acc.realPu) * 100 : 0;
+      return acc;
+    };
+
+    const finalData = [];
+    
+    if (nonJoList.length > 0) {
+      finalData.push({ isSubHeader: true, id: "sub-non-jo", nama: "NON JO", ...calcSummary(nonJoList) });
+      finalData.push(...nonJoList);
+    }
+    
+    if (joList.length > 0) {
+      finalData.push({ isSubHeader: true, id: "sub-jo", nama: "JOI", ...calcSummary(joList) });
+      finalData.push(...joList);
+    }
+
+    return finalData;
+  }, [excelData, globalFilter, sortMode]);
+
+  // ==========================================================
+  // KALKULASI TOTAL KUMULATIF
+  // ==========================================================
+  const summary = useMemo(() => {
+    const rawData = tableData.filter(r => !r.isSubHeader);
+    const total = rawData.reduce(
+      (acc, curr) => {
+        acc.nk += curr.nk; acc.rkapPu += curr.rkapPu; acc.rkapBk += curr.rkapBk;
+        acc.realPu += curr.realPu; acc.realBk += curr.realBk;
+        acc.devPu += curr.devPu; acc.devBk += curr.devBk; acc.devLk += curr.devLk;
+        return acc;
+      },
+      { nk: 0, rkapPu: 0, rkapBk: 0, realPu: 0, realBk: 0, devPu: 0, devBk: 0, devLk: 0 }
+    );
+
+    total.rkapPct = total.rkapPu > 0 ? (total.rkapBk / total.rkapPu) * 100 : 0;
+    total.realPct = total.realPu > 0 ? (total.realBk / total.realPu) * 100 : 0;
+
+    return total;
+  }, [tableData]);
+
+  // ==========================================================
+  // HELPER FORMAT & STYLING
+  // ==========================================================
+  const renderFinancial = (num, isPercent = false) => {
+    if (!num && num !== 0) return "-";
+    const formatted = formatNumber(Math.abs(num), isPercent ? 2 : 0);
+    const suffix = isPercent ? "%" : "";
+
+    if (num < 0) {
+      return (
+        <span style={{ color: "#DC2626", fontWeight: "bold" }}>
+          ({formatted}{suffix})
+        </span>
+      );
+    }
+    return `${formatted}${suffix}`;
+  };
 
   const thStyle = {
-    backgroundColor: "#163261",
-    color: "white",
-    textAlign: "center",
-    padding: "5px 3px",
-    border: "1px solid #ffffff",
-    fontWeight: "bold",
-    lineHeight: "1.2",
-    fontSize: "11px",
+    backgroundColor: "#163261", color: "white", textAlign: "center",
+    padding: "5px 3px", border: "1px solid #ffffff", fontWeight: "bold",
+    lineHeight: "1.2", fontSize: "11px",
   };
-
-  const thRedStyle = {
-    ...thStyle,
-    backgroundColor: "#a50000", // Dark Red
-  };
-
-  const thGreenStyle = {
-    ...thStyle,
-    backgroundColor: "#22c55e", // Green
-  };
-
+  const thRedStyle = { ...thStyle, backgroundColor: "#a50000" };
+  const thGreenStyle = { ...thStyle, backgroundColor: "#22c55e" };
   const tdStyle = {
-    padding: "4px 6px",
-    border: "1px solid #e5e7eb",
-    whiteSpace: "nowrap",
-    lineHeight: "1.1",
-    fontSize: "10.5px",
-    fontVariantNumeric: "tabular-nums",
+    padding: "4px 6px", border: "1px solid #e5e7eb", whiteSpace: "nowrap",
+    lineHeight: "1.1", fontSize: "10.5px", fontVariantNumeric: "tabular-nums",
   };
+
+  // ==========================================================
+  // PAGINATION LOGIC
+  // ==========================================================
+  const ROWS_PER_PAGE = 21; 
+  const totalPages = Math.max(1, Math.ceil(tableData.length / ROWS_PER_PAGE));
+
+  const pages = Array.from({ length: totalPages }).map((_, i) => {
+    const startIndex = i * ROWS_PER_PAGE;
+    return {
+      pageIndex: i + 1,
+      startIndex,
+      data: tableData.slice(startIndex, startIndex + ROWS_PER_PAGE),
+    };
+  });
 
   return (
-    <ContentLayout
-      pageNumber=""
-      sectionNumber="6"
-      slideTitle={'EVALUASI "RKAP VS REALISASI" (1/3)'}
-    >
-      <div style={{ width: "100%", height: "100%", overflow: "hidden" }}>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontFamily: "Arial, sans-serif",
-          }}
+    <>
+      {pages.map(({ pageIndex, data }) => (
+        <ContentLayout
+          key={pageIndex}
+          pageNumber=""
+          sectionNumber="6"
+          slideTitle={`EVALUASI "RKAP VS REALISASI" (${pageIndex}/${totalPages})`}
         >
-          <thead>
-            {/* MAIN HEADERS */}
-            <tr>
-              <th rowSpan={2} style={thStyle}>No.</th>
-              <th rowSpan={2} style={thStyle}>Nama Proyek</th>
-              <th rowSpan={2} style={thStyle}>NK</th>
-              <th colSpan={3} style={thStyle}>RKAP Jan - Mei</th>
-              <th colSpan={3} style={thRedStyle}>Real Jan - Mei</th>
-              <th colSpan={3} style={thGreenStyle}>Dev.</th>
-            </tr>
-            {/* SUB HEADERS */}
-            <tr>
-              <th style={thStyle}>PU<br />1</th>
-              <th style={thStyle}>BK<br />2</th>
-              <th style={thStyle}>BK/PU<br />3=2/1</th>
-              <th style={thRedStyle}>PU<br />4</th>
-              <th style={thRedStyle}>BK<br />5</th>
-              <th style={thRedStyle}>BK/PU<br />6=5/4</th>
-              <th style={thGreenStyle}>PU<br />7=4-1</th>
-              <th style={thGreenStyle}>BK<br />8=5-2</th>
-              <th style={thGreenStyle}>LK<br />9=7-8</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* SUMMARY ROW */}
-            <tr style={{ backgroundColor: "#ffffff", fontWeight: "bold" }}>
-              <td style={{ ...tdStyle, border: "none" }}></td>
-              <td colSpan={2} style={{ ...tdStyle, textAlign: "center", borderLeft: "none" }}>
-                Non JO & JOP
-              </td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>976,437</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>1,003,350</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>102.76%</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>868,125</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>1,090,838</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>125.65%</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>(108,312)</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>87,488</td>
-              <td style={{ ...tdStyle, textAlign: "right" }}>(249,238)</td>
-            </tr>
-
-            {/* DATA ROWS */}
-            {tableData.map((row, index) => (
-              <tr
-                key={row.id}
+          <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
+            
+            {/* TOOLBAR: TOMBOL FILTER */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px", gap: "8px" }}>
+              <span style={{ fontSize: "10px", fontWeight: "bold", color: "#64748B", alignSelf: "center", marginRight: "4px" }}>
+                Urutkan Defisit:
+              </span>
+              <button
+                onClick={() => setSortMode("LK")}
                 style={{
-                  backgroundColor: index % 2 === 0 ? "#e6f0fa" : "#ffffff",
+                  padding: "4px 10px", fontSize: "10px", fontWeight: "bold",
+                  cursor: "pointer", borderRadius: "4px", border: "1px solid",
+                  backgroundColor: sortMode === "LK" ? "#DC2626" : "#ffffff",
+                  color: sortMode === "LK" ? "#ffffff" : "#64748B",
+                  borderColor: sortMode === "LK" ? "#DC2626" : "#CBD5E1"
                 }}
               >
-                <td style={{ ...tdStyle, textAlign: "center" }}>{row.no}</td>
-                <td style={{ ...tdStyle, textAlign: "left", width: "250px", whiteSpace: "normal" }}>
-                  {row.nama}
-                </td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.nk}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.rkapPu}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.rkapBk}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.rkapPct}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.realPu}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.realBk}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.realPct}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.devPu}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.devBk}</td>
-                <td style={{ ...tdStyle, textAlign: "right" }}>{row.devLk}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </ContentLayout>
+                Dev. LK
+              </button>
+              <button
+                onClick={() => setSortMode("PU")}
+                style={{
+                  padding: "4px 10px", fontSize: "10px", fontWeight: "bold",
+                  cursor: "pointer", borderRadius: "4px", border: "1px solid",
+                  backgroundColor: sortMode === "PU" ? "#2563EB" : "#ffffff",
+                  color: sortMode === "PU" ? "#ffffff" : "#64748B",
+                  borderColor: sortMode === "PU" ? "#2563EB" : "#CBD5E1"
+                }}
+              >
+                Dev. PU
+              </button>
+            </div>
+
+            <div style={{ overflow: "hidden" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontFamily: "Arial, sans-serif",
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th rowSpan={2} style={thStyle}>No.</th>
+                    <th rowSpan={2} style={thStyle}>Nama Proyek</th>
+                    <th rowSpan={2} style={thStyle}>NK</th>
+                    <th colSpan={3} style={thStyle}>RKAP S.d Bulan Ini</th>
+                    <th colSpan={3} style={thRedStyle}>Real S.d Bulan Ini</th>
+                    <th colSpan={3} style={thGreenStyle}>Dev.</th>
+                  </tr>
+                  <tr>
+                    <th style={thStyle}>PU<br />1</th>
+                    <th style={thStyle}>BK<br />2</th>
+                    <th style={thStyle}>BK/PU<br />3=2/1</th>
+                    <th style={thRedStyle}>PU<br />4</th>
+                    <th style={thRedStyle}>BK<br />5</th>
+                    <th style={thRedStyle}>BK/PU<br />6=5/4</th>
+                    <th style={thGreenStyle}>PU<br />7=4-1</th>
+                    <th style={thGreenStyle}>BK<br />8=5-2</th>
+                    <th style={thGreenStyle}>LK<br />9=7-8</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* SUMMARY ROW DINAMIS KESELURUHAN */}
+                  <tr style={{ backgroundColor: "#ffffff", fontWeight: "bold", borderBottom: "2px solid #000" }}>
+                    <td colSpan={2} style={{ ...tdStyle, textAlign: "center" }}>
+                      TOTAL NON JO/JOP & JOI
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.nk)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.rkapPu)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.rkapBk)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.rkapPct, true)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.realPu)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.realBk)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.realPct, true)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.devPu)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.devBk)}</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(summary.devLk)}</td>
+                  </tr>
+
+                  {/* DATA ROWS (Termasuk Sub-Header) */}
+                  {data.length === 0 ? (
+                    <tr>
+                      <td colSpan="12" style={{ ...tdStyle, textAlign: "center", padding: "20px", color: "#64748b" }}>
+                        Tidak ada data proyek untuk periode ini
+                      </td>
+                    </tr>
+                  ) : (
+                    data.map((row, index) => {
+                      if (row.isSubHeader) {
+                        return (
+                          <tr key={row.id} style={{ backgroundColor: "#F8FAFC", fontWeight: "bold" }}>
+                            <td colSpan={2} style={{ ...tdStyle, textAlign: "center", color: "#0F172A", padding: "6px" }}>
+                              {row.nama}
+                            </td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.nk)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.rkapPu)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.rkapBk)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.rkapBkpu, true)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.realPu)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.realBk)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.realBkpu, true)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.devPu)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.devBk)}</td>
+                            <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.devLk)}</td>
+                          </tr>
+                        );
+                      }
+
+                      return (
+                        <tr
+                          key={row.id}
+                          style={{
+                            backgroundColor: index % 2 === 0 ? "#e6f0fa" : "#ffffff",
+                          }}
+                        >
+                          <td style={{ ...tdStyle, textAlign: "center" }}>{row.displayNo}</td>
+                          <td style={{ ...tdStyle, textAlign: "left", width: "250px", whiteSpace: "normal" }}>
+                            {row.nama}
+                          </td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.nk)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.rkapPu)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.rkapBk)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.rkapBkpu, true)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.realPu)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.realBk)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.realBkpu, true)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.devPu)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.devBk)}</td>
+                          <td style={{ ...tdStyle, textAlign: "right" }}>{renderFinancial(row.devLk)}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ContentLayout>
+      ))}
+    </>
   );
 };
 

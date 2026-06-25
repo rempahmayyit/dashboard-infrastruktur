@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Building2 } from "lucide-react";
+import { Building2, LogOut } from "lucide-react";
+
+import { supabase } from "../lib/supabase"; // sesuaikan path
 
 import proyek1 from "../assets/proyek1.jpeg";
 import proyek2 from "../assets/proyek2.jpeg";
@@ -37,6 +39,15 @@ export default function LandingPage({ userName = "User" }) {
   const [bgImage] = useState(
     backgrounds[Math.floor(Math.random() * backgrounds.length)],
   );
+
+  const handleLogout = async () => {
+    const confirmLogout = window.confirm("Apakah Anda yakin ingin logout?");
+    if (!confirmLogout) return;
+
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
   return (
     <div
       className="relative h-full w-full overflow-hidden rounded-2xl animate-slowZoom"
@@ -51,6 +62,31 @@ export default function LandingPage({ userName = "User" }) {
 
       {/* Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#000075]/20 via-transparent to-black/40 z-10"></div>
+      {/* Logout Button */}
+      <div className="absolute top-6 right-6 z-30">
+        <button
+          onClick={handleLogout}
+          className="
+    group
+    flex items-center
+    gap-2
+    rounded-full
+    bg-white/10
+    backdrop-blur-lg
+    border border-white/20
+    px-4 py-3
+    text-white
+    hover:bg-red-600
+    hover:border-red-500
+    transition-all
+    duration-300
+    shadow-lg
+  "
+        >
+          <LogOut size={18} />
+          <span className="font-medium">Logout</span>
+        </button>
+      </div>
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center text-center px-8">
         {/* Welcome */}
@@ -91,8 +127,8 @@ export default function LandingPage({ userName = "User" }) {
 
         {/* Tagline */}
         <p className="max-w-3xl text-white/70 text-sm md:text-base tracking-wide">
-          Monitoring Kinerja Pemasaran, Operasional, Keuangan,
-           dan Manajemen Risiko
+          Monitoring Kinerja Pemasaran, Operasional, Keuangan, dan Manajemen
+          Risiko
         </p>
       </div>
 

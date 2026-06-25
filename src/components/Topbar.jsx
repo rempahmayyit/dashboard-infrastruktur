@@ -39,9 +39,9 @@ export default function Topbar({ isCollapsed, setIsCollapsed, activeMenu }) {
               ? "Proyek Dalam Penanganan Khusus"
               : activeMenu}
           </h1>
-          <p className="text-[14px] text-slate-400 mt-1">
+          {/*<p className="text-[14px] text-slate-400 mt-1">
             Dashboard Portofolio Divisi Infrastruktur
-          </p>
+          </p>*/}
         </div>
       </div>
 

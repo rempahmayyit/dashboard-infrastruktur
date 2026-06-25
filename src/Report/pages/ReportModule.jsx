@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
 import { usePengendalianData } from "../../hooks/usePengendalianData";
+import { useFilter } from "../../context/FilterContext";
 
 // Import Komponen
 import ManagementReport from "./ManagementReport";
@@ -15,8 +16,15 @@ import SlideMonitoringBudget from "../components/MonitoringBudget"; // Pastikan 
 import ClosingLayout from "./ClosingLayout";
 
 const ReportDashboard = () => {
+  const slideContainerRef = useRef(null);
   const componentRef = useRef(null);
   const pengendalian = usePengendalianData();
+
+   const { excelData } = useFilter();
+
+  console.log("db_renc_eb :", excelData.db_renc_eb);
+  console.log("Jumlah :", excelData.db_renc_eb.length);
+  console.log("Data pertama :", excelData.db_renc_eb[0]);
 
   // State untuk Slideshow
   const [presentationMode, setPresentationMode] = useState(false);
@@ -125,30 +133,40 @@ const ReportDashboard = () => {
     }
   };
 
+  useEffect(() => {
+    if (slideContainerRef.current) {
+      slideContainerRef.current.scrollTop = 0;
+    }
+  }, [currentSlide]);
+
   // --- RENDER MODE PRESENTASI ---
   if (presentationMode) {
     return (
       <div
+        ref={slideContainerRef}
         style={{
           width: "100vw",
           height: "100vh",
-          backgroundColor: "#000000",
+          backgroundColor: "#000",
+          overflowY: "auto",
+          overflowX: "hidden",
           display: "flex",
           justifyContent: "center",
-          alignItems: "center",
-          overflow: "hidden",
+          alignItems: "flex-start",
           position: "fixed",
           top: 0,
           left: 0,
           zIndex: 9999,
+          padding: "30px 0",
         }}
       >
         {/* Wrapper Slide dengan CSS Transform untuk Scaling */}
         <div
           style={{
             transform: `scale(${scale})`,
-            transformOrigin: "center center",
+            transformOrigin: "top center",
             transition: "transform 0.2s ease-out",
+            margin: "0 auto",
           }}
         >
           {slides[currentSlide]}

@@ -59,7 +59,7 @@ const ClosingLayout = ({ pageNumber }) => {
           paddingTop: "15px",
           width: "90%" 
         }}>
-          <strong>Disclaimer:</strong> Dokumen ini disusun untuk tujuan informasi, sumber yang disiapkan berasal dari pihak-pihak kredibel, namun kami tidak menjamin keakuratan maupun kelengkapannya...
+          <strong>Disclaimer:</strong> Dokumen ini disusun untuk tujuan Informasi, sumber yang disajikan berasal dari pihak-pihak kredibel, namun kami tidak menjamin keakuratan maupun kelengkapannya. Maka tidak dapat dijadikan satu-satunya dasar pengambilan keputusan. Seluruh opini yang tertuang mencerminkan pandangan kami pada tanggal penerbitan dan dapat berubah sewaktu-waktu tanpa pemberitahuan. Materi ini hanya diperuntukkan bagi penerima dan dilarang untuk diperbanyak, disalin, digandakan, atau didistribusikan dalam bentuk apapun tanpa izin tertulis dari <strong>PT Waskita Karya (Persero) Tbk.</strong>
         </div>
       </div>
 
