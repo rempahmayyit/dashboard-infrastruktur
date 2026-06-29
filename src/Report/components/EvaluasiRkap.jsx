@@ -248,7 +248,7 @@ const SlideEvaluasiRkap = () => {
             {/* TOOLBAR: TOMBOL FILTER */}
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px", gap: "8px" }}>
               <span style={{ fontSize: "10px", fontWeight: "bold", color: "#64748B", alignSelf: "center", marginRight: "4px" }}>
-                Urutkan Defisit:
+                Urutkan berdasarkan:
               </span>
               <button
                 onClick={() => setSortMode("LK")}

@@ -1,6 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
-import CCTVPlayer from "../../CCTV/components/CCTVPlayer";
+import CCTVPlayer from "../components/CCTVPlayer";
 
 export default function ActionModals({
   detailModal,
@@ -63,7 +63,8 @@ export default function ActionModals({
         <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
           <div className="bg-white rounded-2xl w-full max-w-6xl overflow-hidden shadow-2xl">
             <div className="flex justify-between items-center px-4 py-3 border-b">
-              <h3 className="font-bold">CCTV Live Monitoring</h3>
+              <h3 className="font-bold">{activeCCTV.project_name}</h3>
+              <p className="text-sm text-slate-500">{activeCCTV.camera_name}</p>
 
               <button
                 onClick={() => setActiveCCTV(null)}

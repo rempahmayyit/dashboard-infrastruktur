@@ -23,6 +23,7 @@ import ReportDashboard from "./Report/pages/ReportModule";
 import { getUserProfile } from "./lib/userProfile";
 
 import MasterProject from "./PusatData/MasterProject";
+import MonitoringCCTVModern from "./CCTV/pages/MonitoringCCTVModern";
 
 // --- Import Komponen Layout ---
 import Sidebar from "./components/Sidebar";
@@ -39,10 +40,22 @@ import {
   Database,
   Video,
   ShieldAlert,
+  CctvIcon,
+  TowerControl,
+  ConstructionIcon,
+  DamIcon,
+  Building2Icon,
+  RouteIcon,
+  RoadIcon,
+  Package2Icon,
+  BrickWallIcon,
+  ShieldBanIcon,
+  icons,
+  GoalIcon,
 } from "lucide-react";
 
 export default function App() {
-  const [activeMenu, setActiveMenu] = useState("Portal Infrastruktur");
+  const [activeMenu, setActiveMenu] = useState("Halaman Utama");
   const [openMenu, setOpenMenu] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [presentationMode, setPresentationMode] = useState(false);
@@ -116,8 +129,6 @@ export default function App() {
       }
     });
 
-    
-
     return () => {
       isMounted = false;
       subscription.unsubscribe();
@@ -182,16 +193,24 @@ export default function App() {
 
   const allMenus = [
     {
-      name: "Portal Infrastruktur",
-      icon: LayoutDashboard,
+      name: "Halaman Utama",
+      icon: GoalIcon,
     },
-    { name: "Dashboard Divisi", icon: LayoutDashboard },
+    { name: "Dashboard", icon: LayoutDashboard },
 
-    { name: "Dashboard Proyek", icon: LayoutDashboard },
+    { name: "Exsum Proyek", icon: RoadIcon },
 
-    { name: "Report Mode", 
+    {
+      name: "CCTV",
       roles: ["admin", "super_admin"],
-      icon: BarChart3 },
+      icon: CctvIcon,
+    },
+
+    {
+      name: "Report Mode",
+      roles: ["viewer", "admin", "super_admin"],
+      icon: BarChart3,
+    },
 
     {
       name: "Pemasaran & Anggaran",
@@ -261,14 +280,16 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeMenu) {
-      case "Portal Infrastruktur":
+      case "Halaman Utama":
         return (
           <LandingPage setActiveMenu={setActiveMenu} userName={userName} />
         );
-      case "Dashboard Divisi":
+      case "Dashboard":
         return <ExecutiveDashboard />;
-      case "Dashboard Proyek":
+      case "Exsum Proyek":
         return <ProjectMapDashboard />;
+      case "CCTV":
+        return <MonitoringCCTVModern />;
       case "Report Mode":
         return <ReportDashboard />;
       case "Pemasaran & Anggaran":
@@ -373,7 +394,7 @@ export default function App() {
       )}
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden print:block">
-        {!isFullscreen && activeMenu !== "Portal Infrastruktur" && (
+        {!isFullscreen && activeMenu !== "Halaman Utama" && (
           <Topbar
             isCollapsed={isCollapsed}
             setIsCollapsed={setIsCollapsed}
@@ -385,7 +406,7 @@ export default function App() {
           className={`flex-1 overflow-y-auto ${
             isFullscreen
               ? "p-0"
-              : activeMenu === "Portal Infrastruktur"
+              : activeMenu === "Halaman Utama"
                 ? "p-0"
                 : "p-8"
           }`}

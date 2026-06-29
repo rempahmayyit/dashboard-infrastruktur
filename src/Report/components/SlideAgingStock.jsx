@@ -1,35 +1,78 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ContentLayout from "../pages/ContentLayout";
+import { useFilter } from "../../context/FilterContext"; // Sesuaikan path ini
+import { formatCompact } from "../../utils/formatters"; // Pastikan path ini sesuai
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Bar,
+  Line,
+} from "recharts";
+
+// Helper Keamanan Angka
+const safeParseNumber = (val) => {
+  if (val === null || val === undefined || val === "") return 0;
+  const cleanStr = String(val).replace(/[^0-9.-]/g, "");
+  const num = Number(cleanStr);
+  return isNaN(num) ? 0 : num;
+};
+
+// Helper Pendeteksi Kolom Otomatis
+const getDynamicValue = (item, typeKey) => {
+  let exactMatch =
+    item[`${typeKey}_realisasi_parsial`] ??
+    item[`${typeKey}_Realisasi_Parsial`] ??
+    item[`${typeKey}_realisasi`];
+  if (exactMatch !== undefined && exactMatch !== null)
+    return safeParseNumber(exactMatch);
+
+  const keys = Object.keys(item);
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i].toLowerCase();
+    if (k.includes(typeKey) && (k.includes("real") || k.includes("parsial"))) {
+      return safeParseNumber(item[keys[i]]);
+    }
+  }
+  return 0;
+};
 
 const SlideAgingStock = () => {
+  const { excelData, globalFilter } = useFilter();
+  const [chartData, setChartData] = useState([]);
+
   // ==========================================
-  // STYLES
+  // STYLES (DIPERBESAR UNTUK KETERBACAAN)
   // ==========================================
   const thMainStyle = {
     backgroundColor: "#163261",
     color: "white",
     textAlign: "center",
-    padding: "4px 2px",
+    padding: "6px 4px", // Padding diperbesar
     border: "1px solid #ffffff",
     fontWeight: "bold",
-    fontSize: "10px",
-    lineHeight: "1.2",
+    fontSize: "12px", // Font diperbesar dari 10px
+    lineHeight: "1.3",
   };
 
   const tdStyle = {
-    padding: "3px 4px",
+    padding: "5px 6px", // Padding diperbesar
     border: "1px solid #d1d5db",
-    fontSize: "9.5px",
+    fontSize: "11px", // Font diperbesar dari 9.5px
     whiteSpace: "nowrap",
-    lineHeight: "1.1",
+    lineHeight: "1.2",
     fontVariantNumeric: "tabular-nums",
   };
 
   const rightHeaderStyle = {
     backgroundColor: "#e5e7eb",
-    padding: "4px 10px",
+    padding: "6px 10px",
     fontWeight: "bold",
-    fontSize: "12px",
+    fontSize: "13px",
     color: "#163261",
     display: "flex",
     justifyContent: "space-between",
@@ -37,7 +80,69 @@ const SlideAgingStock = () => {
   };
 
   // ==========================================
-  // DATA
+  // LOGIKA CHART (PU DARI FILTER + AGING DUMMY)
+  // ==========================================
+  const monthMap = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, Mei: 5, Jun: 6, Jul: 7, Agu: 8, Sep: 9, Okt: 10, Nov: 11, Des: 12 };
+  const currentMonthNum = monthMap[globalFilter?.bulan] || new Date().getMonth() + 1;
+  const monthShortNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+  useEffect(() => {
+    try {
+      const selectedYear = Number(globalFilter?.tahun || 2026);
+      const rawRkapData = excelData?.db_rkap_awal || [];
+      const rawRealisasiData = excelData?.db_realisasi || [];
+
+      let cumulative_PU_rencana = 0;
+      let cumulative_PU_realisasi = 0;
+
+      // Data dummy untuk Aging Stock per bulan
+      const dummyAgingStock = [12000, 13500, 15000, 14200, 16000, 15800, 17500, 18000, 16500, 19000, 20000, 21000];
+
+      const resultChart = monthShortNames.map((mName, index) => {
+        const monthNumber = index + 1;
+
+        const filterDataBulanan = (rawDataArray, isRkap = false) => {
+          return rawDataArray.filter((item) => {
+            const itemYear = safeParseNumber(item.tahun);
+            let itemMonth = safeParseNumber(item.bulan_index);
+            if (itemMonth === 0 && item.bulan) {
+              const textBulan = String(item.bulan).toLowerCase().substring(0, 3);
+              const indexM = ["jan", "feb", "mar", "apr", "mei", "jun", "jul", "agu", "sep", "okt", "nov", "des"].indexOf(textBulan);
+              itemMonth = indexM !== -1 ? indexM + 1 : safeParseNumber(item.bulan);
+            }
+            const isYearMonthMatch = itemYear === selectedYear && itemMonth === monthNumber;
+            if (isRkap && isYearMonthMatch) {
+              return String(item.rkap_status || "").toLowerCase().includes("awal");
+            }
+            return isYearMonthMatch;
+          });
+        };
+
+        const rkapMonthData = filterDataBulanan(rawRkapData, true);
+        const realisasiMonthData = filterDataBulanan(rawRealisasiData, false);
+
+        cumulative_PU_rencana +=
+          rkapMonthData.reduce((sum, item) => sum + safeParseNumber(item.pu_rkap_parsial || item.PU_RKAP_Parsial), 0) / 1000000000;
+        
+        cumulative_PU_realisasi +=
+          realisasiMonthData.reduce((sum, item) => sum + getDynamicValue(item, "pu"), 0) / 1000000000;
+
+        return {
+          month: mName,
+          puRencana: Number(cumulative_PU_rencana.toFixed(0)),
+          puRealisasi: monthNumber <= currentMonthNum ? Number(cumulative_PU_realisasi.toFixed(0)) : null,
+          agingStock: dummyAgingStock[index], // Dummy data dimasukkan ke chart
+        };
+      });
+
+      setChartData(resultChart);
+    } catch (error) {
+      console.error("Error chart:", error);
+    }
+  }, [excelData, globalFilter, currentMonthNum]);
+
+  // ==========================================
+  // DATA (KOLOM PROG SEMENTARA STATIS SEBELUM ADA LOGIKA DINAMIS)
   // ==========================================
   const tableData = [
     { id: 1, idProj: "1324010", nama: "JALAN TOL CIAWI - SUKABUMI SEKSI 3B", prog: "73.04", g1: "5,348", g2: "1,058", g3: "11,425", g4: "1,083", g5: "2,430", g6: "1,972", total: "23,316", dev: "23,316" },
@@ -64,21 +169,23 @@ const SlideAgingStock = () => {
       sectionNumber="20"
       slideTitle={"MONITORING UMUR PERSEDIAAN (FIORI)"}
     >
-      <div style={{ display: "flex", gap: "15px", height: "100%", width: "100%" }}>
+      <div style={{ display: "flex", gap: "20px", height: "100%", width: "100%" }}>
         
         {/* LEFT COLUMN: TABLE */}
-        <div style={{ flex: 1.6, display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "8px", fontStyle: "italic" }}>
-            Periode : April 2026 <span style={{ margin: "0 10px" }}>➔</span> update : 30 April 2026
+        <div style={{ flex: 1.6, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "12px", fontStyle: "italic", color: "#374151" }}>
+            Periode : {globalFilter?.bulan || "April"} {globalFilter?.tahun || "2026"} 
+            <span style={{ margin: "0 10px" }}>➔</span> 
+            update : 30 {globalFilter?.bulan || "April"} {globalFilter?.tahun || "2026"}
           </div>
           
-          <div style={{ flex: 1, overflow: "hidden" }}>
+          <div style={{ flex: 1, overflow: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Arial, sans-serif" }}>
-              <thead>
+              <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
                 <tr>
                   <th rowSpan={3} style={thMainStyle}>No.</th>
                   <th rowSpan={3} style={thMainStyle}>ID Project</th>
-                  <th rowSpan={3} style={{ ...thMainStyle, width: "180px" }}>Nama Proyek</th>
+                  <th rowSpan={3} style={{ ...thMainStyle, width: "220px" }}>Nama Proyek</th>
                   <th rowSpan={3} style={thMainStyle}>Prog.<br/>(%)</th>
                   <th colSpan={9} style={thMainStyle}>Monitoring Persediaan</th>
                 </tr>
@@ -102,11 +209,11 @@ const SlideAgingStock = () => {
                   <td colSpan={13} style={{ ...tdStyle, fontWeight: "bold", textAlign: "center" }}>ON GOING</td>
                 </tr>
                 {tableData.map((row, idx) => (
-                  <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f9fafb" }}>
+                  <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f9fafb", transition: "background-color 0.2s", ":hover": { backgroundColor: "#f3f4f6" } }}>
                     <td style={{ ...tdStyle, textAlign: "center" }}>{row.id}</td>
-                    <td style={{ ...tdStyle, textAlign: "center" }}>{row.idProj}</td>
+                    <td style={{ ...tdStyle, textAlign: "center", fontWeight: "bold" }}>{row.idProj}</td>
                     <td style={{ ...tdStyle, textAlign: "left", whiteSpace: "normal" }}>{row.nama}</td>
-                    <td style={{ ...tdStyle, textAlign: "right", backgroundColor: "#dbeafe" }}>{row.prog}</td>
+                    <td style={{ ...tdStyle, textAlign: "right", backgroundColor: "#dbeafe", fontWeight: "bold", color: "#1e40af" }}>{row.prog}</td>
                     <td style={{ ...tdStyle, textAlign: "right" }}>{row.g1}</td>
                     <td style={{ ...tdStyle, textAlign: "right" }}>{row.g2}</td>
                     <td style={{ ...tdStyle, textAlign: "right" }}>{row.g3}</td>
@@ -114,7 +221,7 @@ const SlideAgingStock = () => {
                     <td style={{ ...tdStyle, textAlign: "right" }}>{row.g5}</td>
                     <td style={{ ...tdStyle, textAlign: "right" }}>{row.g6}</td>
                     <td style={{ ...tdStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#1e3a8a", color: "white" }}>{row.total}</td>
-                    <td style={{ ...tdStyle, textAlign: "right" }}>-</td>
+                    <td style={{ ...tdStyle, textAlign: "right" }}>{row.lep || "-"}</td>
                     <td style={{ ...tdStyle, textAlign: "right", fontWeight: "bold", backgroundColor: "#1e3a8a", color: "white" }}>{row.dev}</td>
                   </tr>
                 ))}
@@ -131,69 +238,60 @@ const SlideAgingStock = () => {
                   <td style={{ ...tdStyle, textAlign: "right" }}>-</td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>113,305</td>
                 </tr>
-                <tr style={{ backgroundColor: "#ffffff" }}>
-                  <td colSpan={4} style={{ ...tdStyle, textAlign: "center" }}>Prosentase</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>23.59%</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>4.41%</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>23.42%</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>24.77%</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>11.48%</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>12.33%</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}>100.00%</td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}></td>
-                  <td style={{ ...tdStyle, textAlign: "right" }}></td>
-                </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: TOP PERSEDIAAN */}
-        <div style={{ flex: 1, border: "1px solid #d1d5db", display: "flex", flexDirection: "column", backgroundColor: "#ffffff" }}>
-          <div style={rightHeaderStyle}>
-            <span>Top Persediaan {">"} 360 HK</span>
-            <span>{"> 360"}</span>
-          </div>
+        {/* RIGHT COLUMN: PERSEDIAAN + CHART */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "15px", height: "100%" }}>
           
-          <div style={{ flex: 1, overflowY: "auto", padding: "5px" }}>
-            {topPersediaan.map((proj, pIdx) => (
-              <div key={pIdx} style={{ marginBottom: "10px" }}>
-                <div style={{ 
-                  display: "flex", 
-                  justifyContent: "space-between", 
-                  fontSize: "10.5px", 
-                  fontWeight: "bold", 
-                  backgroundColor: "#f3f4f6",
-                  padding: "2px 5px",
-                  borderLeft: "3px solid #163261"
-                }}>
-                  <span>⊟ {proj.title}</span>
-                  <span>{proj.value}</span>
-                </div>
-                {proj.items.map((item, iIdx) => (
-                  <div key={iIdx} style={{ 
+          {/* TOP PERSEDIAAN PANEL */}
+          <div style={{ flex: 1, border: "1px solid #d1d5db", display: "flex", flexDirection: "column", backgroundColor: "#ffffff", borderRadius: "8px", overflow: "hidden" }}>
+            <div style={rightHeaderStyle}>
+              <span>Top Persediaan {">"} 360 HK</span>
+              <span>{"> 360"}</span>
+            </div>
+            
+            <div style={{ flex: 1, overflowY: "auto", padding: "8px" }}>
+              {topPersediaan.map((proj, pIdx) => (
+                <div key={pIdx} style={{ marginBottom: "12px" }}>
+                  <div style={{ 
                     display: "flex", 
                     justifyContent: "space-between", 
-                    fontSize: "10px", 
-                    padding: "1px 5px 1px 20px",
-                    color: "#374151"
+                    fontSize: "12px", 
+                    fontWeight: "bold", 
+                    backgroundColor: "#f3f4f6",
+                    padding: "4px 8px",
+                    borderLeft: "3px solid #163261",
+                    marginBottom: "4px"
                   }}>
-                    <span>{item.n}</span>
-                    <span>{item.v}</span>
+                    <span className="truncate pr-2" title={proj.title}>⊟ {proj.title}</span>
+                    <span>{proj.value}</span>
                   </div>
-                ))}
-              </div>
-            ))}
-
+                  {proj.items.map((item, iIdx) => (
+                    <div key={iIdx} style={{ 
+                      display: "flex", 
+                      justifyContent: "space-between", 
+                      fontSize: "11px", 
+                      padding: "2px 8px 2px 20px",
+                      color: "#4b5563"
+                    }}>
+                      <span className="truncate pr-2">{item.n}</span>
+                      <span className="font-semibold">{item.v}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
             {/* GRAND TOTAL BOX */}
             <div style={{ 
-              marginTop: "20px", 
               borderTop: "2px solid #163261", 
-              padding: "5px", 
+              padding: "8px 12px", 
               display: "flex", 
               justifyContent: "space-between", 
               fontWeight: "bold", 
-              fontSize: "12px",
+              fontSize: "13px",
               backgroundColor: "#163261",
               color: "white"
             }}>
@@ -201,8 +299,36 @@ const SlideAgingStock = () => {
               <span>13,970,703,419</span>
             </div>
           </div>
-        </div>
 
+          {/* CHART PANEL BARU */}
+          <div style={{ flex: 1, border: "1px solid #d1d5db", backgroundColor: "#ffffff", borderRadius: "8px", padding: "10px", display: "flex", flexDirection: "column" }}>
+            <div style={{ fontSize: "13px", fontWeight: "bold", color: "#163261", marginBottom: "10px", borderBottom: "1px solid #e5e7eb", paddingBottom: "5px" }}>
+              Tren PU vs Aging Stock
+            </div>
+            <div style={{ flex: 1, minHeight: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} tickFormatter={(val) => `${val / 1000}K`} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ fontSize: "12px", borderRadius: "8px", border: "1px solid #e5e7eb" }}
+                    formatter={(value, name) => {
+                      if (name === "Aging Stock") return [new Intl.NumberFormat('id-ID').format(value), name];
+                      return [`${new Intl.NumberFormat('id-ID').format(value)} M`, name];
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "5px" }} />
+                  <Bar yAxisId="left" dataKey="agingStock" name="Aging Stock" fill="#94a3b8" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Line yAxisId="right" type="monotone" dataKey="puRencana" name="RKAP PU" stroke="#f59e0b" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+                  <Line yAxisId="right" type="monotone" dataKey="puRealisasi" name="Real PU" stroke="#000075" strokeWidth={2.5} dot={{ r: 3 }} connectNulls />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+        </div>
       </div>
     </ContentLayout>
   );

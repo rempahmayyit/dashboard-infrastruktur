@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import CCTVPlayer from "./CCTVPlayer";
+import CCTVPlayer from "../../CCTV/components/CCTVPlayer";
 import Hls from "hls.js";
 
 import {
@@ -44,7 +44,7 @@ export default function MapSection({
     if (Hls.isSupported()) {
       const hls = new Hls();
 
-      hls.loadSource("http://localhost:8000/live.m3u8");
+      hls.loadSource("http://192.168.205.108:8888/1726015_CH02/index.m3u8");
       hls.attachMedia(video);
 
       return () => {
@@ -187,7 +187,7 @@ export default function MapSection({
               onClick={() =>
                 setActiveCCTV({
                   title: activeProject.project_name,
-                  streamUrl: "http://localhost:8000/live.m3u8",
+                  streamUrl: "http://192.168.205.108:8888/1726015_CH02/index.m3u8",
                 })
               }
             />

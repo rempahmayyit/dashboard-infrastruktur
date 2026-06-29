@@ -12,6 +12,11 @@ import SlideKinerjaOperasional from "../components/KinerjaOperasional"; // Pasti
 import SlideWarningList from "../components/SlideWarningList";
 import SlideEvaluasiRkap from "../components/EvaluasiRkap"; // Pastikan path benar
 import SlideEvaluasiBkpu from "../components/EvaluasiBkpu"; // Pastikan path benar
+import SlideEvaluasiSisaRkap from "../components/EvaluasiSisaRkap";
+import SlideCadPemeliharaan from "../components/SlideCadPemeliharaan";
+import SlideTagihanBruto from "../components/SlideTagihanBruto";
+import SlideAgingStock from "../components/SlideAgingStock";
+
 import SlideMonitoringBudget from "../components/MonitoringBudget"; // Pastikan path benar
 import ClosingLayout from "./ClosingLayout";
 
@@ -20,7 +25,7 @@ const ReportDashboard = () => {
   const componentRef = useRef(null);
   const pengendalian = usePengendalianData();
 
-   const { excelData } = useFilter();
+  const { excelData } = useFilter();
 
   console.log("db_renc_eb :", excelData.db_renc_eb);
   console.log("Jumlah :", excelData.db_renc_eb.length);
@@ -57,6 +62,12 @@ const ReportDashboard = () => {
     />,
     <SlideEvaluasiRkap key="rkap" />,
     <SlideEvaluasiBkpu key="bkpu" />,
+    <SlideEvaluasiSisaRkap key="sisaRkap" />,
+    <SlideMonitoringBudget key="budget" />,
+    <SlideCadPemeliharaan key="cadPemel" />,
+    <SlideTagihanBruto key="tagBruto" />,
+    <SlideAgingStock key="stock" />,
+
     <SlideMonitoringBudget key="budget" />,
     <ClosingLayout key="closing" pageNumber={15} />, // Dinamis
   ];
@@ -274,12 +285,12 @@ const ReportDashboard = () => {
               fontWeight: "bold",
             }}
           >
-            Report Dashboard
+            Report
           </h2>
           <p
             style={{ margin: "5px 0 0 0", color: "#64748B", fontSize: "14px" }}
           >
-            Pratinjau, Presentasikan, atau Ekspor dokumen laporan
+            Prewiew & Presentasi, atau Ekspor dokumen laporan
           </p>
         </div>
 

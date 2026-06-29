@@ -124,13 +124,6 @@ export const useProjectMapData = (excelData, globalFilter) => {
         if (!longitude || !latitude || isNaN(longitude) || isNaN(latitude))
           return null;
 
-        if (item.project_name?.includes("Patimban")) {
-          console.log("MASTER", {
-            id: projectId,
-            name: item.project_name,
-          });
-        }
-
         const projectPiutangRows = piutangDetailData.filter(
           (row) => String(row.id_project).trim() === String(projectId).trim(),
         );
@@ -138,7 +131,6 @@ export const useProjectMapData = (excelData, globalFilter) => {
           (row) => String(row.id_project).trim() === String(projectId).trim(),
         );
 
-        
         if (projectAgingRows.length > 0) {
           console.log(
             "MATCH",

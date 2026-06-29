@@ -28,15 +28,29 @@ const KpiCardMinimalist = ({
   icon: Icon,
   onClick,
   isPercentage = false,
+  colorTheme = "slate", // Prop baru untuk tema warna
 }) => {
   // Ambil nilai aman untuk bar persentase (maksimal 100% untuk visual UI)
   const safePersenPeriode = Math.min(Math.abs(persenPeriode || 0), 100);
   const safePersenTahun = Math.min(Math.abs(persenTahun || 0), 100);
 
+  // Dictionary untuk variasi warna
+  const themeStyles = {
+    blue: { border: "border-t-blue-500", iconBg: "bg-blue-50", iconText: "text-blue-600", iconBorder: "border-blue-100", progress: "bg-blue-500", textMain: "text-blue-700" },
+    indigo: { border: "border-t-indigo-500", iconBg: "bg-indigo-50", iconText: "text-indigo-600", iconBorder: "border-indigo-100", progress: "bg-indigo-500", textMain: "text-indigo-700" },
+    orange: { border: "border-t-orange-500", iconBg: "bg-orange-50", iconText: "text-orange-600", iconBorder: "border-orange-100", progress: "bg-orange-500", textMain: "text-orange-700" },
+    red: { border: "border-t-red-500", iconBg: "bg-red-50", iconText: "text-red-600", iconBorder: "border-red-100", progress: "bg-red-500", textMain: "text-red-600" },
+    slate: { border: "border-t-slate-300", iconBg: "bg-slate-50", iconText: "text-slate-500", iconBorder: "border-slate-100", progress: "bg-slate-600", textMain: "text-slate-700" },
+  };
+
+  const theme = themeStyles[colorTheme] || themeStyles.slate;
+
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between transition-all duration-200 ${onClick ? "hover:shadow-md cursor-pointer hover:-translate-y-0.5" : ""}`}
+      className={`bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between transition-all duration-200 border-t-4 ${theme.border} ${
+        onClick ? "hover:shadow-md cursor-pointer hover:-translate-y-0.5" : ""
+      }`}
     >
       {/* HEADER */}
       <div className="mb-5">
@@ -45,7 +59,7 @@ const KpiCardMinimalist = ({
             {title}
           </h3>
           {Icon && (
-            <div className="p-1.5 bg-slate-50 rounded-lg border border-slate-100 text-slate-500">
+            <div className={`p-1.5 rounded-lg border ${theme.iconBg} ${theme.iconBorder} ${theme.iconText}`}>
               <Icon size={16} strokeWidth={2.5} />
             </div>
           )}
@@ -62,19 +76,18 @@ const KpiCardMinimalist = ({
         <div>
           <div className="flex justify-between items-end text-sm font-semibold text-slate-700 mb-1.5">
             <span>YTD</span>
-            {/* Persentase dibuat 2 digit di belakang koma */}
-            <span className={isDeficit ? "text-red-600" : "text-blue-700"}>
+            {/* Persentase mengikuti warna tema atau merah jika defisit */}
+            <span className={isDeficit ? "text-red-600" : theme.textMain}>
               {(persenPeriode || 0).toFixed(2)}%
             </span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-2.5">
             <div
-              className={`h-2.5 rounded-full transition-all duration-500 ${isDeficit ? "bg-red-500" : "bg-blue-600"}`}
+              className={`h-2.5 rounded-full transition-all duration-500 ${isDeficit ? "bg-red-500" : theme.progress}`}
               style={{ width: `${safePersenPeriode}%` }}
             />
           </div>
           <div className="flex justify-between text-sm text-slate-400 mt-1 font-medium">
-            {/* Diubah menjadi Ra dan Ri */}
             <span>
               Ra:{" "}
               {isPercentage
@@ -128,7 +141,9 @@ const KpiCardCashflow = ({ title, data = {}, icon: Icon, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between transition-all duration-200 ${onClick ? "hover:shadow-md cursor-pointer hover:-translate-y-0.5" : ""}`}
+      className={`bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between transition-all duration-200 border-t-4 border-t-emerald-500 ${
+        onClick ? "hover:shadow-md cursor-pointer hover:-translate-y-0.5" : ""
+      }`}
     >
       {/* HEADER */}
       <div className="mb-5">
@@ -213,6 +228,7 @@ export default function ExecutiveKPICards({
       <KpiCardMinimalist
         title="Nilai Kontrak Baru"
         icon={Target}
+        colorTheme="blue"
         mainValue={nkbData.mainValue || 0}
         targetPeriode={nkbData.targetPeriode}
         realPeriode={nkbData.realPeriode}
@@ -225,6 +241,7 @@ export default function ExecutiveKPICards({
       <KpiCardMinimalist
         title="Pendapatan Usaha"
         icon={TrendingUp}
+        colorTheme="indigo"
         mainValue={safeKpi.pendapatanUsaha.mainValue || 0}
         targetPeriode={safeKpi.pendapatanUsaha.targetPeriode}
         realPeriode={safeKpi.pendapatanUsaha.realPeriode}
@@ -238,6 +255,7 @@ export default function ExecutiveKPICards({
         title="Gross Profit Margin"
         isPercentage={true}
         icon={Activity}
+        colorTheme="orange"
         mainValue={`${(safeKpi.gpm.mainValue || 0).toFixed(2)}%`}
         targetPeriode={safeKpi.gpm.targetPeriode}
         realPeriode={safeKpi.gpm.realPeriode}
@@ -250,6 +268,7 @@ export default function ExecutiveKPICards({
       <KpiCardMinimalist
         title="Laba Kotor"
         icon={Coins}
+        colorTheme="red"
         mainValue={safeKpi.labaKotor.mainValue || 0}
         targetPeriode={safeKpi.labaKotor.targetPeriode}
         realPeriode={safeKpi.labaKotor.realPeriode}
@@ -263,6 +282,7 @@ export default function ExecutiveKPICards({
       <KpiCardMinimalist
         title="Laba Bersih"
         icon={BadgeCheck}
+        colorTheme="red"
         mainValue={safeKpi.labaBersih.mainValue || 0}
         targetPeriode={safeKpi.labaBersih.targetPeriode}
         realPeriode={safeKpi.labaBersih.realPeriode}
